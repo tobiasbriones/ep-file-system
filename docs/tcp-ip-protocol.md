@@ -21,3 +21,8 @@ receiver to split the data into tokens delimited by the line feed character.
 [^1]: The 7-layer architecture is more academic than real, a more pragmatic approach is taken in real implementations
 
 [^2]: Read my course project [Reed-Muller Codes](https://dev.mathsoftware.engineer/cp-unah-mm544-reed-muller-codes) 
+
+## Protocol Definition
+
+The TCP/IP protocols are fundamental for transferring data over the internet. 
+These are detailed below. 
