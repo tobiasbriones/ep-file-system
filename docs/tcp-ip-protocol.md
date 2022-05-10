@@ -70,3 +70,14 @@ If we use IPv6, we won't have to give private addresses to local devices with
 DHCP, they can have their own IP address instead. IPv4 only supports an octet or
 one byte in the following structure **xxxx.xxxx.xxxx.xxxx** so that is the
 address of the receiver that the IP protocol will send that data forward.
+
+## TCP vs UDP
+
+The other established protocol **UDP (User Datagram Protocol)** is used to 
+send datagrams that allow faster real time communications. They can drop 
+information to be able to send data faster, so common applications are video 
+meetings or live-streaming when we don't care about some pixels lost.  
+
+TCP has to assemble the packages sent over the network and perform error
+correction. Another protocol for error correction is the **SCTP (Stream Control
+Transmission Protocol)**
