@@ -48,6 +48,17 @@ Tracer software.
 Be careful as TCP works with data streams, so one packet sent does not mean one
 packet received.
 
+#### Handshaking
+
+**Handshaking** is a signal that is sent from one computer to another to
+establish a contract. So for example, we can start the communication with one
+handshake, and end it when we finish the data transaction with another
+handshake.
+
+Handshakes are commonly used in web sockets connections. They are important here
+to avoid the overhead of sending HTTP requests for each message. The overhead is
+only in certain parts (beginning, end) of the communication instead.
+
 ### IP
 
 **IP** stands for **Internet Protocol**, and it is the standard to send those
