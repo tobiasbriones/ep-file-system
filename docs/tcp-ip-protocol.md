@@ -47,3 +47,15 @@ Cisco Packet Tracer software.
 
 Be careful as TCP works with data streams, so one packet sent does not mean 
 one packet received.
+
+### IP
+
+**IP** stands for **Internet Protocol**, and it is the standard to send those
+packages to the correct destination address. The currently used version of this
+protocol is IPv4, but IPv6 is the future as it allows practically and infinite
+amount of addresses.
+
+If we use IPv6, we won't have to give private addresses to local devices with
+DHCP, they can have their own IP address instead. IPv4 only supports an octet or
+one byte in the following structure **xxxx.xxxx.xxxx.xxxx** so that is the
+address of the receiver that the IP protocol will send that data forward.
