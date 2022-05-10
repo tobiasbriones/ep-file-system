@@ -29,24 +29,24 @@ These are detailed below.
 
 ### TCP
 
-**TCP** stands for **Transfer Control Protocol**, and it is the standard that 
-make possible sending large amounts of data over the internet. It can be 
-implemented by any programmer, and it is the basis of sending data over the 
+**TCP** stands for **Transfer Control Protocol**, and it is the standard that
+make possible sending large amounts of data over the internet. It can be
+implemented by any programmer, and it is the basis of sending data over the
 network.
 
 This protocol works with the IP protocol to transport data over the network.
 
-Data are separated into fragments called **packets**, these packets are 
-transmitted over the network and glued together in the receiver to create 
-the original information.
+Data are separated into fragments called **packets**, these packets are
+transmitted over the network and glued together in the receiver to create the
+original information.
 
-Packets are sent via different mediums, some are faster or shorter than 
-others, and can be traced with a technique called **packet tracer**. Packet 
-tracing is something done in networking courses, for example, employing the 
-Cisco Packet Tracer software.
+Packets are sent via different mediums, some are faster or shorter than others,
+and can be traced with a technique called **packet tracer**. Packet tracing is
+something done in networking courses, for example, employing the Cisco Packet
+Tracer software.
 
-Be careful as TCP works with data streams, so one packet sent does not mean 
-one packet received.
+Be careful as TCP works with data streams, so one packet sent does not mean one
+packet received.
 
 ### IP
 
