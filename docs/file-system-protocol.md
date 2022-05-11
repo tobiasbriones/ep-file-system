@@ -15,3 +15,16 @@ year:
 - [Dungeon MST](https://github.com/tobiasbriones/dungeon-mst): A 2D dungeon
   multiplayer video game fully written in Go employing the Gorilla Web Socket
   and ebiten as game library.
+
+## Statuses
+
+The communication statuses are to be the following FSM:
+
+- **START**: The server has accepted the client's request and will start to send
+  data.
+- **DATA**: A chunk of data that has to be buffered by the client.
+- **EOF**: End of File to indicate that the file has been completely sent, and
+  finish the communication.
+
+The `DATA` status should not be explicitly passed or serialized to avoid extra
+boilerplate overhead as many chunks will be sent for large files.
