@@ -28,3 +28,8 @@ The communication statuses are to be the following FSM:
 
 The `DATA` status should not be explicitly passed or serialized to avoid extra
 boilerplate overhead as many chunks will be sent for large files.
+
+## Serialization
+
+To serialize the data sent over TCP, a JSON object will be employed. That 
+way any client can parse it.
