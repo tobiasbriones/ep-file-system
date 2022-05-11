@@ -96,6 +96,35 @@ performs handshakes and enables a port to open to establish the communication.
 Web Sockets applications can vary. They're commonly used for chats, social 
 media, collaborative tools, multiplayer games, etc.
 
+## TCP-Based Protocol
+
+TCP is the best spec to use to transfer data because of its standardization and
+integrity. Data is going to be alright due to that integrity that TCP verifies.
+
+In order to make use of this protocol, we need to design a contract to make
+machines able to communicate in the same language.
+
+A use case of TCP (check the bibliography) to send bytes or data can be
+too low-level like loading buffer arrays and sending these.
+
+Now we can create an abstraction over the above idea, that is, our protocol.
+
+A system that has defined data types, payload, errors, types of messages, etc.,
+is the abstraction that will allow the computers to adequately understand the
+communication.
+
+One important part of this implementation is IO blocking. Concurrent programming
+is key for network applications as we don't want to block the application
+thread when reading from disk or database and managing concurrent users.
+
+Sending and receiving messages is almost the same.
+
+There are many built in abstractions like buffer readers (e.g. Java's
+`BufferedReader`) and third-party libraries for implementing concurrent
+networking applications.
+
+With this insight, a TCP-based protocol can be designed.
+
 ## Bibliography
 
 - [Designing and Implementing an Application Layer Network Protocol Using UNIX Sockets and TCP \| Ryan Lattrel](https://www.egr.msu.edu/classes/ece480/capstone/fall12/group02/documents/Ryan-Lattrel_App-Note.pdf)
