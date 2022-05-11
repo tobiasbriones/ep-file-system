@@ -105,3 +105,4 @@ media, collaborative tools, multiplayer games, etc.
 - [Handshaking \| Wikipedia](https://en.wikipedia.org/wiki/Handshaking)
 - [User Datagram Protocol \| Wikipedia](https://en.wikipedia.org/wiki/User_Datagram_Protocol)
 - [Difference Between TCP and FTP \| Web Hosting Prime](https://webhostingprime.com/difference-between-tcp-and-ftp)
+- [Reading Files \| Go by Example](https://gobyexample.com/reading-files)
