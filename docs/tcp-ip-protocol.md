@@ -95,3 +95,13 @@ performs handshakes and enables a port to open to establish the communication.
 
 Web Sockets applications can vary. They're commonly used for chats, social 
 media, collaborative tools, multiplayer games, etc.
+
+## Bibliography
+
+- [Designing and Implementing an Application Layer Network Protocol Using UNIX Sockets and TCP \| Ryan Lattrel](https://www.egr.msu.edu/classes/ece480/capstone/fall12/group02/documents/Ryan-Lattrel_App-Note.pdf)
+- [TCP/IP \| Definition \& Facts \| Britannica](https://www.britannica.com/technology/TCP-IP)
+- [What is TCP/IP? \| Cloudflare](https://www.cloudflare.com/learning/ddos/glossary/tcp-ip)
+- [TCP/IP Protocols \| IBM Documentation](https://www.ibm.com/docs/en/aix/7.2?topic=protocol-tcpip-protocols)
+- [Handshaking \| Wikipedia](https://en.wikipedia.org/wiki/Handshaking)
+- [User Datagram Protocol \| Wikipedia](https://en.wikipedia.org/wiki/User_Datagram_Protocol)
+- [Difference Between TCP and FTP \| Web Hosting Prime](https://webhostingprime.com/difference-between-tcp-and-ftp)
