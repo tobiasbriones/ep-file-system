@@ -81,3 +81,9 @@ meetings or live-streaming when we don't care about some pixels lost.
 TCP has to assemble the packages sent over the network and perform error
 correction. Another protocol for error correction is the **SCTP (Stream Control
 Transmission Protocol)**
+
+## FTP
+
+**FTP (File Transfer Protocol)** is used to send files easily via TCP. They 
+have users with password login, but it is not secure. The **SFTP (SSH File 
+Transfer Protocol)** is to be used for secure applications instead.
