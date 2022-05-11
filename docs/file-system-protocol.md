@@ -8,9 +8,9 @@ year:
 
 - [Distributed Text File System](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system):
   Real time text file system written in Java 16+, Java RMI for remote object
-  invocation, and JavaFX with push and pull capabilities and deployed to Linux
-  containers on Ubuntu, one container for the file server storage and the other
-  for the file registry facing the external world.
+  invocation, and JavaFX with push, pull, and local cache capabilities, deployed
+  to Linux containers on Ubuntu, one container for the file server storage and
+  the other for the file registry facing the external world.
 
 - [Dungeon MST](https://github.com/tobiasbriones/dungeon-mst): A 2D dungeon
   multiplayer video game fully written in Go employing the Gorilla Web Socket
