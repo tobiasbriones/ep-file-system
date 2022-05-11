@@ -1,5 +1,8 @@
 # TCP/IP Protocol
 
+A general framework of TCP networking applications is given as an insight to
+refresh basic networking concepts useful for this project. 
+
 ## Introduction
 
 Computer applications need to send data to other computers in order to transform
