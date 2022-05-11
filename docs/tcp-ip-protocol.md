@@ -87,3 +87,11 @@ Transmission Protocol)**
 **FTP (File Transfer Protocol)** is used to send files easily via TCP. They 
 have users with password login, but it is not secure. The **SFTP (SSH File 
 Transfer Protocol)** is to be used for secure applications instead.
+
+## Web Socket
+
+Web Socket is the technology used for client-server real-time communication. It
+performs handshakes and enables a port to open to establish the communication.  
+
+Web Sockets applications can vary. They're commonly used for chats, social 
+media, collaborative tools, multiplayer games, etc.
