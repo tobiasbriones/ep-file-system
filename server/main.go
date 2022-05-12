@@ -4,6 +4,12 @@
 
 package server
 
+const (
+	fsRootPath = "fs"
+	port       = 8080
+	network    = "tcp"
+)
+
 func main() {
 
 }
