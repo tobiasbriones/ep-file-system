@@ -6,7 +6,6 @@ package server
 
 import (
 	"fmt"
-	"os"
 )
 
 const (
@@ -17,10 +16,6 @@ const (
 
 func main() {
 
-}
-
-func getFilePath(relPath string) string {
-	return fmt.Sprintf("%v%v%v", fsRootPath, os.PathSeparator, relPath)
 }
 
 func getServerAddress() string {
