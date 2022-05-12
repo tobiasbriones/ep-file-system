@@ -54,4 +54,21 @@ When the client detects it as array it will know that is a data chunk. The
 existence of the `size` attribute here implies that the status is `DATA` too.
 
 The size indicates the length of the chunk or buffer that the client or server
-has to read. 
+has to read.
+
+## System Interaction
+
+The following UML Sequence diagram depicts the most important use cases and
+logic flow for this system:
+
+![FS Send Receive](fs-send-receive.svg)
+
+With that, stakeholders can understand the system architecture.
+
+More conceptual or technical documentation can be developed if required, but it
+is important to optimize for the source code as source of truth instead.
+
+### Client Updates
+
+Another system with the Gorilla Web Socket library can be designed to connect a
+hub of clients and broadcasts in real time file system changes. 
