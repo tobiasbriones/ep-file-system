@@ -29,6 +29,18 @@ func newDataStream(relPath string, bufSize uint, handler Handle) DataStream {
 
 type Handle func(buf []byte)
 
+func GetFileSize(path string) (int64, error) {
+	f, err := os.Open(getFilePath(path))
+	if err != nil {
+		return 0, err
+	}
+	fi, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	return fi.Size(), nil
+}
+
 func StreamFile(stream *DataStream) {
 	f, err := os.Open(stream.path)
 	if err != nil {
