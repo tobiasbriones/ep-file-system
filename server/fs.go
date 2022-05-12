@@ -9,6 +9,10 @@ import (
 	"os"
 )
 
+const (
+	fsRootPath = "fs"
+)
+
 type DataStream struct {
 	path    string
 	bufSize uint

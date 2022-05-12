@@ -9,10 +9,9 @@ import (
 )
 
 const (
-	fsRootPath = "fs"
-	port       = 8080
-	network    = "tcp"
-	bufSize    = 1024
+	port    = 8080
+	network = "tcp"
+	bufSize = 1024
 )
 
 func main() {
