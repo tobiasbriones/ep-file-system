@@ -25,6 +25,7 @@ The communication statuses are to be the following FSM:
 - **DATA**: A chunk of data that has to be buffered by the client.
 - **EOF**: End of File to indicate that the file has been completely sent, and
   finish the communication.
+- **ERROR**: The request couldn't be processed.
 
 The `DATA` status should not be explicitly passed or serialized to avoid extra
 boilerplate overhead as many chunks will be sent for large files.
