@@ -3,3 +3,9 @@
 // This file is part of https://github.com/tobiasbriones/ep-file-system-server
 
 package main
+
+func requireNoError(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
