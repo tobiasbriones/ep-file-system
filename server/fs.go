@@ -19,15 +19,15 @@ const (
 type DataStream struct {
 	path    string
 	bufSize uint
-	handler Handler
+	handle  Handle
 }
 
-func newDataStream(relPath string, bufSize uint, handler Handler) DataStream {
+func newDataStream(relPath string, bufSize uint, handler Handle) DataStream {
 	path := getFilePath(relPath)
 	return DataStream{path, bufSize, handler}
 }
 
-type Handler func(buf []byte)
+type Handle func(buf []byte)
 
 func StreamFile(stream *DataStream) {
 	f, err := os.Open(stream.path)
@@ -56,7 +56,7 @@ func StreamFile(stream *DataStream) {
 		chunksNumber++
 		bytesNumber += int64(len(buf))
 
-		stream.handler(buf)
+		stream.handle(buf)
 
 		if err != nil && err != io.EOF {
 			log.Fatal(err)
