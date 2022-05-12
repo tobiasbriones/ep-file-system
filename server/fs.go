@@ -5,7 +5,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"log"
 	"os"
 )
 
@@ -25,6 +28,49 @@ func newDataStream(relPath string, bufSize uint, handler Handler) DataStream {
 }
 
 type Handler func(buf []byte)
+
+func StreamFile(stream *DataStream) {
+	f, err := os.Open(stream.path)
+	if err != nil {
+		log.Fatalf("Fail to read file %v: %v", stream.path, err.Error())
+	}
+
+	bytesNumber := int64(0)
+	chunksNumber := int64(0)
+	reader := bufio.NewReader(f)
+	buf := make([]byte, 0, stream.bufSize)
+
+	for {
+		n, err := reader.Read(buf[:cap(buf)])
+
+		buf = buf[:n]
+		if n == 0 {
+			if err == nil {
+				continue
+			}
+			if err == io.EOF {
+				break
+			}
+			log.Fatal(err)
+		}
+		chunksNumber++
+		bytesNumber += int64(len(buf))
+
+		stream.handler(buf)
+
+		if err != nil && err != io.EOF {
+			log.Fatal(err)
+		}
+	}
+	log.Println(
+		"Streaming completed.\n",
+		"File:",
+		stream.path,
+		"Bytes:",
+		bytesNumber,
+		"Chunks:", chunksNumber,
+	)
+}
 
 func getFilePath(relPath string) string {
 	return fmt.Sprintf("%v%v%v", fsRootPath, string(os.PathSeparator), relPath)
