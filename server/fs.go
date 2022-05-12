@@ -84,6 +84,23 @@ func StreamFile(stream *DataStream) {
 	)
 }
 
+func CreateFile(relPath string) {
+	path := getFilePath(relPath)
+	f, err := os.Create(path)
+
+	defer f.Close()
+	requireNoError(err)
+}
+
+func WriteBuf(relPath string, buf []byte) {
+	path := getFilePath(relPath)
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	defer f.Close()
+
+	requireNoError(err)
+	_, err = f.Write(buf)
+}
+
 func getFilePath(relPath string) string {
 	return fmt.Sprintf("%v%v%v", fsRootPath, string(os.PathSeparator), relPath)
 }
