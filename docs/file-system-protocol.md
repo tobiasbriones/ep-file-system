@@ -32,5 +32,26 @@ boilerplate overhead as many chunks will be sent for large files.
 
 ## Serialization
 
-To serialize the data sent over TCP, a JSON object will be employed. That 
-way any client can parse it.
+To serialize the data sent over TCP, a JSON object will be employed. That way
+any client can parse it.
+
+### Structure
+
+The DTO should look like the following:
+
+```json
+{
+  "type": "START",
+  "size": 1024,
+  "payload": {}
+}
+```
+
+The payload can contain any information needed for that state.
+
+For the special `DATA` state, a JSON array is to be sent as payload instead.
+When the client detects it as array it will know that is a data chunk. The
+existence of the `size` attribute here implies that the status is `DATA` too.
+
+The size indicates the length of the chunk or buffer that the client or server
+has to read. 
