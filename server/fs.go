@@ -9,6 +9,19 @@ import (
 	"os"
 )
 
+type DataStream struct {
+	path    string
+	bufSize uint
+	handler Handler
+}
+
+func newDataStream(relPath string, bufSize uint, handler Handler) DataStream {
+	path := getFilePath(relPath)
+	return DataStream{path, bufSize, handler}
+}
+
+type Handler func(buf []byte)
+
 func getFilePath(relPath string) string {
 	return fmt.Sprintf("%v%v%v", fsRootPath, os.PathSeparator, relPath)
 }
