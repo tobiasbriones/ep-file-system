@@ -4,6 +4,8 @@
 
 package server
 
+import "fmt"
+
 const (
 	fsRootPath = "fs"
 	port       = 8080
@@ -12,4 +14,8 @@ const (
 
 func main() {
 
+}
+
+func getServerAddress() string {
+	return fmt.Sprintf("localhost:%v", port)
 }
