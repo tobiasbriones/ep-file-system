@@ -5,6 +5,9 @@
 package main
 
 import (
+	"encoding/json"
+	"log"
+	"net"
 	"testing"
 )
 
@@ -38,4 +41,40 @@ func TestReceiveSend(t *testing.T) {
 		// Mimic sending to remote server
 		WriteBuf(newPath, chunk)
 	}
+}
+
+// Makes a request to the server. It can be either upload or download. After the
+// initial request (status START), the server will respond with status OK.
+func TestTcpConn(t *testing.T) {
+	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
+
+	requireNoError(err)
+	conn, err := net.DialTCP(network, nil, tcpAddr)
+	requireNoError(err)
+
+	msg := Message{
+		Status: "start",
+		Action: "upload",
+	}
+	b, err := json.Marshal(msg)
+	requireNoError(err)
+	_, err = conn.Write(b)
+	requireNoError(err)
+
+	buf := make([]byte, 1024)
+
+	n, err := conn.Read(buf)
+	reply := buf[:n]
+
+	requireNoError(err)
+	log.Println("Reply from server: ", string(reply))
+
+	res := Message{}
+	err = json.Unmarshal(reply, &res)
+
+	requireNoError(err)
+	if res.Status != OK {
+		t.Fatal("Fail to establish the TCP connection to the server")
+	}
+	conn.Close()
 }
