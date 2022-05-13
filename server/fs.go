@@ -49,16 +49,28 @@ func GetFileSize(path string) (int64, error) {
 	return fi.Size(), nil
 }
 
-func StreamFile(stream *DataStream) {
-	f, err := os.Open(stream.path)
+func StreamFile(ds *DataStream) {
+	f, err := os.Open(ds.path)
 	if err != nil {
-		log.Fatalf("Fail to read file %v: %v", stream.path, err.Error())
+		log.Fatalf("Fail to read file %v: %v", ds.path, err.Error())
 	}
+	buf := make([]byte, 0, ds.bufSize)
+	reader := bufio.NewReader(f)
+	bytesNumber, chunksNumber := stream(reader, buf, ds.handle)
 
+	log.Println(
+		"Streaming completed.\n",
+		"File:",
+		ds.path,
+		"Bytes:",
+		bytesNumber,
+		"Chunks:", chunksNumber,
+	)
+}
+
+func stream(reader *bufio.Reader, buf []byte, handle Handle) (int64, int64) {
 	bytesNumber := int64(0)
 	chunksNumber := int64(0)
-	reader := bufio.NewReader(f)
-	buf := make([]byte, 0, stream.bufSize)
 
 	for {
 		n, err := reader.Read(buf[:cap(buf)])
@@ -76,20 +88,13 @@ func StreamFile(stream *DataStream) {
 		chunksNumber++
 		bytesNumber += int64(len(buf))
 
-		stream.handle(buf)
+		handle(buf)
 
 		if err != nil && err != io.EOF {
 			log.Fatal(err)
 		}
 	}
-	log.Println(
-		"Streaming completed.\n",
-		"File:",
-		stream.path,
-		"Bytes:",
-		bytesNumber,
-		"Chunks:", chunksNumber,
-	)
+	return bytesNumber, chunksNumber
 }
 
 func CreateFile(relPath string) {
