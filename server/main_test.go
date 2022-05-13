@@ -52,9 +52,12 @@ func TestTcpConn(t *testing.T) {
 	conn, err := net.DialTCP(network, nil, tcpAddr)
 	requireNoError(err)
 
+	info := FileInfo{RelPath: "file.pdf"}
+	infoStr, err := json.Marshal(info)
 	msg := Message{
-		Status: "start",
-		Action: "upload",
+		Status:  "start",
+		Action:  "upload",
+		Payload: string(infoStr),
 	}
 	b, err := json.Marshal(msg)
 	requireNoError(err)

@@ -29,6 +29,14 @@ func newDataStream(relPath string, bufSize uint, handler Handle) DataStream {
 
 type Handle func(buf []byte)
 
+type FileInfo struct {
+	RelPath string
+}
+
+func (i FileInfo) getPath() string {
+	return getFilePath(i.RelPath)
+}
+
 func GetFileSize(path string) (int64, error) {
 	f, err := os.Open(getFilePath(path))
 	if err != nil {

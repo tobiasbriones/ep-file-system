@@ -77,7 +77,6 @@ func handle(conn net.Conn) {
 }
 
 func handleStatusStart(conn net.Conn, msg Message) {
-	log.Println(msg.Action)
 	switch msg.Action {
 	case "upload":
 		handleUpload(conn, msg)
@@ -92,13 +91,27 @@ func handleStatusStart(conn net.Conn, msg Message) {
 }
 
 func handleDownload(conn net.Conn, msg Message) {
-	writeStatus(OK, conn)
+	info := getFileInfo(msg)
+
+	log.Println(info)
 	// TODO
+	writeStatus(OK, conn)
 }
 
 func handleUpload(conn net.Conn, msg Message) {
-	writeStatus(OK, conn)
+	info := getFileInfo(msg)
+
+	log.Println(info)
 	// TODO
+	writeStatus(OK, conn)
+}
+
+func getFileInfo(msg Message) FileInfo {
+	info := FileInfo{}
+	err := json.Unmarshal([]byte(msg.Payload), &info)
+
+	requireNoError(err)
+	return info
 }
 
 func writeStatus(status Status, conn net.Conn) {
