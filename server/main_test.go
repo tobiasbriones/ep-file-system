@@ -49,6 +49,16 @@ func TestReceiveSend(t *testing.T) {
 // Makes a request to the server. It can be either upload or download. After the
 // initial request (status START), the server will respond with status OK.
 func TestTcpConn(t *testing.T) {
+	conn := initiateConn("upload")
+	res := readInitialOkMsg(conn)
+
+	if res.Status != OK {
+		t.Fatal("Fail to establish the TCP connection to the server")
+	}
+	conn.Close()
+}
+
+func initiateConn(action string) *net.TCPConn {
 	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
 
 	requireNoError(err)
@@ -59,16 +69,18 @@ func TestTcpConn(t *testing.T) {
 	infoStr, err := json.Marshal(info)
 	msg := Message{
 		Status:  "start",
-		Action:  "upload",
+		Action:  action,
 		Payload: string(infoStr),
 	}
 	b, err := json.Marshal(msg)
 	requireNoError(err)
 	_, err = conn.Write(b)
 	requireNoError(err)
+	return conn
+}
 
+func readInitialOkMsg(conn net.Conn) Message {
 	buf := make([]byte, 1024)
-
 	n, err := conn.Read(buf)
 	reply := buf[:n]
 
@@ -79,8 +91,5 @@ func TestTcpConn(t *testing.T) {
 	err = json.Unmarshal(reply, &res)
 
 	requireNoError(err)
-	if res.Status != OK {
-		t.Fatal("Fail to establish the TCP connection to the server")
-	}
-	conn.Close()
+	return res
 }
