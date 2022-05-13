@@ -68,6 +68,25 @@ func StreamFile(ds *DataStream) {
 	)
 }
 
+func StreamLocalFile(path string, bufSize uint, handle Handle) {
+	f, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("Fail to read file %v: %v", path, err.Error())
+	}
+	buf := make([]byte, 0, bufSize)
+	reader := bufio.NewReader(f)
+	bytesNumber, chunksNumber := stream(reader, buf, handle)
+
+	log.Println(
+		"Streaming completed.\n",
+		"File:",
+		path,
+		"Bytes:",
+		bytesNumber,
+		"Chunks:", chunksNumber,
+	)
+}
+
 func stream(reader *bufio.Reader, buf []byte, handle Handle) (int64, int64) {
 	bytesNumber := int64(0)
 	chunksNumber := int64(0)
