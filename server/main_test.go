@@ -11,17 +11,20 @@ import (
 	"testing"
 )
 
+const (
+	testFile = "file.pdf"
+)
+
 // Side effect test. Requires a file "file.pdf" into the server's file system
 // directory.
 func TestReceiveSend(t *testing.T) {
-	path := "file.pdf"
-	size, err := GetFileSize(path)
+	size, err := GetFileSize(testFile)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 	downloaded := make([]byte, 0, size)
-	ds := newDataStream(path, bufSize, func(buf []byte) {
+	ds := newDataStream(testFile, bufSize, func(buf []byte) {
 		downloaded = append(downloaded, buf...)
 	})
 
@@ -52,7 +55,7 @@ func TestTcpConn(t *testing.T) {
 	conn, err := net.DialTCP(network, nil, tcpAddr)
 	requireNoError(err)
 
-	info := FileInfo{RelPath: "file.pdf"}
+	info := FileInfo{RelPath: testFile}
 	infoStr, err := json.Marshal(info)
 	msg := Message{
 		Status:  "start",
