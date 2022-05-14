@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 )
 
 const (
@@ -34,6 +35,7 @@ type Message struct {
 	Status
 	Action  string
 	Payload string
+	Data    []byte
 }
 
 func main() {
@@ -101,9 +103,67 @@ func handleDownload(conn net.Conn, msg Message) {
 func handleUpload(conn net.Conn, msg Message) {
 	info := getFileInfo(msg)
 
-	log.Println(info)
-	// TODO
 	writeStatus(OK, conn)
+
+	_, err := os.Create(info.getPath())
+	requireNoError(err)
+
+	log.Println("Writing file:", info.RelPath, "Size:", info.Size)
+
+	// Status = DATA, wait for chunks only
+	count := int64(0)
+	for {
+		chunk := readChunk(conn)
+
+		WriteBuf(info.RelPath, chunk)
+
+		count += int64(len(chunk))
+		if count >= info.Size {
+			break
+		}
+		if len(chunk) == 0 {
+			log.Print(
+				"Fail to read file chunk: ",
+				"The EOF was before the right position",
+			)
+			writeStatus(ERROR, conn)
+			conn.Close()
+			return
+		}
+	}
+	if count != info.Size {
+		log.Println(
+			"Fail to finish writing the file:",
+			"More bytes were written",
+		)
+		writeStatus(ERROR, conn)
+		conn.Close()
+		return
+	}
+
+	// Wait for EOF signal = empty chunk
+	chunk := readChunk(conn)
+
+	if len(chunk) != 0 {
+		log.Println("Fail to read EOF signal")
+		writeStatus(ERROR, conn)
+		return
+	}
+	writeStatus(OK, conn)
+	log.Println("File successfully written")
+}
+
+func readChunk(conn net.Conn) []byte {
+	b := make([]byte, bufSize)
+	n, err := conn.Read(b)
+
+	if err != nil {
+		if err.Error() != "EOF" {
+			log.Println("Error reading chunk:", err)
+			requireNoError(err)
+		}
+	}
+	return b[:n]
 }
 
 func getFileInfo(msg Message) FileInfo {
