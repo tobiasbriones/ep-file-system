@@ -36,3 +36,23 @@ type Message struct {
 	Payload string
 	Data    []byte
 }
+
+type MessageType uint
+
+const (
+	MsgFileInfo MessageType = 0
+	MsgAction   MessageType = 1
+	MsgData     MessageType = 2
+)
+
+func (t MessageType) String() string {
+	return MessageTypes()[t]
+}
+
+func MessageTypes() []string {
+	return []string{
+		"file-info",
+		"action",
+		"data",
+	}
+}
