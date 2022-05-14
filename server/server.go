@@ -44,11 +44,14 @@ func handle(conn net.Conn) {
 }
 
 func handleStatusStart(conn net.Conn, msg Message) {
-	switch msg.Action {
-	case "upload":
+	payload, err := msg.StartPayload()
+	requireNoError(err)
+
+	switch payload.Action {
+	case ActionUpload:
 		handleUpload(conn, msg)
 		break
-	case "download":
+	case ActionDownload:
 		handleDownload(conn, msg)
 		break
 	default:
@@ -58,19 +61,22 @@ func handleStatusStart(conn net.Conn, msg Message) {
 }
 
 func handleDownload(conn net.Conn, msg Message) {
-	info := getFileInfo(msg)
+	payload, err := msg.StartPayload()
+	requireNoError(err)
 
-	log.Println(info)
+	log.Println(payload.FileInfo)
 	// TODO
 	writeStatus(Ok, conn)
 }
 
 func handleUpload(conn net.Conn, msg Message) {
-	info := getFileInfo(msg)
+	payload, err := msg.StartPayload()
+	requireNoError(err)
+	info := payload.FileInfo
 
 	writeStatus(Ok, conn)
 
-	_, err := os.Create(info.getPath())
+	_, err = os.Create(info.getPath())
 	requireNoError(err)
 
 	log.Println("Writing file:", info.RelPath, "Size:", info.Size)
@@ -129,14 +135,6 @@ func readChunk(conn net.Conn) []byte {
 		}
 	}
 	return b[:n]
-}
-
-func getFileInfo(msg Message) FileInfo {
-	info := FileInfo{}
-	err := json.Unmarshal([]byte(msg.Payload), &info)
-
-	requireNoError(err)
-	return info
 }
 
 func writeStatus(status Status, conn net.Conn) {

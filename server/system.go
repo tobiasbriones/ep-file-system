@@ -4,13 +4,28 @@
 
 package main
 
-import "errors"
+import (
+	"encoding/json"
+	"errors"
+)
 
 type Message struct {
 	Status
-	Action  string
-	Payload string
-	Data    []byte
+	Payload []byte
+}
+
+func (m Message) StartPayload() (StartPayload, error) {
+	if m.Status != Start {
+		return StartPayload{}, errors.New("message status is not START")
+	}
+	payload := StartPayload{}
+	err := json.Unmarshal(m.Payload, &payload)
+	return payload, err
+}
+
+type StartPayload struct {
+	Action
+	FileInfo
 }
 
 type Status uint
@@ -30,7 +45,7 @@ func (s Status) String() string {
 
 func ToStatus(i uint) (Status, error) {
 	if int(i) >= len(Statuses()) {
-		return -1, errors.New("invalid status")
+		return Status(0), errors.New("invalid status")
 	}
 	return Status(i), nil
 }
@@ -46,33 +61,6 @@ func Statuses() []string {
 	}
 }
 
-type MessageType uint
-
-const (
-	MsgFileInfo MessageType = 0
-	MsgAction   MessageType = 1
-	MsgData     MessageType = 2
-)
-
-func (t MessageType) String() string {
-	return MessageTypes()[t]
-}
-
-func ToMessageType(i uint) (MessageType, error) {
-	if int(i) >= len(MessageTypes()) {
-		return -1, errors.New("invalid message type")
-	}
-	return MessageType(i), nil
-}
-
-func MessageTypes() []string {
-	return []string{
-		"file-info",
-		"action",
-		"data",
-	}
-}
-
 type Action uint
 
 const (
@@ -82,7 +70,7 @@ const (
 
 func ToAction(i uint) (Action, error) {
 	if int(i) >= len(Actions()) {
-		return -1, errors.New("invalid action")
+		return Action(0), errors.New("invalid action")
 	}
 	return Action(i), nil
 }
