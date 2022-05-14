@@ -72,3 +72,24 @@ func MessageTypes() []string {
 		"data",
 	}
 }
+
+type Action uint
+
+const (
+	ActionUpload   Action = 0
+	ActionDownload Action = 1
+)
+
+func ToAction(i uint) (Action, error) {
+	if int(i) >= len(Actions()) {
+		return -1, errors.New("invalid action")
+	}
+	return Action(i), nil
+}
+
+func Actions() []string {
+	return []string{
+		"upload",
+		"download",
+	}
+}
