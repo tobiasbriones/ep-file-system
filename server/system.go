@@ -4,6 +4,8 @@
 
 package main
 
+import "errors"
+
 type Status uint
 
 const (
@@ -17,6 +19,13 @@ const (
 
 func (s Status) String() string {
 	return Statuses()[s]
+}
+
+func ToStatus(i uint) (Status, error) {
+	if int(i) >= len(Statuses()) {
+		return -1, errors.New("invalid status")
+	}
+	return Status(i), nil
 }
 
 func Statuses() []string {
