@@ -58,6 +58,13 @@ func (t MessageType) String() string {
 	return MessageTypes()[t]
 }
 
+func ToMessageType(i uint) (MessageType, error) {
+	if int(i) >= len(MessageTypes()) {
+		return -1, errors.New("invalid message type")
+	}
+	return MessageType(i), nil
+}
+
 func MessageTypes() []string {
 	return []string{
 		"file-info",
