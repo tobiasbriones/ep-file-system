@@ -21,23 +21,6 @@ const (
 	bufSize = 1024
 )
 
-type Status string
-
-const (
-	START Status = "start"
-	OK    Status = "ok"
-	DATA  Status = "data"
-	EOF   Status = "eof"
-	ERROR Status = "error"
-)
-
-type Message struct {
-	Status
-	Action  string
-	Payload string
-	Data    []byte
-}
-
 func main() {
 	server, err := net.Listen(network, getServerAddress())
 
