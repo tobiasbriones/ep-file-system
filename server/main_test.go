@@ -49,7 +49,7 @@ func TestReceiveSend(t *testing.T) {
 // initial request (status START), the server will respond with status OK.
 func TestTcpConn(t *testing.T) {
 	conn := initiateConn(t, "upload")
-	res := readInitialOkMsg(t, conn)
+	res := readResponseMsg(t, conn)
 
 	if res.Status != OK {
 		t.Fatal("Fail to establish the TCP connection to the server")
@@ -79,18 +79,17 @@ func initiateConn(t *testing.T, action string) *net.TCPConn {
 	return conn
 }
 
-func readInitialOkMsg(t *testing.T, conn net.Conn) Message {
+func readResponseMsg(t *testing.T, conn net.Conn) Message {
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 	reply := buf[:n]
 
-	requirePassedTest(t, err, "Fail to read status=OK response from server")
+	requirePassedTest(t, err, "Fail to read response from server")
 	log.Println("Reply from server: ", string(reply))
 
 	res := Message{}
 	err = json.Unmarshal(reply, &res)
-
-	requirePassedTest(t, err, "Fail to deserialize server status=OK response")
+	requirePassedTest(t, err, "Fail to deserialize server response")
 	return res
 }
 
