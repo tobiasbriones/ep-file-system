@@ -31,14 +31,21 @@ type Handle func(buf []byte)
 
 type FileInfo struct {
 	RelPath string
+	Size    int64
 }
 
-func (i FileInfo) getPath() string {
+// ReadFileSize Returns the file size read from the server file system.
+func (i *FileInfo) readFileSize() (int64, error) {
+	return ReadFileSize(i.getPath())
+}
+
+// Returns the file path in the server file system.
+func (i *FileInfo) getPath() string {
 	return getFilePath(i.RelPath)
 }
 
-func GetFileSize(path string) (int64, error) {
-	f, err := os.Open(getFilePath(path))
+func ReadFileSize(path string) (int64, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return 0, err
 	}

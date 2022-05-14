@@ -18,7 +18,8 @@ const (
 // Side effect test. Requires a file "file.pdf" into the server's file system
 // directory.
 func TestReceiveSend(t *testing.T) {
-	size, err := GetFileSize(testFile)
+	serverFileInfo, err := newTestFileInfo()
+	size := serverFileInfo.Size
 
 	if err != nil {
 		t.Fatal(err)
@@ -65,7 +66,7 @@ func initiateConn(action string) *net.TCPConn {
 	conn, err := net.DialTCP(network, nil, tcpAddr)
 	requireNoError(err)
 
-	info := FileInfo{RelPath: testFile}
+	info, err := newTestFileInfo()
 	infoStr, err := json.Marshal(info)
 	msg := Message{
 		Status:  "start",
@@ -92,4 +93,14 @@ func readInitialOkMsg(conn net.Conn) Message {
 
 	requireNoError(err)
 	return res
+}
+
+func newTestFileInfo() (FileInfo, error) {
+	i := FileInfo{
+		RelPath: testFile,
+		Size:    0,
+	}
+	size, err := i.readFileSize()
+	i.Size = size
+	return i, err
 }
