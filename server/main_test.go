@@ -21,9 +21,7 @@ func TestReceiveSend(t *testing.T) {
 	serverFileInfo, err := newTestFileInfo()
 	size := serverFileInfo.Size
 
-	if err != nil {
-		t.Fatal(err)
-	}
+	requirePassedTest(t, err, "Fail to load test file info")
 	downloaded := make([]byte, 0, size)
 	ds := newDataStream(testFile, bufSize, func(buf []byte) {
 		downloaded = append(downloaded, buf...)
