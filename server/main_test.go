@@ -16,7 +16,7 @@ const (
 )
 
 // Side effect test. Requires a file "file.pdf" into the server's file system
-// directory.
+// directory. It tests the server file system for write and read.
 func TestReceiveSend(t *testing.T) {
 	serverFileInfo, err := newTestFileInfo()
 	size := serverFileInfo.Size
