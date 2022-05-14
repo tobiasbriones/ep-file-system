@@ -6,6 +6,13 @@ package main
 
 import "errors"
 
+type Message struct {
+	Status
+	Action  string
+	Payload string
+	Data    []byte
+}
+
 type Status uint
 
 const (
@@ -37,13 +44,6 @@ func Statuses() []string {
 		"error",
 		"done",
 	}
-}
-
-type Message struct {
-	Status
-	Action  string
-	Payload string
-	Data    []byte
 }
 
 type MessageType uint
