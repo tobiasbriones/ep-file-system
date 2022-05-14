@@ -4,8 +4,16 @@
 
 package main
 
+import "testing"
+
 func requireNoError(e error) {
 	if e != nil {
 		panic(e)
+	}
+}
+
+func requirePassedTest(t *testing.T, e error, msg string) {
+	if e != nil {
+		t.Fatal(msg, "\n Error:", e)
 	}
 }

@@ -5,20 +5,25 @@
 package main
 
 import (
+	"encoding/json"
+	"log"
+	"net"
 	"testing"
 )
 
-// Side effect test. Requires a file "file.pdf" into the server's file system
-// directory.
-func TestReceiveSend(t *testing.T) {
-	path := "file.pdf"
-	size, err := GetFileSize(path)
+const (
+	testFile = "file.pdf"
+)
 
-	if err != nil {
-		t.Fatal(err)
-	}
+// Side effect test. Requires a file "file.pdf" into the server's file system
+// directory. It tests the server file system for write and read.
+func TestReceiveSend(t *testing.T) {
+	serverFileInfo, err := newTestFileInfo()
+	size := serverFileInfo.Size
+
+	requirePassedTest(t, err, "Fail to load test file info")
 	downloaded := make([]byte, 0, size)
-	ds := newDataStream(path, bufSize, func(buf []byte) {
+	ds := newDataStream(testFile, bufSize, func(buf []byte) {
 		downloaded = append(downloaded, buf...)
 	})
 
@@ -38,4 +43,63 @@ func TestReceiveSend(t *testing.T) {
 		// Mimic sending to remote server
 		WriteBuf(newPath, chunk)
 	}
+}
+
+// Makes a request to the server. It can be either upload or download. After the
+// initial request (status START), the server will respond with status OK.
+func TestTcpConn(t *testing.T) {
+	conn := initiateConn(t, "upload")
+	res := readInitialOkMsg(t, conn)
+
+	if res.Status != OK {
+		t.Fatal("Fail to establish the TCP connection to the server")
+	}
+	conn.Close()
+}
+
+func initiateConn(t *testing.T, action string) *net.TCPConn {
+	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
+	requirePassedTest(t, err, "Fail to resolve TCP address")
+
+	conn, err := net.DialTCP(network, nil, tcpAddr)
+	requirePassedTest(t, err, "Fail to establish connection")
+
+	info, err := newTestFileInfo()
+	requirePassedTest(t, err, "Fail to load test FileInfo")
+
+	infoStr, err := json.Marshal(info)
+	msg := Message{
+		Status:  "start",
+		Action:  action,
+		Payload: string(infoStr),
+	}
+	b, err := json.Marshal(msg)
+	_, err = conn.Write(b)
+	requirePassedTest(t, err, "Fail to write status=START to the server")
+	return conn
+}
+
+func readInitialOkMsg(t *testing.T, conn net.Conn) Message {
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	reply := buf[:n]
+
+	requirePassedTest(t, err, "Fail to read status=OK response from server")
+	log.Println("Reply from server: ", string(reply))
+
+	res := Message{}
+	err = json.Unmarshal(reply, &res)
+
+	requirePassedTest(t, err, "Fail to deserialize server status=OK response")
+	return res
+}
+
+func newTestFileInfo() (FileInfo, error) {
+	i := FileInfo{
+		RelPath: testFile,
+		Size:    0,
+	}
+	size, err := i.readFileSize()
+	i.Size = size
+	return i, err
 }

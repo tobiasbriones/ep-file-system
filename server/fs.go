@@ -29,8 +29,23 @@ func newDataStream(relPath string, bufSize uint, handler Handle) DataStream {
 
 type Handle func(buf []byte)
 
-func GetFileSize(path string) (int64, error) {
-	f, err := os.Open(getFilePath(path))
+type FileInfo struct {
+	RelPath string
+	Size    int64
+}
+
+// ReadFileSize Returns the file size read from the server file system.
+func (i *FileInfo) readFileSize() (int64, error) {
+	return ReadFileSize(i.getPath())
+}
+
+// Returns the file path in the server file system.
+func (i *FileInfo) getPath() string {
+	return getFilePath(i.RelPath)
+}
+
+func ReadFileSize(path string) (int64, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return 0, err
 	}
@@ -41,16 +56,47 @@ func GetFileSize(path string) (int64, error) {
 	return fi.Size(), nil
 }
 
-func StreamFile(stream *DataStream) {
-	f, err := os.Open(stream.path)
+func StreamFile(ds *DataStream) {
+	f, err := os.Open(ds.path)
 	if err != nil {
-		log.Fatalf("Fail to read file %v: %v", stream.path, err.Error())
+		log.Fatalf("Fail to read file %v: %v", ds.path, err.Error())
 	}
+	buf := make([]byte, 0, ds.bufSize)
+	reader := bufio.NewReader(f)
+	bytesNumber, chunksNumber := stream(reader, buf, ds.handle)
 
+	log.Println(
+		"Streaming completed.\n",
+		"File:",
+		ds.path,
+		"Bytes:",
+		bytesNumber,
+		"Chunks:", chunksNumber,
+	)
+}
+
+func StreamLocalFile(path string, bufSize uint, handle Handle) {
+	f, err := os.Open(path)
+	if err != nil {
+		log.Fatalf("Fail to read file %v: %v", path, err.Error())
+	}
+	buf := make([]byte, 0, bufSize)
+	reader := bufio.NewReader(f)
+	bytesNumber, chunksNumber := stream(reader, buf, handle)
+
+	log.Println(
+		"Streaming completed.\n",
+		"File:",
+		path,
+		"Bytes:",
+		bytesNumber,
+		"Chunks:", chunksNumber,
+	)
+}
+
+func stream(reader *bufio.Reader, buf []byte, handle Handle) (int64, int64) {
 	bytesNumber := int64(0)
 	chunksNumber := int64(0)
-	reader := bufio.NewReader(f)
-	buf := make([]byte, 0, stream.bufSize)
 
 	for {
 		n, err := reader.Read(buf[:cap(buf)])
@@ -68,20 +114,13 @@ func StreamFile(stream *DataStream) {
 		chunksNumber++
 		bytesNumber += int64(len(buf))
 
-		stream.handle(buf)
+		handle(buf)
 
 		if err != nil && err != io.EOF {
 			log.Fatal(err)
 		}
 	}
-	log.Println(
-		"Streaming completed.\n",
-		"File:",
-		stream.path,
-		"Bytes:",
-		bytesNumber,
-		"Chunks:", chunksNumber,
-	)
+	return bytesNumber, chunksNumber
 }
 
 func CreateFile(relPath string) {
