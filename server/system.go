@@ -4,15 +4,31 @@
 
 package main
 
-type Status string
+type Status uint
 
 const (
-	START Status = "start"
-	OK    Status = "ok"
-	DATA  Status = "data"
-	EOF   Status = "eof"
-	ERROR Status = "error"
+	Start Status = 0
+	Ok    Status = 1
+	Data  Status = 2
+	Eof   Status = 3
+	Error Status = 4
+	Done  Status = 5
 )
+
+func (s Status) String() string {
+	return Statuses()[s]
+}
+
+func Statuses() []string {
+	return []string{
+		"start",
+		"ok",
+		"data",
+		"eof",
+		"error",
+		"done",
+	}
+}
 
 type Message struct {
 	Status

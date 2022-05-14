@@ -34,11 +34,11 @@ func handle(conn net.Conn) {
 	}
 	log.Println(msg.Status)
 	switch msg.Status {
-	case START:
+	case Start:
 		handleStatusStart(conn, msg)
 		break
 	default:
-		writeStatus(ERROR, conn)
+		writeStatus(Error, conn)
 		break
 	}
 }
@@ -52,7 +52,7 @@ func handleStatusStart(conn net.Conn, msg Message) {
 		handleDownload(conn, msg)
 		break
 	default:
-		writeStatus(ERROR, conn)
+		writeStatus(Error, conn)
 		break
 	}
 }
@@ -62,13 +62,13 @@ func handleDownload(conn net.Conn, msg Message) {
 
 	log.Println(info)
 	// TODO
-	writeStatus(OK, conn)
+	writeStatus(Ok, conn)
 }
 
 func handleUpload(conn net.Conn, msg Message) {
 	info := getFileInfo(msg)
 
-	writeStatus(OK, conn)
+	writeStatus(Ok, conn)
 
 	_, err := os.Create(info.getPath())
 	requireNoError(err)
@@ -91,7 +91,7 @@ func handleUpload(conn net.Conn, msg Message) {
 				"Fail to read file chunk: ",
 				"The EOF was before the right position",
 			)
-			writeStatus(ERROR, conn)
+			writeStatus(Error, conn)
 			conn.Close()
 			return
 		}
@@ -101,7 +101,7 @@ func handleUpload(conn net.Conn, msg Message) {
 			"Fail to finish writing the file:",
 			"More bytes were written",
 		)
-		writeStatus(ERROR, conn)
+		writeStatus(Error, conn)
 		conn.Close()
 		return
 	}
@@ -111,10 +111,10 @@ func handleUpload(conn net.Conn, msg Message) {
 
 	if len(chunk) != 0 {
 		log.Println("Fail to read EOF signal")
-		writeStatus(ERROR, conn)
+		writeStatus(Error, conn)
 		return
 	}
-	writeStatus(OK, conn)
+	writeStatus(Ok, conn)
 	log.Println("File successfully written")
 }
 
