@@ -49,10 +49,10 @@ func handleStatusStart(conn net.Conn, msg Message) {
 
 	switch payload.Action {
 	case ActionUpload:
-		handleUpload(conn, msg)
+		handleUpload(conn, payload)
 		break
 	case ActionDownload:
-		handleDownload(conn, msg)
+		handleDownload(conn, payload)
 		break
 	default:
 		writeStatus(Error, conn)
@@ -60,23 +60,18 @@ func handleStatusStart(conn net.Conn, msg Message) {
 	}
 }
 
-func handleDownload(conn net.Conn, msg Message) {
-	payload, err := msg.StartPayload()
-	requireNoError(err)
-
+func handleDownload(conn net.Conn, payload StartPayload) {
 	log.Println(payload.FileInfo)
 	// TODO
 	writeStatus(Ok, conn)
 }
 
-func handleUpload(conn net.Conn, msg Message) {
-	payload, err := msg.StartPayload()
-	requireNoError(err)
+func handleUpload(conn net.Conn, payload StartPayload) {
 	info := payload.FileInfo
 
 	writeStatus(Ok, conn)
 
-	_, err = os.Create(info.getPath())
+	_, err := os.Create(info.getPath())
 	requireNoError(err)
 
 	log.Println("Writing file:", info.RelPath, "Size:", info.Size)

@@ -71,7 +71,9 @@ func initiateConn(t *testing.T, action Action) *net.TCPConn {
 	}
 	requirePassedTest(t, err, "Fail to load test FileInfo")
 
-	payload, err := json.Marshal(body)
+	payload, err := NewPayload(body)
+	requirePassedTest(t, err, "Fail to load create payload")
+
 	msg := Message{
 		Status:  Start,
 		Payload: payload,

@@ -11,15 +11,21 @@ import (
 
 type Message struct {
 	Status
-	Payload []byte
+	Payload
 }
 
-func (m Message) StartPayload() (StartPayload, error) {
-	if m.Status != Start {
-		return StartPayload{}, errors.New("message status is not START")
-	}
+type Payload struct {
+	Data []byte
+}
+
+func NewPayload(v any) (Payload, error) {
+	payload, err := json.Marshal(v)
+	return Payload{Data: payload}, err
+}
+
+func (p Payload) StartPayload() (StartPayload, error) {
 	payload := StartPayload{}
-	err := json.Unmarshal(m.Payload, &payload)
+	err := json.Unmarshal(p.Data, &payload)
 	return payload, err
 }
 
