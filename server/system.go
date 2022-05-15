@@ -23,6 +23,8 @@ func NewPayload(v any) (Payload, error) {
 	return Payload{Data: payload}, err
 }
 
+// StartPayload Returns the computed attribute for an assumed StartPayload
+// data.
 func (p Payload) StartPayload() (StartPayload, error) {
 	payload := StartPayload{}
 	err := json.Unmarshal(p.Data, &payload)
