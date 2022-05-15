@@ -14,3 +14,12 @@ type Client struct {
 	req    StartPayload
 	count  int64
 }
+
+func newClient(
+	conn net.Conn,
+) *Client {
+	return &Client{
+		conn:   conn,
+		status: Start,
+	}
+}
