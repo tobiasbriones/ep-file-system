@@ -21,12 +21,7 @@ func listen(server net.Listener) {
 
 func handle(conn net.Conn) {
 	defer conn.Close()
-
-	dec := json.NewDecoder(conn)
-
-	var msg Message
-
-	err := dec.Decode(&msg)
+	msg, err := readMessage(conn)
 
 	if err != nil {
 		log.Println("Skipped: ", conn)
@@ -136,10 +131,14 @@ func writeStatus(status Status, conn net.Conn) {
 	msg := Message{
 		Status: status,
 	}
-	b, err := json.Marshal(msg)
-
+	enc := json.NewEncoder(conn)
+	err := enc.Encode(msg)
 	requireNoError(err)
-	_, err = conn.Write(b)
+}
 
-	requireNoError(err)
+func readMessage(conn net.Conn) (Message, error) {
+	var msg Message
+	dec := json.NewDecoder(conn)
+	err := dec.Decode(&msg)
+	return msg, err
 }

@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net"
 	"testing"
 )
@@ -50,11 +49,9 @@ func TestReceiveSend(t *testing.T) {
 func TestTcpConn(t *testing.T) {
 	conn := initiateConn(t, ActionUpload)
 	res := readResponseMsg(t, conn)
-
 	if res.Status != Ok {
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
-	conn.Close()
 }
 
 func initiateConn(t *testing.T, action Action) *net.TCPConn {
@@ -85,17 +82,11 @@ func initiateConn(t *testing.T, action Action) *net.TCPConn {
 }
 
 func readResponseMsg(t *testing.T, conn net.Conn) Message {
-	buf := make([]byte, 1024)
-	n, err := conn.Read(buf)
-	reply := buf[:n]
-
+	var msg Message
+	dec := json.NewDecoder(conn)
+	err := dec.Decode(&msg)
 	requirePassedTest(t, err, "Fail to read response from server")
-	log.Println("Reply from server: ", string(reply))
-
-	res := Message{}
-	err = json.Unmarshal(reply, &res)
-	requirePassedTest(t, err, "Fail to deserialize server response")
-	return res
+	return msg
 }
 
 func newTestFileInfo() (FileInfo, error) {
