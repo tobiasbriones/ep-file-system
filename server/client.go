@@ -5,6 +5,7 @@
 package main
 
 import (
+	"log"
 	"net"
 )
 
@@ -22,4 +23,33 @@ func newClient(
 		conn:   conn,
 		status: Start,
 	}
+}
+
+func (c *Client) run() {
+	defer c.conn.Close()
+	for {
+		switch c.status {
+		default:
+			c.listenMessage()
+		case Data:
+			c.listenData()
+		case Eof:
+			c.listenEof()
+		case Done, Error:
+			log.Println("Exiting client")
+			return
+		}
+	}
+}
+
+func (c *Client) listenMessage() {
+
+}
+
+func (c *Client) listenData() {
+
+}
+
+func (c *Client) listenEof() {
+
 }
