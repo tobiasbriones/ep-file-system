@@ -6,6 +6,15 @@ package io
 
 import "testing"
 
+func TestBasics(t *testing.T) {
+	if Root != "" {
+		t.Fatal("Invalid definition of root path")
+	}
+	if Separator != "/" {
+		t.Fatal("Invalid definition of path separator")
+	}
+}
+
 func TestNewPath(t *testing.T) {
 	_, err := NewPath("")
 	requireNoError(t, err)
