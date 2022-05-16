@@ -54,6 +54,10 @@ func (c *Client) listenEof() {
 
 }
 
+func (c *Client) overflows(chunk []byte) bool {
+	return c.count+int64(len(chunk)) > c.req.Size
+}
+
 func (c *Client) error(msg string) {
 	// TODO update func to accept msg
 	writeStatus(Error, c.conn)
