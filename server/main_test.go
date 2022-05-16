@@ -100,7 +100,8 @@ func TestDownload(t *testing.T) {
 	}
 	payload, err := res.StreamPayload()
 	requirePassedTest(t, err, "Fail to read StreamPayload")
-	writeState(Stream, conn)
+	err = writeState(Stream, conn)
+	requirePassedTest(t, err, "Fail to write state=STREAM")
 	path := "download.pdf"
 	err = CreateLocalFile(path)
 	requirePassedTest(t, err, "Fail to create file download.pdf")
@@ -153,7 +154,8 @@ func upload(t *testing.T, conn *net.TCPConn, path string) {
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {
-	writeState(Eof, conn)
+	err := writeState(Eof, conn)
+	requirePassedTest(t, err, "Fail to write EOF")
 }
 
 func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
