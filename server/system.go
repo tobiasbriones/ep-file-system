@@ -106,3 +106,7 @@ type StartPayload struct {
 type StreamPayload struct {
 	FileInfo
 }
+
+type Channel struct {
+	Name string
+}
