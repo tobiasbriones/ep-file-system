@@ -50,6 +50,10 @@ type Path struct {
 	value string
 }
 
+func (p *Path) IsRoot() bool {
+	return p.value == Root
+}
+
 // NewPathFrom constructs a Path from the given tokens. Tokens must be
 // independent, e.g. not containing the separator character, one at a time.
 func NewPathFrom(values ...string) (Path, error) {
