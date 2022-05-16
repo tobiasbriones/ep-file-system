@@ -82,7 +82,11 @@ func (c *Client) startUpload(payload StartPayload) {
 		c.error("File sent is empty")
 		return
 	}
-	CreateFile(payload.RelPath)
+	err := CreateFile(payload.RelPath)
+	if err != nil {
+		c.error("Fail to create file")
+		return
+	}
 	log.Println("Payload saved, writing state=DATA", payload)
 	c.state = Data
 	writeState(Data, c.conn)
@@ -114,7 +118,11 @@ func (c *Client) processChunk(chunk []byte) {
 		c.error("Underflow!")
 		return
 	}
-	WriteBuf(c.req.RelPath, chunk)
+	err := WriteBuf(c.req.RelPath, chunk)
+	if err != nil {
+		c.error("Fail to write chunk")
+		return
+	}
 	c.count += int64(len(chunk))
 }
 

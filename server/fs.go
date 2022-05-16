@@ -135,28 +135,30 @@ func stream(
 	return bytesNumber, chunksNumber, nil
 }
 
-func CreateFile(relPath string) {
+func CreateFile(relPath string) error {
 	path := getFilePath(relPath)
-	CreateLocalFile(path)
+	return CreateLocalFile(path)
 }
 
-func CreateLocalFile(path string) {
+func CreateLocalFile(path string) error {
 	f, err := os.Create(path)
-	requireNoError(err)
 	f.Close()
+	return err
 }
 
-func WriteBuf(relPath string, buf []byte) {
+func WriteBuf(relPath string, buf []byte) error {
 	path := getFilePath(relPath)
-	WriteLocalBuf(path, buf)
+	return WriteLocalBuf(path, buf)
 }
 
-func WriteLocalBuf(path string, buf []byte) {
+func WriteLocalBuf(path string, buf []byte) error {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-	requireNoError(err)
+	if err != nil {
+		return err
+	}
 	_, err = f.Write(buf)
-	requireNoError(err)
 	f.Close()
+	return err
 }
 
 func getFilePath(relPath string) string {
