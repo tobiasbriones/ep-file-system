@@ -62,6 +62,7 @@ func StreamFile(ds *DataStream) {
 	if err != nil {
 		log.Fatalf("Fail to read file %v: %v", ds.path, err.Error())
 	}
+	defer f.Close()
 	buf := make([]byte, 0, ds.bufSize)
 	reader := bufio.NewReader(f)
 	bytesNumber, chunksNumber := stream(reader, buf, ds.handle)
