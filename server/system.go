@@ -40,7 +40,6 @@ type Status uint
 
 const (
 	Start Status = iota
-	Ok
 	Data
 	Eof
 	Error
@@ -61,7 +60,6 @@ func ToStatus(i uint) (Status, error) {
 func Statuses() []string {
 	return []string{
 		"start",
-		"ok",
 		"data",
 		"eof",
 		"error",
