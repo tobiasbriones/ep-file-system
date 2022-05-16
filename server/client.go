@@ -5,8 +5,10 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net"
+	"os"
 )
 
 type Client struct {
@@ -33,6 +35,8 @@ func (c *Client) run() {
 			c.listenMessage()
 		case Data:
 			c.listenData()
+		case Stream:
+			c.listenStream()
 		case Eof:
 			c.listenEof()
 		case Done, Error:
@@ -63,7 +67,6 @@ func (c *Client) start(msg Message) {
 	payload, err := msg.StartPayload()
 	requireNoError(err)
 	c.req = payload
-	c.status = Data
 	c.count = 0
 
 	switch payload.Action {
@@ -81,10 +84,32 @@ func (c *Client) startUpload(payload StartPayload) {
 	}
 	CreateFile(payload.RelPath)
 	log.Println("Payload saved, writing status=DATA", payload)
+	c.status = Data
 	writeStatus(Data, c.conn)
 }
 
-func (c *Client) startDownload(msg StartPayload) {
+func (c *Client) startDownload(payload StartPayload) {
+	if _, err := os.Stat(payload.getPath()); errors.Is(err, os.ErrNotExist) {
+		c.error("Requested file does not exists")
+		return
+	}
+	log.Println("Payload saved, writing status=STREAM", payload)
+	c.status = Stream
+	writeStatus(Stream, c.conn)
+}
+
+func (c *Client) listenStream() {
+	log.Println("Listening for client STREAM signal")
+	msg, err := readMessage(c.conn)
+	requireNoError(err)
+	if msg.Status != Stream {
+		c.error("Wrong client status, status=STREAM was expected")
+		return
+	}
+	c.stream()
+}
+
+func (c *Client) stream() {
 	// TODO
 }
 
