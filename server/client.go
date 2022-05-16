@@ -89,10 +89,36 @@ func (c *Client) startDownload(msg StartPayload) {
 }
 
 func (c *Client) listenData() {
-
+	chunk := readChunk(c.conn)
+	c.processChunk(chunk)
+	if c.count == c.req.Size {
+		c.status = Eof
+		log.Println("File saved, writing status EOF")
+		writeStatus(Eof, c.conn)
+	}
 }
 
 func (c *Client) listenEof() {
+	log.Println("Listening for EOF")
+	msg, err := readMessage(c.conn)
+	requireNoError(err)
+	c.eof(msg)
+}
+
+func (c *Client) processChunk(chunk []byte) {
+	if c.overflows(chunk) {
+		c.error("Overflow!")
+		return
+	}
+	if len(chunk) == 0 {
+		c.error("Underflow!")
+		return
+	}
+	WriteBuf(c.req.RelPath, chunk)
+	c.count += int64(len(chunk))
+}
+
+func (c *Client) eof(msg Message) {
 
 }
 
@@ -102,6 +128,7 @@ func (c *Client) overflows(chunk []byte) bool {
 
 func (c *Client) error(msg string) {
 	// TODO update func to accept msg
+	log.Println("ERROR:", msg)
 	c.status = Error
 	writeStatus(Error, c.conn)
 }
