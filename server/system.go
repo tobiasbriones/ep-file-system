@@ -39,12 +39,12 @@ type StartPayload struct {
 type Status uint
 
 const (
-	Start Status = 0
-	Ok    Status = 1
-	Data  Status = 2
-	Eof   Status = 3
-	Error Status = 4
-	Done  Status = 5
+	Start Status = iota
+	Ok
+	Data
+	Eof
+	Error
+	Done
 )
 
 func (s Status) String() string {
@@ -72,8 +72,8 @@ func Statuses() []string {
 type Action uint
 
 const (
-	ActionUpload   Action = 0
-	ActionDownload Action = 1
+	ActionUpload Action = iota
+	ActionDownload
 )
 
 func ToAction(i uint) (Action, error) {
