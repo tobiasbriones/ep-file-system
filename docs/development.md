@@ -20,7 +20,7 @@ There's no need to implement archaic primitive-obsession systems nowadays. You n
 
 In my another [file system](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system) written in Java I had to standardize the path separator because I don't work for M$ Windows or Linux or MacOS. 
 
-I had my own file system, so I don't care if M$ marketers decide to use a cringe symbol that has to escaped all the time for Windows paths just to branded as Microsoft Windows only. 
+I had my own file system, so I don't care if M$ marketers decide to use a cringe symbol that has to be escaped all the time for Windows paths just to brand it as Microsoft Windows only. 
 
 I do direct math, computer science, etc. So my domain is math, computer science, etc. My domain is about doing the right thing right, so most of the time I choose to build the DSL instead of relying on generic/primitive/platform-dependent standards.
 
