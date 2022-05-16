@@ -53,3 +53,8 @@ func (c *Client) listenData() {
 func (c *Client) listenEof() {
 
 }
+
+func (c *Client) error(msg string) {
+	// TODO update func to accept msg
+	writeStatus(Error, c.conn)
+}
