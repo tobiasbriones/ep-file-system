@@ -48,11 +48,12 @@ func TestReceiveSend(t *testing.T) {
 // initial request (status START), the server will respond with status OK.
 func TestTcpConn(t *testing.T) {
 	info, _ := newTestFileInfo()
+	info.Size = 0 // Don't upload anything, just initiate a connection and wait
 	conn := initiateConn(t, ActionUpload, info)
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.Status != Ok {
+	if res.Status != Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
 }
