@@ -88,31 +88,6 @@ func (c *Client) startUpload(payload StartPayload) {
 	writeState(Data, c.conn)
 }
 
-func (c *Client) startDownload(payload StartPayload) {
-	if _, err := os.Stat(payload.getPath()); errors.Is(err, os.ErrNotExist) {
-		c.error("Requested file does not exists")
-		return
-	}
-	log.Println("Payload saved, writing state=STREAM", payload)
-	c.state = Stream
-	writeState(Stream, c.conn)
-}
-
-func (c *Client) listenStream() {
-	log.Println("Listening for client STREAM signal")
-	msg, err := readMessage(c.conn)
-	requireNoError(err)
-	if msg.State != Stream {
-		c.error("Wrong client state, state=STREAM was expected")
-		return
-	}
-	c.stream()
-}
-
-func (c *Client) stream() {
-	// TODO
-}
-
 func (c *Client) listenData() {
 	chunk := readChunk(c.conn)
 	c.processChunk(chunk)
@@ -151,6 +126,31 @@ func (c *Client) eof(msg Message) {
 	log.Println("DONE!")
 	c.state = Done
 	writeState(Done, c.conn)
+}
+
+func (c *Client) startDownload(payload StartPayload) {
+	if _, err := os.Stat(payload.getPath()); errors.Is(err, os.ErrNotExist) {
+		c.error("Requested file does not exists")
+		return
+	}
+	log.Println("Payload saved, writing state=STREAM", payload)
+	c.state = Stream
+	writeState(Stream, c.conn)
+}
+
+func (c *Client) listenStream() {
+	log.Println("Listening for client STREAM signal")
+	msg, err := readMessage(c.conn)
+	requireNoError(err)
+	if msg.State != Stream {
+		c.error("Wrong client state, state=STREAM was expected")
+		return
+	}
+	c.stream()
+}
+
+func (c *Client) stream() {
+	// TODO
 }
 
 func (c *Client) overflows(chunk []byte) bool {
