@@ -28,6 +28,47 @@ func TestNewPath(t *testing.T) {
 	requireNoError(t, err)
 }
 
+func TestNewComposedPath(t *testing.T) {
+	composed, err := NewPathFrom(Root)
+	requireNoError(t, err)
+
+	if composed.value != Root {
+		t.Fatal("Wrong root composed path")
+	}
+
+	composed, err = NewPathFrom(
+		"fs",
+		"dir",
+	)
+	requireNoError(t, err)
+
+	if composed.value != "fs/dir" {
+		t.Fatal("Wrong composed path")
+	}
+
+	composed, err = NewPathFrom(
+		"fs",
+		"dir",
+		"file.txt",
+	)
+	requireNoError(t, err)
+
+	if composed.value != "fs/dir/file.txt" {
+		t.Fatal("Wrong composed path")
+	}
+
+	composed, err = NewPathFrom(
+		"fs",
+		"/dir",
+		"file.txt",
+	)
+	requireError(
+		t,
+		err,
+		"Composed paths must not have tokens containing the separator char",
+	)
+}
+
 func TestNewFileAndDirectory(t *testing.T) {
 	// There is no difference between File and Directory so far...
 
@@ -44,5 +85,11 @@ func TestNewFileAndDirectory(t *testing.T) {
 func requireNoError(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err.Error())
+	}
+}
+
+func requireError(t *testing.T, err error, msg string) {
+	if err == nil {
+		t.Fatal(msg)
 	}
 }
