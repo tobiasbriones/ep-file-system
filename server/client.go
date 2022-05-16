@@ -133,9 +133,26 @@ func (c *Client) startDownload(payload StartPayload) {
 		c.error("Requested file does not exists")
 		return
 	}
-	log.Println("Payload saved, writing state=STREAM", payload)
+	size, err := ReadFileSize(payload.getPath())
+	requireNoError(err)
+	c.writeStreamState(StreamPayload{
+		FileInfo: FileInfo{
+			RelPath: payload.RelPath,
+			Size:    size,
+		},
+	})
+}
+
+func (c *Client) writeStreamState(payload StreamPayload) {
+	p, err := NewPayloadFrom(payload)
+	requireNoError(err)
+	msg := Message{
+		State:   Stream,
+		Payload: p,
+	}
 	c.state = Stream
-	writeState(Stream, c.conn)
+	writeMessage(msg, c.conn)
+	log.Println("Payload sent, writing state=STREAM", payload)
 }
 
 func (c *Client) listenStream() {
