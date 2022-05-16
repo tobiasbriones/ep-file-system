@@ -12,25 +12,25 @@ import (
 )
 
 type Client struct {
-	conn   net.Conn
-	status Status
-	req    StartPayload
-	count  int64
+	conn  net.Conn
+	state State
+	req   StartPayload
+	count int64
 }
 
 func newClient(
 	conn net.Conn,
 ) *Client {
 	return &Client{
-		conn:   conn,
-		status: Start,
+		conn:  conn,
+		state: Start,
 	}
 }
 
 func (c *Client) run() {
 	defer c.conn.Close()
 	for {
-		switch c.status {
+		switch c.state {
 		default:
 			c.listenMessage()
 		case Data:
@@ -55,11 +55,11 @@ func (c *Client) listenMessage() {
 
 func (c *Client) onMessage(msg Message) {
 	log.Println("Message received:", msg)
-	switch msg.Status {
+	switch msg.State {
 	case Start:
 		c.start(msg)
 	default:
-		c.error("Wrong message status")
+		c.error("Wrong message state")
 	}
 }
 
@@ -83,9 +83,9 @@ func (c *Client) startUpload(payload StartPayload) {
 		return
 	}
 	CreateFile(payload.RelPath)
-	log.Println("Payload saved, writing status=DATA", payload)
-	c.status = Data
-	writeStatus(Data, c.conn)
+	log.Println("Payload saved, writing state=DATA", payload)
+	c.state = Data
+	writeState(Data, c.conn)
 }
 
 func (c *Client) startDownload(payload StartPayload) {
@@ -93,17 +93,17 @@ func (c *Client) startDownload(payload StartPayload) {
 		c.error("Requested file does not exists")
 		return
 	}
-	log.Println("Payload saved, writing status=STREAM", payload)
-	c.status = Stream
-	writeStatus(Stream, c.conn)
+	log.Println("Payload saved, writing state=STREAM", payload)
+	c.state = Stream
+	writeState(Stream, c.conn)
 }
 
 func (c *Client) listenStream() {
 	log.Println("Listening for client STREAM signal")
 	msg, err := readMessage(c.conn)
 	requireNoError(err)
-	if msg.Status != Stream {
-		c.error("Wrong client status, status=STREAM was expected")
+	if msg.State != Stream {
+		c.error("Wrong client state, state=STREAM was expected")
 		return
 	}
 	c.stream()
@@ -117,9 +117,9 @@ func (c *Client) listenData() {
 	chunk := readChunk(c.conn)
 	c.processChunk(chunk)
 	if c.count == c.req.Size {
-		c.status = Eof
-		log.Println("File saved, writing status EOF")
-		writeStatus(Eof, c.conn)
+		c.state = Eof
+		log.Println("File saved, writing state EOF")
+		writeState(Eof, c.conn)
 	}
 }
 
@@ -144,13 +144,13 @@ func (c *Client) processChunk(chunk []byte) {
 }
 
 func (c *Client) eof(msg Message) {
-	if msg.Status != Eof {
+	if msg.State != Eof {
 		c.error("Expecting EOF")
 		return
 	}
 	log.Println("DONE!")
-	c.status = Done
-	writeStatus(Done, c.conn)
+	c.state = Done
+	writeState(Done, c.conn)
 }
 
 func (c *Client) overflows(chunk []byte) bool {
@@ -160,6 +160,6 @@ func (c *Client) overflows(chunk []byte) bool {
 func (c *Client) error(msg string) {
 	// TODO update func to accept msg
 	log.Println("ERROR:", msg)
-	c.status = Error
-	writeStatus(Error, c.conn)
+	c.state = Error
+	writeState(Error, c.conn)
 }

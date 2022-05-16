@@ -47,7 +47,7 @@ func TestReceiveSend(t *testing.T) {
 }
 
 // Makes a request to the server. It can be either upload or download. After the
-// initial request (status START), the server will respond with status OK.
+// initial request (state START), the server will respond with state OK.
 func TestTcpConn(t *testing.T) {
 	info, _ := newTestFileInfo()
 	info.Size = 0 // Don't upload anything, just initiate a connection and wait
@@ -55,7 +55,7 @@ func TestTcpConn(t *testing.T) {
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.Status != Error { // The file sent is empty, ERROR must be responded.
+	if res.State != Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
 }
@@ -67,22 +67,22 @@ func TestUpload(t *testing.T) {
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.Status != Data {
+	if res.State != Data {
 		t.Fatal("Fail to get state=DATA")
 	}
-	log.Println("Status=DATA")
+	log.Println("State=DATA")
 	upload(t, conn, testLocalFile)
 	log.Println("Uploaded")
 
 	res = readResponseMsg(t, conn)
-	if res.Status != Eof {
+	if res.State != Eof {
 		t.Fatal("Fail to get state=EOF")
 	}
 
-	log.Println("Status=EOF", res)
+	log.Println("State=EOF", res)
 	eof(t, conn)
 	res = readResponseMsg(t, conn)
-	log.Println(res.Status)
+	log.Println(res.State)
 }
 
 func upload(t *testing.T, conn *net.TCPConn, path string) {
@@ -94,7 +94,7 @@ func upload(t *testing.T, conn *net.TCPConn, path string) {
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {
-	writeStatus(Eof, conn)
+	writeState(Eof, conn)
 }
 
 func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
@@ -114,12 +114,12 @@ func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
 	requirePassedTest(t, err, "Fail to load create payload")
 
 	msg := Message{
-		Status:  Start,
+		State:   Start,
 		Payload: payload,
 	}
 	b, err := json.Marshal(msg)
 	_, err = conn.Write(b)
-	requirePassedTest(t, err, "Fail to write status=START to the server")
+	requirePassedTest(t, err, "Fail to write state=START to the server")
 	return conn
 }
 

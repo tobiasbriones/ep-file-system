@@ -10,7 +10,7 @@ import (
 )
 
 type Message struct {
-	Status
+	State
 	Payload
 }
 
@@ -36,10 +36,10 @@ type StartPayload struct {
 	FileInfo
 }
 
-type Status uint
+type State uint
 
 const (
-	Start Status = iota
+	Start State = iota
 	Data
 	Stream
 	Eof
@@ -47,18 +47,18 @@ const (
 	Done
 )
 
-func (s Status) String() string {
-	return Statuses()[s]
+func (s State) String() string {
+	return States()[s]
 }
 
-func ToStatus(i uint) (Status, error) {
-	if int(i) >= len(Statuses()) {
-		return Status(0), errors.New("invalid status")
+func ToState(i uint) (State, error) {
+	if int(i) >= len(States()) {
+		return State(0), errors.New("invalid state")
 	}
-	return Status(i), nil
+	return State(i), nil
 }
 
-func Statuses() []string {
+func States() []string {
 	return []string{
 		"start",
 		"data",
