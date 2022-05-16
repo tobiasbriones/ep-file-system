@@ -85,6 +85,20 @@ func TestUpload(t *testing.T) {
 	log.Println(res.State)
 }
 
+// Requires not to have a file "not-exists.txt" in the server FS.
+func TestDownloadIfNotExists(t *testing.T) {
+	info := FileInfo{
+		RelPath: "not-exists",
+		Size:    0,
+	}
+	conn := initiateConn(t, ActionDownload, info)
+	defer conn.Close()
+	res := readResponseMsg(t, conn)
+	if res.State != Error {
+		t.Fatal("Fail to get state=ERROR")
+	}
+}
+
 func upload(t *testing.T, conn *net.TCPConn, path string) {
 	log.Println("Streaming file to server:", path)
 	StreamLocalFile(path, bufSize, func(buf []byte) {
