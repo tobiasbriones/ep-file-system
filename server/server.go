@@ -36,6 +36,10 @@ func writeState(state State, conn net.Conn) {
 	msg := Message{
 		State: state,
 	}
+	writeMessage(msg, conn)
+}
+
+func writeMessage(msg Message, conn net.Conn) {
 	enc := json.NewEncoder(conn)
 	err := enc.Encode(msg)
 	requireNoError(err)
