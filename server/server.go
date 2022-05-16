@@ -32,10 +32,14 @@ func readChunk(conn net.Conn) []byte {
 	return b[:n]
 }
 
-func writeStatus(status Status, conn net.Conn) {
+func writeState(state State, conn net.Conn) {
 	msg := Message{
-		Status: status,
+		State: state,
 	}
+	writeMessage(msg, conn)
+}
+
+func writeMessage(msg Message, conn net.Conn) {
 	enc := json.NewEncoder(conn)
 	err := enc.Encode(msg)
 	requireNoError(err)

@@ -80,6 +80,7 @@ func StreamLocalFile(path string, bufSize uint, handle Handle) {
 	if err != nil {
 		log.Fatalf("Fail to read file %v: %v", path, err.Error())
 	}
+	defer f.Close()
 	buf := make([]byte, 0, bufSize)
 	reader := bufio.NewReader(f)
 	bytesNumber, chunksNumber := stream(reader, buf, handle)
@@ -125,19 +126,26 @@ func stream(reader *bufio.Reader, buf []byte, handle Handle) (int64, int64) {
 
 func CreateFile(relPath string) {
 	path := getFilePath(relPath)
-	f, err := os.Create(path)
+	CreateLocalFile(path)
+}
 
-	defer f.Close()
+func CreateLocalFile(path string) {
+	f, err := os.Create(path)
 	requireNoError(err)
+	f.Close()
 }
 
 func WriteBuf(relPath string, buf []byte) {
 	path := getFilePath(relPath)
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
-	defer f.Close()
+	WriteLocalBuf(path, buf)
+}
 
+func WriteLocalBuf(path string, buf []byte) {
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	requireNoError(err)
 	_, err = f.Write(buf)
+	requireNoError(err)
+	f.Close()
 }
 
 func getFilePath(relPath string) string {

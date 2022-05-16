@@ -47,7 +47,7 @@ func TestReceiveSend(t *testing.T) {
 }
 
 // Makes a request to the server. It can be either upload or download. After the
-// initial request (status START), the server will respond with status OK.
+// initial request (state START), the server will respond with state OK.
 func TestTcpConn(t *testing.T) {
 	info, _ := newTestFileInfo()
 	info.Size = 0 // Don't upload anything, just initiate a connection and wait
@@ -55,7 +55,7 @@ func TestTcpConn(t *testing.T) {
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.Status != Error { // The file sent is empty, ERROR must be responded.
+	if res.State != Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
 }
@@ -67,22 +67,76 @@ func TestUpload(t *testing.T) {
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.Status != Data {
+	if res.State != Data {
 		t.Fatal("Fail to get state=DATA")
 	}
-	log.Println("Status=DATA")
+	log.Println("State=DATA")
 	upload(t, conn, testLocalFile)
 	log.Println("Uploaded")
 
 	res = readResponseMsg(t, conn)
-	if res.Status != Eof {
+	if res.State != Eof {
 		t.Fatal("Fail to get state=EOF")
 	}
 
-	log.Println("Status=EOF", res)
+	log.Println("State=EOF", res)
 	eof(t, conn)
 	res = readResponseMsg(t, conn)
-	log.Println(res.Status)
+	log.Println(res.State)
+}
+
+// Requires the file testFile = "file.pdf" in the server FS, and will write it
+// to "download.pdf" into this source code directory.
+func TestDownload(t *testing.T) {
+	info, _ := newTestFileInfo()
+	conn := initiateConn(t, ActionDownload, info)
+	defer conn.Close()
+	res := readResponseMsg(t, conn)
+	if res.State != Stream {
+		t.Fatal("Fail to get state=STREAM")
+	}
+	payload, err := res.StreamPayload()
+	requirePassedTest(t, err, "Fail to read StreamPayload")
+	writeState(Stream, conn)
+	path := "download.pdf"
+	CreateLocalFile(path)
+	size := uint64(payload.Size)
+	count := uint64(0)
+	log.Println(size)
+	for {
+		if count >= size {
+			break
+		}
+		b := make([]byte, bufSize)
+		n, err := conn.Read(b)
+		requirePassedTest(t, err, "Fail to read chunk from server")
+		chunk := b[:n]
+		WriteLocalBuf(path, chunk)
+		count += uint64(n)
+		log.Println(n)
+		if n == 0 {
+			t.Fatal("Underflow!")
+		}
+	}
+	log.Println(count)
+	if count != size {
+		// TODO The download works, but extra bytes are written
+		t.Fatal("Overflow!")
+	}
+}
+
+// Requires not to have a file "not-exists.txt" in the server FS.
+func TestDownloadIfNotExists(t *testing.T) {
+	info := FileInfo{
+		RelPath: "not-exists",
+		Size:    0,
+	}
+	conn := initiateConn(t, ActionDownload, info)
+	defer conn.Close()
+	res := readResponseMsg(t, conn)
+	if res.State != Error {
+		t.Fatal("Fail to get state=ERROR")
+	}
 }
 
 func upload(t *testing.T, conn *net.TCPConn, path string) {
@@ -94,7 +148,7 @@ func upload(t *testing.T, conn *net.TCPConn, path string) {
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {
-	writeStatus(Eof, conn)
+	writeState(Eof, conn)
 }
 
 func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
@@ -114,12 +168,12 @@ func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
 	requirePassedTest(t, err, "Fail to load create payload")
 
 	msg := Message{
-		Status:  Start,
+		State:   Start,
 		Payload: payload,
 	}
 	b, err := json.Marshal(msg)
 	_, err = conn.Write(b)
-	requirePassedTest(t, err, "Fail to write status=START to the server")
+	requirePassedTest(t, err, "Fail to write state=START to the server")
 	return conn
 }
 

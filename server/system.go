@@ -10,12 +10,17 @@ import (
 )
 
 type Message struct {
-	Status
+	State
 	Payload
 }
 
 type Payload struct {
 	Data []byte
+}
+
+func NewPayloadFrom(p any) (Payload, error) {
+	ser, err := json.Marshal(p)
+	return Payload{Data: ser}, err
 }
 
 func NewPayload(v any) (Payload, error) {
@@ -31,38 +36,50 @@ func (p Payload) StartPayload() (StartPayload, error) {
 	return payload, err
 }
 
+// StreamPayload Returns the computed attribute for an assumed StreamPayload
+// data.
+func (p Payload) StreamPayload() (StreamPayload, error) {
+	payload := StreamPayload{}
+	err := json.Unmarshal(p.Data, &payload)
+	return payload, err
+}
+
 type StartPayload struct {
 	Action
 	FileInfo
 }
 
-type Status uint
+type StreamPayload struct {
+	FileInfo
+}
+
+type State uint
 
 const (
-	Start Status = 0
-	Ok    Status = 1
-	Data  Status = 2
-	Eof   Status = 3
-	Error Status = 4
-	Done  Status = 5
+	Start State = iota
+	Data
+	Stream
+	Eof
+	Error
+	Done
 )
 
-func (s Status) String() string {
-	return Statuses()[s]
+func (s State) String() string {
+	return States()[s]
 }
 
-func ToStatus(i uint) (Status, error) {
-	if int(i) >= len(Statuses()) {
-		return Status(0), errors.New("invalid status")
+func ToState(i uint) (State, error) {
+	if int(i) >= len(States()) {
+		return State(0), errors.New("invalid state")
 	}
-	return Status(i), nil
+	return State(i), nil
 }
 
-func Statuses() []string {
+func States() []string {
 	return []string{
 		"start",
-		"ok",
 		"data",
+		"stream",
 		"eof",
 		"error",
 		"done",
@@ -72,8 +89,8 @@ func Statuses() []string {
 type Action uint
 
 const (
-	ActionUpload   Action = 0
-	ActionDownload Action = 1
+	ActionUpload Action = iota
+	ActionDownload
 )
 
 func ToAction(i uint) (Action, error) {
