@@ -12,6 +12,7 @@ package io
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -47,6 +48,20 @@ func NewDirectoryFromString(value string) (Directory, error) {
 
 type Path struct {
 	value string
+}
+
+func NewPathFrom(values ...string) (Path, error) {
+	str := ""
+	for _, value := range values {
+		if strings.Contains(value, Separator) {
+			msg := "invalid path token, it contains the separator character"
+			return Path{}, errors.New(msg)
+		}
+		str += value + Separator
+	}
+	// Remove last separator
+	str = str[:len(str)-1]
+	return NewPath(str)
 }
 
 func NewPath(value string) (Path, error) {
