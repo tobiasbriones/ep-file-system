@@ -16,6 +16,8 @@ After implementing the design said above, all my headaches were immediately term
 
 There's no need to implement archaic primitive-obsession systems nowadays. You need less algorithms or tricks to handle that data. Replace stupid algorithms with well-defined domain specific centric systems.
 
+Sending the chunks as raw byte arrays is good because a file is just that, a bunch of bytes without any structure. So there's no problem with that design decision. It also avoids the extra overhead of sending a `Message` as long as the FSM states are valid in the client and server, that is, state `DATA` (upload) or `STREAM` (download).
+
 ### Example/Take Away
 
 In my another [file system](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system) written in Java I had to standardize the path separator because I don't work for M$ Windows or Linux or MacOS. 
