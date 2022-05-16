@@ -21,8 +21,18 @@ const (
 )
 
 // CommonFile Defines a generic file sum type: File or Directory.
-type CommonFile interface {
-	path() string
+type CommonFile interface{}
+
+// File is just a simple Path for this system.
+// It's open to extension with more properties.
+type File struct {
+	Path
+}
+
+// Directory is just a simple Path for this system.
+// It's open to extension with more properties.
+type Directory struct {
+	Path
 }
 
 type Path struct {
