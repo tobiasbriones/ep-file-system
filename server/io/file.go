@@ -20,6 +20,11 @@ const (
 	ValidPathRegex = "^$|\\w+/*\\.*-*"
 )
 
+// CommonFile Defines a generic file sum type: File or Directory.
+type CommonFile interface {
+	path() string
+}
+
 type Path struct {
 	value string
 }
