@@ -41,6 +41,7 @@ type Status uint
 const (
 	Start Status = iota
 	Data
+	Stream
 	Eof
 	Error
 	Done
@@ -61,6 +62,7 @@ func Statuses() []string {
 	return []string{
 		"start",
 		"data",
+		"stream",
 		"eof",
 		"error",
 		"done",
