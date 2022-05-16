@@ -135,12 +135,15 @@ func (c *Client) startDownload(payload StartPayload) {
 	}
 	size, err := ReadFileSize(payload.getPath())
 	requireNoError(err)
-	c.writeStreamState(StreamPayload{
-		FileInfo: FileInfo{
-			RelPath: payload.RelPath,
-			Size:    size,
-		},
-	})
+	info := FileInfo{
+		RelPath: payload.RelPath,
+		Size:    size,
+	}
+	c.req = StartPayload{
+		Action:   ActionDownload,
+		FileInfo: info,
+	}
+	c.writeStreamState(StreamPayload{FileInfo: info})
 }
 
 func (c *Client) writeStreamState(payload StreamPayload) {
@@ -167,7 +170,13 @@ func (c *Client) listenStream() {
 }
 
 func (c *Client) stream() {
-	// TODO
+	StreamLocalFile(c.req.FileInfo.getPath(), bufSize, func(buf []byte) {
+		_, err := c.conn.Write(buf)
+		requireNoError(err)
+	})
+	log.Println("File sent to client, changing state to DONE")
+	c.state = Done
+	writeState(Done, c.conn)
 }
 
 func (c *Client) overflows(chunk []byte) bool {
