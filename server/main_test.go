@@ -85,6 +85,46 @@ func TestUpload(t *testing.T) {
 	log.Println(res.State)
 }
 
+// Requires the file testFile = "file.pdf" in the server FS, and will write it
+// to "download.pdf" into this source code directory.
+func TestDownload(t *testing.T) {
+	info, _ := newTestFileInfo()
+	conn := initiateConn(t, ActionDownload, info)
+	defer conn.Close()
+	res := readResponseMsg(t, conn)
+	if res.State != Stream {
+		t.Fatal("Fail to get state=STREAM")
+	}
+	payload, err := res.StreamPayload()
+	requirePassedTest(t, err, "Fail to read StreamPayload")
+	writeState(Stream, conn)
+	path := "download.pdf"
+	CreateLocalFile(path)
+	size := uint64(payload.Size)
+	count := uint64(0)
+	log.Println(size)
+	for {
+		if count >= size {
+			break
+		}
+		b := make([]byte, bufSize)
+		n, err := conn.Read(b)
+		requirePassedTest(t, err, "Fail to read chunk from server")
+		chunk := b[:n]
+		WriteLocalBuf(path, chunk)
+		count += uint64(n)
+		log.Println(n)
+		if n == 0 {
+			t.Fatal("Underflow!")
+		}
+	}
+	log.Println(count)
+	if count != size {
+		// TODO The download works, but extra bytes are written
+		t.Fatal("Overflow!")
+	}
+}
+
 // Requires not to have a file "not-exists.txt" in the server FS.
 func TestDownloadIfNotExists(t *testing.T) {
 	info := FileInfo{
