@@ -49,6 +49,7 @@ func ReadFileSize(path string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer f.Close()
 	fi, err := f.Stat()
 	if err != nil {
 		return 0, err
