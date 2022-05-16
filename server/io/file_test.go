@@ -4,7 +4,10 @@
 
 package io
 
-import "testing"
+import (
+	"log"
+	"testing"
+)
 
 func TestBasics(t *testing.T) {
 	if Root != "" {
@@ -67,6 +70,30 @@ func TestNewComposedPath(t *testing.T) {
 		err,
 		"Composed paths must not have tokens containing the separator char",
 	)
+}
+
+func TestPath_Append(t *testing.T) {
+	path, err := NewPath(Root)
+	requireNoError(t, err)
+
+	err = path.Append("fs", "dir", "file.txt")
+	requireNoError(t, err)
+
+	if path.value != "fs/dir/file.txt" {
+		log.Println(path.value)
+		t.Fatal("Fail to append path to the root path")
+	}
+
+	path, err = NewPath("usr1/general")
+	requireNoError(t, err)
+
+	err = path.Append("fs", "dir", "file.txt")
+	requireNoError(t, err)
+
+	if path.value != "usr1/general/fs/dir/file.txt" {
+		log.Println(path.value)
+		t.Fatal("Fail to append path")
+	}
 }
 
 func TestNewFileAndDirectory(t *testing.T) {
