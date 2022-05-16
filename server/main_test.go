@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	testFile = "file.pdf"
+	testFile      = "file.pdf"
+	testLocalFile = "C:\\file.pdf"
 )
 
 // Side effect test. Requires a file "file.pdf" into the server's file system
@@ -48,30 +49,73 @@ func TestReceiveSend(t *testing.T) {
 // Makes a request to the server. It can be either upload or download. After the
 // initial request (status START), the server will respond with status OK.
 func TestTcpConn(t *testing.T) {
-	conn := initiateConn(t, "upload")
-	res := readResponseMsg(t, conn)
+	info, _ := newTestFileInfo()
+	info.Size = 0 // Don't upload anything, just initiate a connection and wait
+	conn := initiateConn(t, ActionUpload, info)
+	defer conn.Close()
 
-	if res.Status != OK {
+	res := readResponseMsg(t, conn)
+	if res.Status != Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
-	conn.Close()
 }
 
-func initiateConn(t *testing.T, action string) *net.TCPConn {
+// Side effect. Requires testLocalFile = "C:\\file.pdf".
+func TestUpload(t *testing.T) {
+	info, _ := newTestLocalFileInfo()
+	conn := initiateConn(t, ActionUpload, info)
+	defer conn.Close()
+
+	res := readResponseMsg(t, conn)
+	if res.Status != Data {
+		t.Fatal("Fail to get state=DATA")
+	}
+	log.Println("Status=DATA")
+	upload(t, conn, testLocalFile)
+	log.Println("Uploaded")
+
+	res = readResponseMsg(t, conn)
+	if res.Status != Eof {
+		t.Fatal("Fail to get state=EOF")
+	}
+
+	log.Println("Status=EOF", res)
+	eof(t, conn)
+	res = readResponseMsg(t, conn)
+	log.Println(res.Status)
+}
+
+func upload(t *testing.T, conn *net.TCPConn, path string) {
+	log.Println("Streaming file to server:", path)
+	StreamLocalFile(path, bufSize, func(buf []byte) {
+		_, err := conn.Write(buf)
+		requirePassedTest(t, err, "Fail to write chunk to server")
+	})
+}
+
+func eof(t *testing.T, conn *net.TCPConn) {
+	writeStatus(Eof, conn)
+}
+
+func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
 	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
 	requirePassedTest(t, err, "Fail to resolve TCP address")
 
 	conn, err := net.DialTCP(network, nil, tcpAddr)
 	requirePassedTest(t, err, "Fail to establish connection")
 
-	info, err := newTestFileInfo()
+	body := StartPayload{
+		Action:   action,
+		FileInfo: info,
+	}
 	requirePassedTest(t, err, "Fail to load test FileInfo")
 
-	infoStr, err := json.Marshal(info)
+	payload, err := NewPayload(body)
+	requirePassedTest(t, err, "Fail to load create payload")
+
 	msg := Message{
-		Status:  "start",
-		Action:  action,
-		Payload: string(infoStr),
+		Status:  Start,
+		Payload: payload,
 	}
 	b, err := json.Marshal(msg)
 	_, err = conn.Write(b)
@@ -80,17 +124,11 @@ func initiateConn(t *testing.T, action string) *net.TCPConn {
 }
 
 func readResponseMsg(t *testing.T, conn net.Conn) Message {
-	buf := make([]byte, 1024)
-	n, err := conn.Read(buf)
-	reply := buf[:n]
-
+	var msg Message
+	dec := json.NewDecoder(conn)
+	err := dec.Decode(&msg)
 	requirePassedTest(t, err, "Fail to read response from server")
-	log.Println("Reply from server: ", string(reply))
-
-	res := Message{}
-	err = json.Unmarshal(reply, &res)
-	requirePassedTest(t, err, "Fail to deserialize server response")
-	return res
+	return msg
 }
 
 func newTestFileInfo() (FileInfo, error) {
@@ -99,6 +137,16 @@ func newTestFileInfo() (FileInfo, error) {
 		Size:    0,
 	}
 	size, err := i.readFileSize()
+	i.Size = size
+	return i, err
+}
+
+func newTestLocalFileInfo() (FileInfo, error) {
+	i := FileInfo{
+		RelPath: testFile,
+		Size:    0,
+	}
+	size, err := ReadFileSize(testLocalFile)
 	i.Size = size
 	return i, err
 }
