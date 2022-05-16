@@ -11,6 +11,7 @@ package io
 
 import (
 	"errors"
+	"log"
 	"regexp"
 	"strings"
 )
@@ -48,6 +49,22 @@ func NewDirectoryFromString(value string) (Directory, error) {
 
 type Path struct {
 	value string
+}
+
+func (p *Path) Append(values ...string) error {
+	end, err := NewPathFrom(values...)
+	if err != nil {
+		return err
+	}
+	var newValue string
+	if p.IsRoot() {
+		newValue = end.value
+	} else {
+		newValue = p.value + Separator + end.value
+	}
+	p.value = newValue
+	log.Println("New val:", newValue, p.value)
+	return nil
 }
 
 func (p *Path) IsRoot() bool {
