@@ -29,10 +29,20 @@ type File struct {
 	Path
 }
 
+func NewFileFromString(value string) (File, error) {
+	path, err := NewPath(value)
+	return File{Path: path}, err
+}
+
 // Directory is just a simple Path for this system.
 // It's open to extension with more properties.
 type Directory struct {
 	Path
+}
+
+func NewDirectoryFromString(value string) (Directory, error) {
+	path, err := NewPath(value)
+	return Directory{Path: path}, err
 }
 
 type Path struct {
