@@ -15,7 +15,7 @@ import (
 const (
 	Root           = ""
 	Separator      = "/"
-	ValidPathRegex = "^$|\\\\w+/*\\\\.*-*"
+	ValidPathRegex = "^$|\\w+/*\\.*-*"
 )
 
 type Path struct {
@@ -30,6 +30,6 @@ func NewPath(value string) (Path, error) {
 }
 
 func isValidPath(value string) bool {
-	match, _ := regexp.MatchString(ValidPathRegex, value)
-	return match
+	r, _ := regexp.Compile(ValidPathRegex)
+	return r.MatchString(value)
 }
