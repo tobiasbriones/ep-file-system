@@ -125,17 +125,23 @@ func stream(reader *bufio.Reader, buf []byte, handle Handle) (int64, int64) {
 
 func CreateFile(relPath string) {
 	path := getFilePath(relPath)
-	f, err := os.Create(path)
+	CreateLocalFile(path)
+}
 
+func CreateLocalFile(path string) {
+	f, err := os.Create(path)
 	defer f.Close()
 	requireNoError(err)
 }
 
 func WriteBuf(relPath string, buf []byte) {
 	path := getFilePath(relPath)
+	WriteLocalBuf(path, buf)
+}
+
+func WriteLocalBuf(path string, buf []byte) {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	defer f.Close()
-
 	requireNoError(err)
 	_, err = f.Write(buf)
 }
