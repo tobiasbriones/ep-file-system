@@ -28,6 +28,19 @@ func TestNewPath(t *testing.T) {
 	requireNoError(t, err)
 }
 
+func TestNewFileAndDirectory(t *testing.T) {
+	// There is no difference between File and Directory so far...
+
+	_, err := NewDirectoryFromString("")
+	requireNoError(t, err)
+
+	_, err = NewDirectoryFromString("fs")
+	requireNoError(t, err)
+
+	_, err = NewFileFromString("fs/file-1.txt")
+	requireNoError(t, err)
+}
+
 func requireNoError(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err.Error())
