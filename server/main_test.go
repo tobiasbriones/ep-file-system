@@ -6,12 +6,14 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net"
 	"testing"
 )
 
 const (
-	testFile = "file.pdf"
+	testFile      = "file.pdf"
+	testLocalFile = "C:\\file.pdf"
 )
 
 // Side effect test. Requires a file "file.pdf" into the server's file system
@@ -58,6 +60,43 @@ func TestTcpConn(t *testing.T) {
 	}
 }
 
+// Side effect. Requires testLocalFile = "C:\\file.pdf".
+func TestUpload(t *testing.T) {
+	info, _ := newTestLocalFileInfo()
+	conn := initiateConn(t, ActionUpload, info)
+	defer conn.Close()
+
+	res := readResponseMsg(t, conn)
+	if res.Status != Data {
+		t.Fatal("Fail to get state=DATA")
+	}
+	log.Println("Status=DATA")
+	upload(t, conn, testLocalFile)
+	log.Println("Uploaded")
+
+	res = readResponseMsg(t, conn)
+	if res.Status != Eof {
+		t.Fatal("Fail to get state=EOF")
+	}
+
+	log.Println("Status=EOF", res)
+	eof(t, conn)
+	res = readResponseMsg(t, conn)
+	log.Println(res.Status)
+}
+
+func upload(t *testing.T, conn *net.TCPConn, path string) {
+	log.Println("Streaming file to server:", path)
+	StreamLocalFile(path, bufSize, func(buf []byte) {
+		_, err := conn.Write(buf)
+		requirePassedTest(t, err, "Fail to write chunk to server")
+	})
+}
+
+func eof(t *testing.T, conn *net.TCPConn) {
+	writeStatus(Eof, conn)
+}
+
 func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {
 	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
 	requirePassedTest(t, err, "Fail to resolve TCP address")
@@ -98,6 +137,16 @@ func newTestFileInfo() (FileInfo, error) {
 		Size:    0,
 	}
 	size, err := i.readFileSize()
+	i.Size = size
+	return i, err
+}
+
+func newTestLocalFileInfo() (FileInfo, error) {
+	i := FileInfo{
+		RelPath: testFile,
+		Size:    0,
+	}
+	size, err := ReadFileSize(testLocalFile)
 	i.Size = size
 	return i, err
 }
