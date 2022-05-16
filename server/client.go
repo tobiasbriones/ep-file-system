@@ -119,7 +119,13 @@ func (c *Client) processChunk(chunk []byte) {
 }
 
 func (c *Client) eof(msg Message) {
-
+	if msg.Status != Eof {
+		c.error("Expecting EOF")
+		return
+	}
+	log.Println("DONE!")
+	c.status = Done
+	writeStatus(Done, c.conn)
 }
 
 func (c *Client) overflows(chunk []byte) bool {
