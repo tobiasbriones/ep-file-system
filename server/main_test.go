@@ -118,7 +118,6 @@ func TestDownload(t *testing.T) {
 		err = WriteLocalBuf(path, chunk)
 		requirePassedTest(t, err, "Fail to write chunk to file")
 		count += uint64(n)
-		log.Println(n)
 		if n == 0 {
 			t.Fatal("Underflow!")
 		}
