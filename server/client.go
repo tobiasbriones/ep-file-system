@@ -49,7 +49,10 @@ func (c *Client) run() {
 func (c *Client) listenMessage() {
 	log.Println("Listening for client message")
 	msg, err := readMessage(c.conn)
-	requireNoError(err)
+	if err != nil {
+		c.error("Fail to read message")
+		return
+	}
 	c.onMessage(msg)
 }
 
@@ -65,7 +68,10 @@ func (c *Client) onMessage(msg Message) {
 
 func (c *Client) start(msg Message) {
 	payload, err := msg.StartPayload()
-	requireNoError(err)
+	if err != nil {
+		c.error("Fail to read StartPayload")
+		return
+	}
 	c.req = payload
 	c.count = 0
 
@@ -82,26 +88,41 @@ func (c *Client) startUpload(payload StartPayload) {
 		c.error("File sent is empty")
 		return
 	}
-	CreateFile(payload.RelPath)
+	err := CreateFile(payload.RelPath)
+	if err != nil {
+		c.error("Fail to create file")
+		return
+	}
 	log.Println("Payload saved, writing state=DATA", payload)
 	c.state = Data
-	writeState(Data, c.conn)
+	err = writeState(Data, c.conn)
+	if err != nil {
+		c.error("Fail to write state=DATA")
+		return
+	}
 }
 
 func (c *Client) listenData() {
-	chunk := readChunk(c.conn)
+	chunk, _ := readChunk(c.conn)
 	c.processChunk(chunk)
 	if c.count == c.req.Size {
 		c.state = Eof
 		log.Println("File saved, writing state EOF")
-		writeState(Eof, c.conn)
+		err := writeState(Eof, c.conn)
+		if err != nil {
+			c.error("Fail to write state=EOF")
+			return
+		}
 	}
 }
 
 func (c *Client) listenEof() {
 	log.Println("Listening for EOF")
 	msg, err := readMessage(c.conn)
-	requireNoError(err)
+	if err != nil {
+		c.error("Fail to read message")
+		return
+	}
 	c.eof(msg)
 }
 
@@ -114,7 +135,11 @@ func (c *Client) processChunk(chunk []byte) {
 		c.error("Underflow!")
 		return
 	}
-	WriteBuf(c.req.RelPath, chunk)
+	err := WriteBuf(c.req.RelPath, chunk)
+	if err != nil {
+		c.error("Fail to write chunk")
+		return
+	}
 	c.count += int64(len(chunk))
 }
 
@@ -125,7 +150,11 @@ func (c *Client) eof(msg Message) {
 	}
 	log.Println("DONE!")
 	c.state = Done
-	writeState(Done, c.conn)
+	err := writeState(Done, c.conn)
+	if err != nil {
+		c.error("Fail to write state=DONE")
+		return
+	}
 }
 
 func (c *Client) startDownload(payload StartPayload) {
@@ -134,7 +163,10 @@ func (c *Client) startDownload(payload StartPayload) {
 		return
 	}
 	size, err := ReadFileSize(payload.getPath())
-	requireNoError(err)
+	if err != nil {
+		c.error("Fail to read file size")
+		return
+	}
 	info := FileInfo{
 		RelPath: payload.RelPath,
 		Size:    size,
@@ -148,20 +180,30 @@ func (c *Client) startDownload(payload StartPayload) {
 
 func (c *Client) writeStreamState(payload StreamPayload) {
 	p, err := NewPayloadFrom(payload)
-	requireNoError(err)
+	if err != nil {
+		c.error("Fail to read payload from StreamPayload")
+		return
+	}
 	msg := Message{
 		State:   Stream,
 		Payload: p,
 	}
 	c.state = Stream
-	writeMessage(msg, c.conn)
+	err = writeMessage(msg, c.conn)
+	if err != nil {
+		c.error("Fail to write state=STREAM")
+		return
+	}
 	log.Println("Payload sent, writing state=STREAM", payload)
 }
 
 func (c *Client) listenStream() {
 	log.Println("Listening for client STREAM signal")
 	msg, err := readMessage(c.conn)
-	requireNoError(err)
+	if err != nil {
+		c.error("Fail to read message")
+		return
+	}
 	if msg.State != Stream {
 		c.error("Wrong client state, state=STREAM was expected")
 		return
@@ -170,13 +212,25 @@ func (c *Client) listenStream() {
 }
 
 func (c *Client) stream() {
-	StreamLocalFile(c.req.FileInfo.getPath(), bufSize, func(buf []byte) {
+	err := StreamLocalFile(c.req.FileInfo.getPath(), bufSize, func(buf []byte) {
 		_, err := c.conn.Write(buf)
-		requireNoError(err)
+		if err != nil {
+			// TODO Fix StreamLocalFile paradigm
+			c.error("Fail to write chunk")
+			return
+		}
 	})
+	if err != nil {
+		c.error("Fail to stream file")
+		return
+	}
 	log.Println("File sent to client, changing state to DONE")
 	c.state = Done
-	writeState(Done, c.conn)
+	err = writeState(Done, c.conn)
+	if err != nil {
+		c.error("Fail to write state=DONE")
+		return
+	}
 }
 
 func (c *Client) overflows(chunk []byte) bool {

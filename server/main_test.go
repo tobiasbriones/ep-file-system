@@ -28,11 +28,13 @@ func TestReceiveSend(t *testing.T) {
 		downloaded = append(downloaded, buf...)
 	})
 
-	StreamFile(&ds) // blocking
+	err = StreamFile(&ds) // blocking
+	requirePassedTest(t, err, "Fail to stream file")
 
 	// Upload the file back
 	newPath := "new-file.pdf"
-	CreateFile(newPath)
+	err = CreateFile(newPath)
+	requirePassedTest(t, err, "Fail to create file new-file.pdf")
 	for i := 0; i < cap(downloaded); i += bufSize {
 		end := i + bufSize
 
@@ -42,7 +44,8 @@ func TestReceiveSend(t *testing.T) {
 		chunk := downloaded[i:end]
 
 		// Mimic sending to remote server
-		WriteBuf(newPath, chunk)
+		err = WriteBuf(newPath, chunk)
+		requirePassedTest(t, err, "Fail to write chunk")
 	}
 }
 
@@ -97,9 +100,11 @@ func TestDownload(t *testing.T) {
 	}
 	payload, err := res.StreamPayload()
 	requirePassedTest(t, err, "Fail to read StreamPayload")
-	writeState(Stream, conn)
+	err = writeState(Stream, conn)
+	requirePassedTest(t, err, "Fail to write state=STREAM")
 	path := "download.pdf"
-	CreateLocalFile(path)
+	err = CreateLocalFile(path)
+	requirePassedTest(t, err, "Fail to create file download.pdf")
 	size := uint64(payload.Size)
 	count := uint64(0)
 	log.Println(size)
@@ -111,9 +116,9 @@ func TestDownload(t *testing.T) {
 		n, err := conn.Read(b)
 		requirePassedTest(t, err, "Fail to read chunk from server")
 		chunk := b[:n]
-		WriteLocalBuf(path, chunk)
+		err = WriteLocalBuf(path, chunk)
+		requirePassedTest(t, err, "Fail to write chunk to file")
 		count += uint64(n)
-		log.Println(n)
 		if n == 0 {
 			t.Fatal("Underflow!")
 		}
@@ -141,14 +146,16 @@ func TestDownloadIfNotExists(t *testing.T) {
 
 func upload(t *testing.T, conn *net.TCPConn, path string) {
 	log.Println("Streaming file to server:", path)
-	StreamLocalFile(path, bufSize, func(buf []byte) {
+	err := StreamLocalFile(path, bufSize, func(buf []byte) {
 		_, err := conn.Write(buf)
 		requirePassedTest(t, err, "Fail to write chunk to server")
 	})
+	requirePassedTest(t, err, "Fail to stream file")
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {
-	writeState(Eof, conn)
+	err := writeState(Eof, conn)
+	requirePassedTest(t, err, "Fail to write EOF")
 }
 
 func initiateConn(t *testing.T, action Action, info FileInfo) *net.TCPConn {

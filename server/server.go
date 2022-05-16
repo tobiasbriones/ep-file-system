@@ -13,36 +13,37 @@ import (
 func listen(server net.Listener) {
 	for {
 		conn, err := server.Accept()
-		requireNoError(err)
+		if err != nil {
+			log.Println("Fail to accept client")
+			continue
+		}
 		client := newClient(conn)
 		go client.run()
 	}
 }
 
-func readChunk(conn net.Conn) []byte {
+func readChunk(conn net.Conn) ([]byte, error) {
 	b := make([]byte, bufSize)
 	n, err := conn.Read(b)
 
 	if err != nil {
 		if err.Error() != "EOF" {
-			log.Println("Error reading chunk:", err)
-			requireNoError(err)
+			return []byte{}, err
 		}
 	}
-	return b[:n]
+	return b[:n], nil
 }
 
-func writeState(state State, conn net.Conn) {
+func writeState(state State, conn net.Conn) error {
 	msg := Message{
 		State: state,
 	}
-	writeMessage(msg, conn)
+	return writeMessage(msg, conn)
 }
 
-func writeMessage(msg Message, conn net.Conn) {
+func writeMessage(msg Message, conn net.Conn) error {
 	enc := json.NewEncoder(conn)
-	err := enc.Encode(msg)
-	requireNoError(err)
+	return enc.Encode(msg)
 }
 
 func readMessage(conn net.Conn) (Message, error) {
