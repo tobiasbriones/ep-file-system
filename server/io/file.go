@@ -4,6 +4,8 @@
 
 // Package io Models a file system according to
 // https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system/tree/main/model
+// It doesn't have to be too granular, as long as it can read the format of this
+// file system.
 // Author Tobias Briones
 package io
 
