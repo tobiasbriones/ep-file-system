@@ -28,7 +28,8 @@ func TestReceiveSend(t *testing.T) {
 		downloaded = append(downloaded, buf...)
 	})
 
-	StreamFile(&ds) // blocking
+	err = StreamFile(&ds) // blocking
+	requirePassedTest(t, err, "Fail to stream file")
 
 	// Upload the file back
 	newPath := "new-file.pdf"
@@ -141,10 +142,11 @@ func TestDownloadIfNotExists(t *testing.T) {
 
 func upload(t *testing.T, conn *net.TCPConn, path string) {
 	log.Println("Streaming file to server:", path)
-	StreamLocalFile(path, bufSize, func(buf []byte) {
+	err := StreamLocalFile(path, bufSize, func(buf []byte) {
 		_, err := conn.Write(buf)
 		requirePassedTest(t, err, "Fail to write chunk to server")
 	})
+	requirePassedTest(t, err, "Fail to stream file")
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {

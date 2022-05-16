@@ -170,10 +170,11 @@ func (c *Client) listenStream() {
 }
 
 func (c *Client) stream() {
-	StreamLocalFile(c.req.FileInfo.getPath(), bufSize, func(buf []byte) {
+	err := StreamLocalFile(c.req.FileInfo.getPath(), bufSize, func(buf []byte) {
 		_, err := c.conn.Write(buf)
 		requireNoError(err)
 	})
+	requireNoError(err)
 	log.Println("File sent to client, changing state to DONE")
 	c.state = Done
 	writeState(Done, c.conn)
