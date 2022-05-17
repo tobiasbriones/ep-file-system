@@ -11,7 +11,6 @@ package io
 
 import (
 	"errors"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -63,7 +62,6 @@ func (p *Path) Append(values ...string) error {
 		newValue = p.value + Separator + end.value
 	}
 	p.value = newValue
-	log.Println("New val:", newValue, p.value)
 	return nil
 }
 
