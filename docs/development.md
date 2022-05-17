@@ -29,3 +29,17 @@ I do direct math, computer science, etc. So my domain is math, computer science,
 Now when coming to performance everything turns obscure and hell (imagine those "algorithms" written in C/C++ for high-performance models). That's because computer hardware is general-purpose (that is good), and imperative. If you want a performant high-level "algorithm" well done, your computer hardware will tell you: we don't do that here.
 
 Fortunately, performance is not the most important tradeoff, and computer hardware has evolved lately to implement better architectures like ARM, or SIMD. That way hardware gets more familiarized with linear algebra and math, and it's more efficient.
+
+## Domain Model
+
+I had some loose file system logic, some weird data structures, and the utility functions. This is a design smell, so I decided to build a basic domain model based on my other [file system](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system/tree/main/model).
+
+This basic model just adjusts to the project requirements, so I don't have to implement other features like `getParent`, or tree traversal, etc. 
+
+The Android and Web clients need to read these models too, building the base model for the file system (`File`, `Directory`, `Node`, operations like file name/extension, etc.) would be insanely expensive.
+
+To address this problem, the domain model in the server has to be adecuate for this project since it's the most important module. The clients can read just primitive data types to consume the content.
+
+This way, the loose logic is correctly coupled, and testable.
+
+I always test the domain modules as much as I can to avoid propagating errors forward to presentation layers, and avoid system downtimes or failures.
