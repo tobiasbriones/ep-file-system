@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"server/io"
 )
 
 type State uint
@@ -100,11 +101,11 @@ func (p Payload) StreamPayload() (StreamPayload, error) {
 
 type StartPayload struct {
 	Action
-	FileInfo
+	io.FileInfo
 }
 
 type StreamPayload struct {
-	FileInfo
+	io.FileInfo
 }
 
 type Channel struct {

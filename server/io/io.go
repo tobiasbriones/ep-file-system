@@ -6,6 +6,7 @@ package io
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -26,15 +27,50 @@ type FileInfo struct {
 }
 
 // ReadFileSize Returns the file size read from the server file system.
-func (i *FileInfo) ReadFileSize() (int64, error) {
-	file, err := i.ToFile(DefChannel)
+func (i *FileInfo) ReadFileSize(channel string) (int64, error) {
+	file, err := i.ToFile(channel)
 	if err != nil {
 		return 0, err
 	}
-	return readFileSize(file.value)
+	return ReadFileSize(file.value)
 }
 
-func (i FileInfo) ToFile(channel string) (File, error) {
+func (i *FileInfo) Stream(channel string, bufSize uint, handle Handle) error {
+	file, err := i.ToFile(channel)
+	if err != nil {
+		return err
+	}
+	return StreamLocalFile(file.value, bufSize, handle)
+}
+
+func (i *FileInfo) Exists(channel string) (bool, error) {
+	file, err := i.ToFile(channel)
+	if err != nil {
+		return false, err
+	}
+	if _, err := os.Stat(file.value); errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (i *FileInfo) Create(channel string) error {
+	file, err := i.ToFile(channel)
+	if err != nil {
+		return err
+	}
+	return CreateFile(file.value)
+}
+
+func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
+	file, err := i.ToFile(channel)
+	if err != nil {
+		return err
+	}
+	return WriteBuf(file.value, chunk)
+}
+
+func (i *FileInfo) ToFile(channel string) (File, error) {
 	path, err := getPath(i.RelPath, channel)
 	if err != nil {
 		return File{}, err
