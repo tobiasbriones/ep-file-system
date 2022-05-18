@@ -19,6 +19,9 @@ const (
 	Eof
 	Error
 	Done
+	// Update This state will be used to send broadcast notifications to
+	// clients. It is not related to the main FSM.
+	Update
 )
 
 func (s State) String() string {
@@ -99,6 +102,12 @@ func (p Payload) StreamPayload() (StreamPayload, error) {
 	return payload, err
 }
 
+func (p Payload) UpdatePayload() (UpdatePayload, error) {
+	payload := UpdatePayload{}
+	err := json.Unmarshal(p.Data, &payload)
+	return payload, err
+}
+
 type StartPayload struct {
 	Action
 	io.FileInfo
@@ -107,6 +116,10 @@ type StartPayload struct {
 
 type StreamPayload struct {
 	io.FileInfo
+}
+
+type UpdatePayload struct {
+	change bool // Rudimentary signal to test broadcast
 }
 
 type Channel struct {
