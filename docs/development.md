@@ -120,3 +120,19 @@ I initially used strings for the enum values, but then I have to send strings. T
 I really want to avoid that fragmentation and `switch`es.
 
 With integer inices I can easily check if the value is valid too.
+
+### What About Underengineering?
+
+Go like many popular languages are for underengineering, for ordinary software written by ordinary programmers.
+
+I can build underengineered systems of course, but the problem is that next move you realize you have to debug nonsense that can be easily avoided.
+
+Robert C. Martin says, and I repeat all the time so others understand my pain: "The only way to go fast is to go well". Those phrases are the only boilerplate I love repeating. Java boilerplate is useless but these sentences are gold for me to defend my position as a professional engineer against annoying "stakeholders" or managers. They can't just fired us by writing working and tested software.
+
+I got a better phrase for this, it looks stupid but you have to tell this to people because people only understands obvious things by recalling them all the time: "the only way to do things right is to do them right", there is no shortcut.
+
+What can I do with a moutain of unmaintainable software that gets more complicated and coupled each time? From my experience, I have write refactorizable code to avoid underengineering and overengineering. Refactorize later as required. That's it.
+
+It would be great to use Rust but companies without footprint and massive scalability issues will prefer to use a simpler language like Go with GC.
+
+I just can't build underengineered systems because of my professionalism, but can't have much overthinking when using most languages like Go, TS, etc. Thus the answer to this section is to find a good balance. SWE is all about solving dynamic problems, is all about tradeoff like how much to design in this part?.
