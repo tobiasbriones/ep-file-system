@@ -10,3 +10,12 @@ type Hub struct {
 	unregister chan *Client
 	change     chan bool // Rudimentary signal to test broadcast
 }
+
+func NewHub() *Hub {
+	return &Hub{
+		clients:    make(map[uint]*Client),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+		change:     make(chan bool),
+	}
+}
