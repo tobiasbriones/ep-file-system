@@ -90,3 +90,27 @@ We don't have to use primitive data types, or non-cohesive algorithms as I menti
 That was important at that time, but now is just a sad joke.
 
 We have to evaluate tradeoffs pretty well.
+
+### More than Simple Enums
+
+For this statically typed system I need to send the states via a TCP `Message`.
+
+Enums can be easily defined via integers (`iota`) in Go, but they don't have a string representation. That implies that if I change the order of definition then the whole system will immediatelly break and is also a troble for backwards compatibility.
+
+If I use strings to define the `enum`s I lose the advantage of switching on integer IDs. So I had to define a parallel string array to convert the value into string.
+
+This is too bad:
+
+![Commit Fix Enum Strings](commit-fix-enum-strings.png)
+
+The enums are now fragmented, e.g. you have to manually keep the string representation in sync with the bunch of `const`s defined above. That's pretty lame.
+
+Whenever I face these kinds of problems in Go, I have to ask the question: How to solve this in a simple way?. Since that is the way Go is supposed to be.
+
+But simple is not underengineered though.
+
+Messages has to be read into the application memory as programming language constructs or abstractions, but when sending them over the network they're only raw bytes. I heard the new Web 3 standard will fix that and that we'll send objects instead of JSON or bytes over the network. I don't know about that information, but I hope so!.
+
+Transforming DTOs, raw data types, all this is too exhausting, and only shows lack of modern tech. It also adds incorrecness in the way.
+
+What should be sent over the network?. Integers or strings to represent the `enum` values?. Integers use to be physical implementations. I can't add another `enum` because I can't tell wheter a `0` is a state from `FSM1` or `FSM2` if that value comes as raw from the network. What was the client's original intention?.
