@@ -50,3 +50,25 @@ Go is a simple language, so it's often underengineered. I think about Go as if P
 
 The states of the FSM need to be well defined constants, sum types like `enum`s.
 
+### Iota a Bad Trick
+
+`iota` is something too implicit, you just define groups of `const` and they get their int value from there on starting from zero.
+
+If you change the order of definition then your enum value is going to change, and that is a huge problem for backwards compatibility.
+
+```go
+type State uint
+
+const (
+	Start State = iota
+	Data
+	Stream
+	Eof
+	Error
+	Done
+)
+```
+
+You may say, `iota` is not a trick but a feature. I don't think is a proper feature. Can you see how fragmented this is going?
+
+Tutorials on the internet tell you to use `iota`, so it looks like it's idiomatic Go.
