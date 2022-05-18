@@ -102,6 +102,7 @@ func (p Payload) StreamPayload() (StreamPayload, error) {
 type StartPayload struct {
 	Action
 	io.FileInfo
+	Channel Channel
 }
 
 type StreamPayload struct {
@@ -110,4 +111,8 @@ type StreamPayload struct {
 
 type Channel struct {
 	Name string
+}
+
+func NewChannel(name string) Channel {
+	return Channel{Name: name}
 }

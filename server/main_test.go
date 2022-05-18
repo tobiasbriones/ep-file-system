@@ -15,6 +15,7 @@ import (
 const (
 	testFile      = "file.pdf"
 	testLocalFile = "C:\\file.pdf"
+	testChannel   = "test"
 )
 
 // Side effect test. Requires a file "file.pdf" into the server's file system
@@ -68,7 +69,8 @@ func TestTcpConn(t *testing.T) {
 
 // Side effect. Requires testLocalFile = "C:\\file.pdf".
 func TestUpload(t *testing.T) {
-	info, _ := newTestLocalFileInfo()
+	info, err := newTestLocalFileInfo()
+	requirePassedTest(t, err, "Fail to read file info")
 	conn := initiateConn(t, ActionUpload, info)
 	defer conn.Close()
 
@@ -91,8 +93,8 @@ func TestUpload(t *testing.T) {
 	log.Println(res.State)
 }
 
-// Requires the file testFile = "file.pdf" in the server FS, and will write it
-// to "download.pdf" into this source code directory.
+// Requires the file testFile = "file.pdf" in the server FS at channel "test",
+//and will write it to "download.pdf" into this source code directory.
 func TestDownload(t *testing.T) {
 	info := newTestFileInfo()
 	conn := initiateConn(t, ActionDownload, info)
@@ -171,6 +173,7 @@ func initiateConn(t *testing.T, action Action, info io.FileInfo) *net.TCPConn {
 	body := StartPayload{
 		Action:   action,
 		FileInfo: info,
+		Channel:  NewChannel(testChannel),
 	}
 	requirePassedTest(t, err, "Fail to load test FileInfo")
 

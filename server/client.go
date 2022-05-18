@@ -71,6 +71,12 @@ func (c *Client) start(msg Message) {
 		c.error("Fail to read StartPayload")
 		return
 	}
+	channelPath, err := payload.ChannelPath(payload.Channel.Name)
+	if err != nil {
+		c.error("Fail to read StartPayload Path")
+		return
+	}
+	err = io.MakeDirIfNotExists(channelPath)
 	c.req = payload
 	c.count = 0
 
@@ -87,7 +93,7 @@ func (c *Client) startUpload(payload StartPayload) {
 		c.error("File sent is empty")
 		return
 	}
-	err := payload.Create(io.DefChannel)
+	err := payload.Create(c.req.Channel.Name)
 	if err != nil {
 		c.error("Fail to create file")
 		return
@@ -134,7 +140,7 @@ func (c *Client) processChunk(chunk []byte) {
 		c.error("Underflow!")
 		return
 	}
-	err := c.req.WriteChunk(io.DefChannel, chunk)
+	err := c.req.WriteChunk(c.req.Channel.Name, chunk)
 	if err != nil {
 		c.error("Fail to write chunk")
 		return
@@ -157,7 +163,7 @@ func (c *Client) eof(msg Message) {
 }
 
 func (c *Client) startDownload(payload StartPayload) {
-	exists, err := c.req.Exists(io.DefChannel)
+	exists, err := c.req.Exists(c.req.Channel.Name)
 	if err != nil {
 		c.error("Fail to read file exists")
 		return
@@ -166,19 +172,17 @@ func (c *Client) startDownload(payload StartPayload) {
 		c.error("Requested file does not exist")
 		return
 	}
-	size, err := c.req.ReadFileSize(io.DefChannel)
+	size, err := c.req.ReadFileSize(c.req.Channel.Name)
 	if err != nil {
 		c.error("Fail to read file size")
 		return
 	}
+	payload.Action = ActionDownload
 	info := io.FileInfo{
 		RelPath: payload.RelPath,
 		Size:    size,
 	}
-	c.req = StartPayload{
-		Action:   ActionDownload,
-		FileInfo: info,
-	}
+	c.req = payload
 	c.writeStreamState(StreamPayload{FileInfo: info})
 }
 
@@ -217,7 +221,7 @@ func (c *Client) listenStream() {
 
 func (c *Client) stream() {
 	err := c.req.Stream(
-		io.DefChannel,
+		c.req.Channel.Name,
 		bufSize,
 		func(buf []byte) {
 			_, err := c.conn.Write(buf)
