@@ -19,6 +19,16 @@ const (
 	Eof
 	Error
 	Done
+	// Connect Next states are not related to the main FSM. Initiates the
+	// server/client connection, it's sent by the client.
+	Connect
+	// Quit Sent by a client to exit.
+	Quit
+	// Update This state will be used to send broadcast notifications to
+	// clients.
+	Update
+	// Ok Sent by the server to confirm a client request.
+	Ok
 )
 
 func (s State) String() string {
@@ -40,6 +50,10 @@ func States() []string {
 		"eof",
 		"error",
 		"done",
+		"connect",
+		"quit",
+		"update",
+		"ok",
 	}
 }
 
@@ -99,15 +113,30 @@ func (p Payload) StreamPayload() (StreamPayload, error) {
 	return payload, err
 }
 
+func (p Payload) UpdatePayload() (UpdatePayload, error) {
+	payload := UpdatePayload{}
+	err := json.Unmarshal(p.Data, &payload)
+	return payload, err
+}
+
 type StartPayload struct {
 	Action
 	io.FileInfo
+	Channel Channel
 }
 
 type StreamPayload struct {
 	io.FileInfo
 }
 
+type UpdatePayload struct {
+	change bool // Rudimentary signal to test broadcast
+}
+
 type Channel struct {
 	Name string
+}
+
+func NewChannel(name string) Channel {
+	return Channel{Name: name}
 }

@@ -70,6 +70,10 @@ func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
 	return WriteBuf(file.value, chunk)
 }
 
+func (i *FileInfo) ChannelPath(channel string) (Path, error) {
+	return getChannelPath(channel)
+}
+
 func (i *FileInfo) ToFile(channel string) (File, error) {
 	path, err := getPath(i.RelPath, channel)
 	if err != nil {
@@ -131,6 +135,15 @@ func stream(
 		}
 	}
 	return bytesNumber, chunksNumber, nil
+}
+
+func getChannelPath(channel string) (Path, error) {
+	// TODO File needs to implement Parent()
+	path, err := NewPathFrom(fsRootPath, channel)
+	if err != nil {
+		return Path{}, err
+	}
+	return path, nil
 }
 
 func getPath(relPath string, channel string) (Path, error) {
