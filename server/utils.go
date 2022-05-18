@@ -6,6 +6,8 @@ package main
 
 import "testing"
 
+var valid = struct{}{}
+
 func requireNoError(e error) {
 	if e != nil {
 		panic(e)
