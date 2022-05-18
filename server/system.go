@@ -27,6 +27,8 @@ const (
 	// Update This state will be used to send broadcast notifications to
 	// clients.
 	Update
+	// Ok Sent by the server to confirm a client request.
+	Ok
 )
 
 func (s State) String() string {
