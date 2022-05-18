@@ -50,6 +50,10 @@ func States() []string {
 		"eof",
 		"error",
 		"done",
+		"connect",
+		"quit",
+		"update",
+		"ok",
 	}
 }
 
