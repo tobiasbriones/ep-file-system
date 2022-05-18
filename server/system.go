@@ -19,8 +19,13 @@ const (
 	Eof
 	Error
 	Done
+	// Connect Next states are not related to the main FSM. Initiates the
+	// server/client connection, it's sent by the client.
+	Connect
+	// Quit Sent by a client to exit.
+	Quit
 	// Update This state will be used to send broadcast notifications to
-	// clients. It is not related to the main FSM.
+	// clients.
 	Update
 )
 
