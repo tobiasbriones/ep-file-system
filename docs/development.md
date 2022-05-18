@@ -80,3 +80,13 @@ It's like other lame languages like JavaScript or Python, you can't even define 
 I know Go is a simple language for concurrent applications and microservices. Easy to adopt and move forward on large teams where programmers are coming and going (Google). But for doing mediocre things I rather use Java. You can't build monoliths on Go by the way, so Go is just a niche language, it is not general-purpose either.
 
 On the other hand, I'd rather write Go than any horrible languages like Python, PHP, or JavaScript, having into account the bloated communities and tools they have. If you don't write static types, then you need a lot of bloated buggy software like Anaconda, Electron, etc. It's a tradeoff, why use those languages then?
+
+#### Fun Fact
+
+Primitive Android programmers told you not to use `enum`s in Java because of the overhead. That's because Android phones were super slow and limited back in that time.
+
+We don't have to use primitive data types, or non-cohesive algorithms as I mentioned before. Low-level tricks is for bad programmers, that's part of the past.
+
+That was important at that time, but now is just a sad joke.
+
+We have to evaluate tradeoffs pretty well.
