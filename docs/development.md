@@ -114,3 +114,9 @@ Messages has to be read into the application memory as programming language cons
 Transforming DTOs, raw data types, all this is too exhausting, and only shows lack of modern tech. It also adds incorrecness in the way.
 
 What should be sent over the network?. Integers or strings to represent the `enum` values?. Integers use to be physical implementations. I can't add another `enum` because I can't tell wheter a `0` is a state from `FSM1` or `FSM2` if that value comes as raw from the network. What was the client's original intention?.
+
+I initially used strings for the enum values, but then I have to send strings. Then I have to read an action as a string from the client `Message`, and to convert that raw string I need a `switch` to check it's a valid state, or else the not-so-clever string array to use integer indices but get index out of bound panics anytime I update the enum and spend 40 minutes debugging nonsense.
+
+I really want to avoid that fragmentation and `switch`es.
+
+With integer inices I can easily check if the value is valid too.
