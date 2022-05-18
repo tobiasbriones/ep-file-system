@@ -3,3 +3,10 @@
 // This file is part of https://github.com/tobiasbriones/ep-file-system-server
 
 package main
+
+type Hub struct {
+	clients    map[uint]*Client
+	register   chan *Client
+	unregister chan *Client
+	change     chan bool // Rudimentary signal to test broadcast
+}
