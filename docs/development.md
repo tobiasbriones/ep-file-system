@@ -135,4 +135,6 @@ What can I do with a moutain of unmaintainable software that gets more complicat
 
 It would be great to use Rust but companies without footprint and massive scalability issues will prefer to use a simpler language like Go with GC.
 
-I just can't build underengineered systems because of my professionalism, but can't have much overthinking when using most languages like Go, TS, etc. Thus the answer to this section is to find a good balance. SWE is all about solving dynamic problems, is all about tradeoff like how much to design in this part?.
+Debugging is a skill for bad programmers. It's like comments, the more you debug, the more issues there are in the underlying code. In years of writting software, the only debbuging skill I have is to create breakpoints with `println` to trace program states, and saving logs for production troubles. We don't need messy debugging tools, that's not to be proud about. Rust gives you the information right after compiling, and we can use Rust with easier scripting languages like TS (e.g. Deno is written in Rust, but the consumer language is TS), see my point?.
+
+I just can't build underengineered systems because of my professionalism, but can't have much overthinking when using most languages like Go, TS, etc. Thus the answer to this section is to find a good balance. SWE is all about solving dynamic problems, is all about tradeoffs like how much to design in this part of the system?.
