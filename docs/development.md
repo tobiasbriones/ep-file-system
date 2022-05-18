@@ -43,3 +43,10 @@ To address this problem, the domain model in the server has to be adecuate for t
 This way, the loose logic is correctly coupled, and testable.
 
 I always test the domain modules as much as I can to avoid propagating errors forward to presentation layers, and avoid system downtimes or failures.
+
+## Enums in Go
+
+Go is a simple language, so it's often underengineered. I think about Go as if Python was a real language, or Python well done.
+
+The states of the FSM need to be well defined constants, sum types like `enum`s.
+
