@@ -72,3 +72,11 @@ const (
 You may say, `iota` is not a trick but a feature. I don't think is a proper feature. Can you see how fragmented this is going?
 
 Tutorials on the internet tell you to use `iota`, so it looks like it's idiomatic Go.
+
+### Lack of Features
+
+It's like other lame languages like JavaScript or Python, you can't even define a simple `enum` data type.
+
+I know Go is a simple language for concurrent applications and microservices. Easy to adopt and move forward on large teams where programmers are coming and going (Google). But for doing mediocre things I rather use Java. You can't build monoliths on Go by the way, so Go is just a niche language, it is not general-purpose either.
+
+On the other hand, I'd rather write Go than any horrible languages like Python, PHP, or JavaScript, having into account the bloated communities and tools they have. If you don't write static types, then you need a lot of bloated buggy software like Anaconda, Electron, etc. It's a tradeoff, why use those languages then?
