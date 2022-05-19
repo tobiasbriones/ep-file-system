@@ -1,5 +1,9 @@
 # Development
 
+In this article, I will document the personal experience I had with Go and this
+project by also employing my previous thoughts and experiences on some design
+decisions.
+
 ## EOF Issues
 
 EOF signals might be an issue in a Go implementation. They might be read as
