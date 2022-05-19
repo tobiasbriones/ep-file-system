@@ -171,3 +171,11 @@ func ToState(value string) (State, error) {
 	return State(value), nil
 }
 ```
+
+Moreover defining an empty struct which takes 0 bytes of memory and is useful for the boilerplate of Go Sets. Go doesn't have Sets, they're just Maps with true everywhere. Use the empty `struct` instead of bool.
+
+```go
+var valid = struct{}{}
+```
+
+That approach should be used for quit channel signals too for the reasons stated above.
