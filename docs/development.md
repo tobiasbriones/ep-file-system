@@ -7,32 +7,32 @@ errors, or skipped, so take special care with this signal. It's defined
 at `io.EOF`.
 
 When passing to state EOF the client sent the EOF signal I had defined in the
-beggining, that is, an empty chunk: `[]byte{}`. The problem is that the server
+beginning, that is, an empty chunk: `[]byte{}`. The problem is that the server
 never heard back from the client and the communication was on hold forever. The
 server didn't read that EOF signal, so it wasn't able to proceed with the next
 state.
 
-This had me some time reasoning about some syncronization issue, but the problem
-is that the signal was not getting read by the server because it is an empty
-message literally. Go writes and reads keep in sync due to its good concurrency
-model to write linear code, so syncronization was not the problem. It might have
-been due to some validation logic I wrote or the way the empty message is
-handled.
+This had me some time reasoning about some synchronization issue, but the
+problem is that the signal was not getting read by the server because it is an
+empty message literally. Go writes and reads keep in sync due to its good
+concurrency model to write linear code, so synchronization was not the problem.
+It might have been due to some validation logic I wrote or the way the empty
+message is handled.
 
 I wanted to use the empty chunk as my EOF signal to keep reading chunks. This is
 because data is sent as chunks instead of actual high-level `Message`s. So I
-though it was ok to keep with that inertia and get the EOF signal just as the
+thought it was ok to keep with that inertia and get the EOF signal just as the
 empty chunk.
 
 In the end, I realized that was a primitive design. I chose to use raw chunks to
-remove the overhead when streaming files. The EOF is only sent onece, so I must
+remove the overhead when streaming files. The EOF is only sent once, so I must
 use a proper high-level `Message`.
 
 After implementing the design said above, all my headaches were immediately
 terminated.
 
 There's no need to implement archaic primitive-obsession systems nowadays. You
-need less algorithms or tricks to handle that data. Replace stupid algorithms
+need fewer algorithms or tricks to handle that data. Replace stupid algorithms
 with well-defined domain specific centric systems.
 
 Sending the chunks as raw byte arrays is good because a file is just that, a
@@ -46,7 +46,7 @@ upload) or `STREAM` (download).
 In my
 another [file system](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system)
 written in Java I had to standardize the path separator because I don't work for
-M$ Windows or Linux or MacOS.
+M$ Windows or Linux or macOS.
 
 I had my own file system, so I don't care if M$ marketers decide to use a cringe
 symbol that has to be escaped all the time for Windows paths just to brand it as
@@ -83,7 +83,7 @@ The Android and Web clients need to read these models too, building the base
 model for the file system (`File`, `Directory`, `Node`, operations like file
 name/extension, etc.) would be insanely expensive.
 
-To address this problem, the domain model in the server has to be adecuate for
+To address this problem, the domain model in the server has to be adequate for
 this project since it's the most important module. The clients can read just
 primitive data types to consume the content.
 
@@ -94,10 +94,10 @@ forward to presentation layers, and avoid system downtimes or failures.
 
 ## Enums in Go
 
-Go is a simple language, so it's often underengineered. I think about Go as if
+Go is a simple language, so it's often under-engineered. I think about Go as if
 Python was a real language, or Python well done.
 
-The states of the FSM need to be well defined constants, sum types like `enum`s.
+The states of the FSM need to be well-defined constants, sum types like `enum`s.
 
 ### Iota a Bad Trick
 
@@ -163,7 +163,7 @@ For this statically typed system I need to send the states via a TCP `Message`.
 
 Enums can be easily defined via integers (`iota`) in Go, but they don't have a
 string representation. That implies that if I change the order of definition
-then the whole system will immediatelly break and is also a troble for backwards
+then the whole system will immediately break and is also a trouble for backwards
 compatibility.
 
 If I use strings to define the `enum`s I lose the advantage of switching on
@@ -178,23 +178,23 @@ The enums are now fragmented, e.g. you have to manually keep the string
 representation in sync with the bunch of `const`s defined above. That's pretty
 lame.
 
-Whenever I face these kinds of problems in Go, I have to ask the question: How
-to solve this in a simple way?. Since that is the way Go is supposed to be.
+Whenever I face these kinds of problems in Go, I have to ask: How to solve this
+in a simple way?. Since that is the way Go is supposed to be.
 
-But simple is not underengineered though.
+But simple is not under-engineered though.
 
-Messages has to be read into the application memory as programming language
+Messages have to be read into the application memory as programming language
 constructs or abstractions, but when sending them over the network they're only
 raw bytes. I heard the new Web 3 standard will fix that and that we'll send
 objects instead of JSON or bytes over the network. I don't know about that
 information, but I hope so!.
 
 Transforming DTOs, raw data types, all this is too exhausting, and only shows
-lack of modern tech. It also adds incorrecness in the way.
+lack of modern tech. It also adds incorrectness in the way.
 
 What should be sent over the network?. Integers or strings to represent
 the `enum` values?. Integers use to be physical implementations. I can't add
-another `enum` because I can't tell wheter a `0` is a state from `FSM1`
+another `enum` because I can't tell whether a `0` is a state from `FSM1`
 or `FSM2` if that value comes as raw from the network. What was the client's
 original intention?.
 
@@ -206,46 +206,46 @@ panics anytime I update the enum and spend 40 minutes debugging nonsense.
 
 I really want to avoid that fragmentation and `switch`es.
 
-With integer inices I can easily check if the value is valid too.
+With integer indices I can easily check if the value is valid too.
 
-### What About Underengineering?
+### What About Under engineering?
 
-Go like many popular languages are for underengineering, for ordinary software
+Go like many popular languages are for under-engineering, for ordinary software
 written by ordinary programmers.
 
-I can build underengineered systems of course, but the problem is that next move
-you realize you have to debug nonsense that can be easily avoided.
+I can build under-engineered systems of course, but the problem is that next
+move you realize you have to debug nonsense that can be easily avoided.
 
 Robert C. Martin says, and I repeat all the time so others understand my pain: "
 The only way to go fast is to go well". Those phrases are the only boilerplate I
 love repeating. Java boilerplate is useless but these sentences are gold for me
 to defend my position as a professional engineer against annoying "stakeholders"
-or managers. They can't just fired us by writing working and tested software.
+or managers. They can't just fire us by writing working and tested software.
 
-I got a better phrase for this, it looks stupid but you have to tell this to
+I got a better phrase for this, it looks stupid, but you have to tell this to
 people because people only understands obvious things by recalling them all the
 time: "the only way to do things right is to do them right", there is no
 shortcut.
 
-What can I do with a moutain of unmaintainable software that gets more
-complicated and coupled each time? From my experience, I have write
-refactorizable code to avoid underengineering and overengineering. Refactorize
-later as required. That's it.
+What can I do with a mountain of unmaintainable software that gets more
+complicated and coupled each time? From my experience, I have to write
+refactorable code to avoid under-engineering and over-engineering. Refactorize
+later as needed. That's it.
 
 It would be great to use Rust but companies without footprint and massive
 scalability issues will prefer to use a simpler language like Go with GC.
 
 Debugging is a skill for bad programmers. It's like comments, the more you
-debug, the more issues there are in the underlying code. In years of writting
-software, the only debbuging skill I have is to create breakpoints
+debug, the more issues there are in the underlying code. In years of writing
+software, the only debugging skill I have is to create breakpoints
 with `println` to trace program states, and saving logs for production troubles.
 We don't need messy debugging tools, that's not to be proud about. Rust gives
 you the information right after compiling, and we can use Rust with easier
 scripting languages like TS (e.g. Deno is written in Rust, but the consumer
 language is TS), see my point?.
 
-I just can't build underengineered systems because of my professionalism, but
-can't have much overthinking when using most languages like Go, TS, etc. Thus
+I just can't build under-engineered systems because of my professionalism, but
+can't have much overthinking when using most languages like Go, TS, etc. Thus,
 the answer to this section is to find a good balance. SWE is all about solving
 dynamic problems, is all about tradeoffs like how much to design in this part of
 the system?.
@@ -283,7 +283,7 @@ return State(value), nil
 }
 ```
 
-Moreover defining an empty struct which takes 0 bytes of memory and is useful
+Moreover, defining an empty struct which takes 0 bytes of memory and is useful
 for the boilerplate of Go Sets. Go doesn't have Sets, they're just Maps with
 true everywhere. Use the empty `struct` instead of bool.
 
