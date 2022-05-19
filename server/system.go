@@ -7,7 +7,76 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"server/io"
 )
+
+type State uint
+
+const (
+	Start State = iota
+	Data
+	Stream
+	Eof
+	Error
+	Done
+	// Connect Next states are not related to the main FSM. Initiates the
+	// server/client connection, it's sent by the client.
+	Connect
+	// Quit Sent by a client to exit.
+	Quit
+	// Update This state will be used to send broadcast notifications to
+	// clients.
+	Update
+	// Ok Sent by the server to confirm a client request.
+	Ok
+)
+
+func (s State) String() string {
+	return States()[s]
+}
+
+func ToState(i uint) (State, error) {
+	if int(i) >= len(States()) {
+		return State(0), errors.New("invalid state")
+	}
+	return State(i), nil
+}
+
+func States() []string {
+	return []string{
+		"start",
+		"data",
+		"stream",
+		"eof",
+		"error",
+		"done",
+		"connect",
+		"quit",
+		"update",
+		"ok",
+	}
+}
+
+type Action uint
+
+const (
+	ActionUpload Action = iota
+	ActionDownload
+)
+
+func ToAction(i uint) (Action, error) {
+	if int(i) >= len(Actions()) {
+		return Action(0), errors.New("invalid action")
+	}
+	return Action(i), nil
+}
+
+func Actions() []string {
+	return []string{
+		"upload",
+		"download",
+	}
+}
 
 type Message struct {
 	State
@@ -44,65 +113,30 @@ func (p Payload) StreamPayload() (StreamPayload, error) {
 	return payload, err
 }
 
+func (p Payload) UpdatePayload() (UpdatePayload, error) {
+	payload := UpdatePayload{}
+	err := json.Unmarshal(p.Data, &payload)
+	return payload, err
+}
+
 type StartPayload struct {
 	Action
-	FileInfo
+	io.FileInfo
+	Channel Channel
 }
 
 type StreamPayload struct {
-	FileInfo
+	io.FileInfo
 }
 
-type State uint
-
-const (
-	Start State = iota
-	Data
-	Stream
-	Eof
-	Error
-	Done
-)
-
-func (s State) String() string {
-	return States()[s]
+type UpdatePayload struct {
+	change bool // Rudimentary signal to test broadcast
 }
 
-func ToState(i uint) (State, error) {
-	if int(i) >= len(States()) {
-		return State(0), errors.New("invalid state")
-	}
-	return State(i), nil
+type Channel struct {
+	Name string
 }
 
-func States() []string {
-	return []string{
-		"start",
-		"data",
-		"stream",
-		"eof",
-		"error",
-		"done",
-	}
-}
-
-type Action uint
-
-const (
-	ActionUpload Action = iota
-	ActionDownload
-)
-
-func ToAction(i uint) (Action, error) {
-	if int(i) >= len(Actions()) {
-		return Action(0), errors.New("invalid action")
-	}
-	return Action(i), nil
-}
-
-func Actions() []string {
-	return []string{
-		"upload",
-		"download",
-	}
+func NewChannel(name string) Channel {
+	return Channel{Name: name}
 }

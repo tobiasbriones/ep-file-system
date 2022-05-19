@@ -5,10 +5,9 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"net"
-	"os"
+	"server/io"
 )
 
 type Client struct {
@@ -72,6 +71,12 @@ func (c *Client) start(msg Message) {
 		c.error("Fail to read StartPayload")
 		return
 	}
+	channelPath, err := payload.ChannelPath(payload.Channel.Name)
+	if err != nil {
+		c.error("Fail to read StartPayload Path")
+		return
+	}
+	err = io.MakeDirIfNotExists(channelPath)
 	c.req = payload
 	c.count = 0
 
@@ -88,7 +93,7 @@ func (c *Client) startUpload(payload StartPayload) {
 		c.error("File sent is empty")
 		return
 	}
-	err := CreateFile(payload.RelPath)
+	err := payload.Create(c.req.Channel.Name)
 	if err != nil {
 		c.error("Fail to create file")
 		return
@@ -135,7 +140,7 @@ func (c *Client) processChunk(chunk []byte) {
 		c.error("Underflow!")
 		return
 	}
-	err := WriteBuf(c.req.RelPath, chunk)
+	err := c.req.WriteChunk(c.req.Channel.Name, chunk)
 	if err != nil {
 		c.error("Fail to write chunk")
 		return
@@ -158,23 +163,26 @@ func (c *Client) eof(msg Message) {
 }
 
 func (c *Client) startDownload(payload StartPayload) {
-	if _, err := os.Stat(payload.getPath()); errors.Is(err, os.ErrNotExist) {
-		c.error("Requested file does not exists")
+	exists, err := c.req.Exists(c.req.Channel.Name)
+	if err != nil {
+		c.error("Fail to read file exists")
 		return
 	}
-	size, err := ReadFileSize(payload.getPath())
+	if !exists {
+		c.error("Requested file does not exist")
+		return
+	}
+	size, err := c.req.ReadFileSize(c.req.Channel.Name)
 	if err != nil {
 		c.error("Fail to read file size")
 		return
 	}
-	info := FileInfo{
+	payload.Action = ActionDownload
+	info := io.FileInfo{
 		RelPath: payload.RelPath,
 		Size:    size,
 	}
-	c.req = StartPayload{
-		Action:   ActionDownload,
-		FileInfo: info,
-	}
+	c.req = payload
 	c.writeStreamState(StreamPayload{FileInfo: info})
 }
 
@@ -212,14 +220,18 @@ func (c *Client) listenStream() {
 }
 
 func (c *Client) stream() {
-	err := StreamLocalFile(c.req.FileInfo.getPath(), bufSize, func(buf []byte) {
-		_, err := c.conn.Write(buf)
-		if err != nil {
-			// TODO Fix StreamLocalFile paradigm
-			c.error("Fail to write chunk")
-			return
-		}
-	})
+	err := c.req.Stream(
+		c.req.Channel.Name,
+		bufSize,
+		func(buf []byte) {
+			_, err := c.conn.Write(buf)
+			if err != nil {
+				// TODO Fix StreamLocalFile paradigm
+				c.error("Fail to write chunk")
+				return
+			}
+		},
+	)
 	if err != nil {
 		c.error("Fail to stream file")
 		return
