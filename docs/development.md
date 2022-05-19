@@ -258,28 +258,28 @@ I have found the following design as best for Go enums:
 type State string
 
 const (
-Start  State = "START"
-Data   State = "DATA"
-Stream State = "STREAM"
-Eof    State = "EOF"
-Error  State = "ERROR"
-Done   State = "DONE"
+    Start  State = "START"
+    Data   State = "DATA"
+    Stream State = "STREAM"
+    Eof    State = "EOF"
+    Error  State = "ERROR"
+    Done   State = "DONE"
 )
 
 var stateStrings = map[string]struct{}{
-"start":  valid,
-"data":   valid,
-"stream": valid,
-"eof":    valid,
-"error":  valid,
-"done":   valid,
+    "start":  valid,
+    "data":   valid,
+    "stream": valid,
+    "eof":    valid,
+    "error":  valid,
+    "done":   valid,
 }
 
 func ToState(value string) (State, error) {
-if _, isValid := stateStrings[value]; !isValid {
-return "", errors.New("invalid state value: " + value)
-}
-return State(value), nil
+    if _, isValid := stateStrings[value]; !isValid {
+        return "", errors.New("invalid state value: " + value)
+    }
+    return State(value), nil
 }
 ```
 
