@@ -332,7 +332,9 @@ independently-deployable modules.
 With Java, I would create different Java/Gradle modules in the root of the
 project and import them as required. I can get to be circular, but it's not too
 bad. That way I can build *modular* monoliths that are pretty useful in
-development.
+development. Check the 
+[other FS](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system)
+source code for seeing this.
 
 ## A Development Cycle Can Be Shorter
 
