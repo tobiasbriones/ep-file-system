@@ -10,18 +10,38 @@ import (
 	"server/io"
 )
 
-type State uint
+type State string
 
 const (
-	Start State = iota
-	Data
-	Stream
-	Eof
-	Error
-	Done
+	Start  State = "START"
+	Data   State = "DATA"
+	Stream State = "STREAM"
+	Eof    State = "EOF"
+	Error  State = "ERROR"
+	Done   State = "DONE"
+)
+
+var stateStrings = map[string]struct{}{
+	"start":  valid,
+	"data":   valid,
+	"stream": valid,
+	"eof":    valid,
+	"error":  valid,
+	"done":   valid,
+}
+
+func ToState(value string) (State, error) {
+	if _, isValid := stateStrings[value]; !isValid {
+		return "", errors.New("invalid state value: " + value)
+	}
+	return State(value), nil
+}
+
+// TODO Update
+const (
 	// Connect Next states are not related to the main FSM. Initiates the
 	// server/client connection, it's sent by the client.
-	Connect
+	Connect = iota
 	// Quit Sent by a client to exit.
 	Quit
 	// Update This state will be used to send broadcast notifications to
@@ -30,32 +50,6 @@ const (
 	// Ok Sent by the server to confirm a client request.
 	Ok
 )
-
-func (s State) String() string {
-	return States()[s]
-}
-
-func ToState(i uint) (State, error) {
-	if int(i) >= len(States()) {
-		return State(0), errors.New("invalid state")
-	}
-	return State(i), nil
-}
-
-func States() []string {
-	return []string{
-		"start",
-		"data",
-		"stream",
-		"eof",
-		"error",
-		"done",
-		"connect",
-		"quit",
-		"update",
-		"ok",
-	}
-}
 
 type Action uint
 
