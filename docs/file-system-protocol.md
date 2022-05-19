@@ -70,5 +70,4 @@ is important to optimize for the source code as source of truth instead.
 
 ### Client Updates
 
-Another system with the Gorilla Web Socket library can be designed to connect a
-hub of clients and broadcasts in real time file system changes. 
+A TCP Hub is implemented to register, unregister, and broadcast changes to the client.
