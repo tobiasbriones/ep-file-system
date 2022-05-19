@@ -68,6 +68,15 @@ With that, stakeholders can understand the system architecture.
 More conceptual or technical documentation can be developed if required, but it
 is important to optimize for the source code as source of truth instead.
 
+The file system actions for `UPLOAD` and `DOWNLOAD` are a formal finite state
+machine defined above.
+
+![FS Send Receive State Diagram](fs-send-receive-state-diagram.svg)
+
+Invisible transitions are implicitly sent to the same state (e.g. if more 
+data is coming, then the state keeps at `DATA` until if *finishes*).
+
 ### Client Updates
 
-A TCP Hub is implemented to register, unregister, and broadcast changes to the client.
+A TCP Hub is implemented to register, unregister, and broadcast changes to the
+client.
