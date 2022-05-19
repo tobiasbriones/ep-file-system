@@ -138,3 +138,36 @@ It would be great to use Rust but companies without footprint and massive scalab
 Debugging is a skill for bad programmers. It's like comments, the more you debug, the more issues there are in the underlying code. In years of writting software, the only debbuging skill I have is to create breakpoints with `println` to trace program states, and saving logs for production troubles. We don't need messy debugging tools, that's not to be proud about. Rust gives you the information right after compiling, and we can use Rust with easier scripting languages like TS (e.g. Deno is written in Rust, but the consumer language is TS), see my point?.
 
 I just can't build underengineered systems because of my professionalism, but can't have much overthinking when using most languages like Go, TS, etc. Thus the answer to this section is to find a good balance. SWE is all about solving dynamic problems, is all about tradeoffs like how much to design in this part of the system?.
+
+### Final Design
+
+I have found the following design as best for Go enums:
+
+```go
+type State string
+
+const (
+	Start  State = "START"
+	Data   State = "DATA"
+	Stream State = "STREAM"
+	Eof    State = "EOF"
+	Error  State = "ERROR"
+	Done   State = "DONE"
+)
+
+var stateStrings = map[string]struct{}{
+	"start":  valid,
+	"data":   valid,
+	"stream": valid,
+	"eof":    valid,
+	"error":  valid,
+	"done":   valid,
+}
+
+func ToState(value string) (State, error) {
+	if _, isValid := stateStrings[value]; !isValid {
+		return "", errors.New("invalid state value: " + value)
+	}
+	return State(value), nil
+}
+```
