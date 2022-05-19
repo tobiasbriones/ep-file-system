@@ -297,3 +297,20 @@ var valid = struct{}{}
 
 That approach should be used for quit channel signals too for the reasons stated
 above.
+
+## Go Dependency System
+
+Something I have detected is that Go dependencies are linear to avoid circular
+dependencies.
+
+This might be a mess but is a good design decision in the end.
+
+It can be a mess because, for example, in the dungeon game, I have the server
+module and the client or game module. I need to extract the game model logic,
+but I couldn't. I had to do something gross to move forward:
+copy-paste the game model to the game module and to the server module.
+
+This must be because Go is aimed for microservices and each module has to be
+small and most important undependable deployable.
+
+That's why I had said that you can't build monoliths with Go. 
