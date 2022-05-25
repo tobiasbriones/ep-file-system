@@ -7,6 +7,7 @@ package io
 import (
 	"bufio"
 	"errors"
+	"fs"
 	"io"
 	"log"
 	"os"
@@ -70,16 +71,16 @@ func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
 	return WriteBuf(file.Value, chunk)
 }
 
-func (i *FileInfo) ChannelPath(channel string) (Path, error) {
+func (i *FileInfo) ChannelPath(channel string) (fs.Path, error) {
 	return getChannelPath(channel)
 }
 
-func (i *FileInfo) ToFile(channel string) (File, error) {
+func (i *FileInfo) ToFile(channel string) (fs.File, error) {
 	path, err := getPath(i.RelPath, channel)
 	if err != nil {
-		return File{}, err
+		return fs.File{}, err
 	}
-	return File{Path: path}, nil
+	return fs.File{Path: path}, nil
 }
 
 func StreamLocalFile(path string, bufSize uint, handle Handle) error {
@@ -137,24 +138,24 @@ func stream(
 	return bytesNumber, chunksNumber, nil
 }
 
-func getChannelPath(channel string) (Path, error) {
+func getChannelPath(channel string) (fs.Path, error) {
 	// TODO File needs to implement Parent()
-	path, err := NewPathFrom(fsRootPath, channel)
+	path, err := fs.NewPathFrom(fsRootPath, channel)
 	if err != nil {
-		return Path{}, err
+		return fs.Path{}, err
 	}
 	return path, nil
 }
 
-func getPath(relPath string, channel string) (Path, error) {
-	path, err := NewPathFrom(fsRootPath, channel)
+func getPath(relPath string, channel string) (fs.Path, error) {
+	path, err := fs.NewPathFrom(fsRootPath, channel)
 	if err != nil {
-		return Path{}, err
+		return fs.Path{}, err
 	}
-	children := strings.Split(relPath, Separator)
+	children := strings.Split(relPath, fs.Separator)
 	err = path.Append(children...)
 	if err != nil {
-		return Path{}, err
+		return fs.Path{}, err
 	}
 	return path, nil
 }

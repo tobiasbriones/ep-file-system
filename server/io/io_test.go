@@ -4,17 +4,20 @@
 
 package io
 
-import "testing"
+import (
+	"fs"
+	"testing"
+)
 
 func TestGetPath(t *testing.T) {
 	path, err := getPath("file.txt", DefChannel)
-	requireNoError(t, err)
+	fs.RequireNoError(t, err)
 	if path.Value != "fs/main/file.txt" {
 		t.Fatal("Computed path is wrong")
 	}
 
 	path, err = getPath("dir1/dir2/file.txt", DefChannel)
-	requireNoError(t, err)
+	fs.RequireNoError(t, err)
 	if path.Value != "fs/main/dir1/dir2/file.txt" {
 		t.Fatal("Computed path is wrong")
 	}

@@ -8,7 +8,10 @@ package io
 // module.
 // Author Tobias Briones
 
-import "os"
+import (
+	"fs"
+	"os"
+)
 
 func CreateFile(path string) error {
 	f, err := os.Create(path)
@@ -39,6 +42,6 @@ func ReadFileSize(path string) (int64, error) {
 	return fi.Size(), nil
 }
 
-func MakeDirIfNotExists(path Path) error {
+func MakeDirIfNotExists(path fs.Path) error {
 	return os.MkdirAll(path.Value, os.ModePerm)
 }

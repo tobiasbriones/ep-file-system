@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // This file is part of https://github.com/tobiasbriones/ep-file-system-server
 
-package io
+package fs
 
 import (
 	"log"
@@ -20,20 +20,20 @@ func TestBasics(t *testing.T) {
 
 func TestNewPath(t *testing.T) {
 	_, err := NewPath("")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	// Notice how everything is relative (no initial "/")
 	// Although the path "/" is also valid
 	_, err = NewPath("fs")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	_, err = NewPath("fs/file-1.txt")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 }
 
 func TestNewComposedPath(t *testing.T) {
 	composed, err := NewPathFrom(Root)
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	if composed.Value != Root {
 		t.Fatal("Wrong root composed path")
@@ -43,7 +43,7 @@ func TestNewComposedPath(t *testing.T) {
 		"fs",
 		"dir",
 	)
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	if composed.Value != "fs/dir" {
 		t.Fatal("Wrong composed path")
@@ -54,7 +54,7 @@ func TestNewComposedPath(t *testing.T) {
 		"dir",
 		"file.txt",
 	)
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	if composed.Value != "fs/dir/file.txt" {
 		t.Fatal("Wrong composed path")
@@ -65,7 +65,7 @@ func TestNewComposedPath(t *testing.T) {
 		"/dir",
 		"file.txt",
 	)
-	requireError(
+	RequireError(
 		t,
 		err,
 		"Composed paths must not have tokens containing the separator char",
@@ -74,10 +74,10 @@ func TestNewComposedPath(t *testing.T) {
 
 func TestPath_Append(t *testing.T) {
 	path, err := NewPath(Root)
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	err = path.Append("fs", "dir", "file.txt")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	if path.Value != "fs/dir/file.txt" {
 		log.Println(path.Value)
@@ -85,10 +85,10 @@ func TestPath_Append(t *testing.T) {
 	}
 
 	path, err = NewPath("usr1/general")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	err = path.Append("fs", "dir", "file.txt")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	if path.Value != "usr1/general/fs/dir/file.txt" {
 		log.Println(path.Value)
@@ -100,23 +100,11 @@ func TestNewFileAndDirectory(t *testing.T) {
 	// There is no difference between File and Directory so far...
 
 	_, err := NewDirectoryFromString("")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	_, err = NewDirectoryFromString("fs")
-	requireNoError(t, err)
+	RequireNoError(t, err)
 
 	_, err = NewFileFromString("fs/file-1.txt")
-	requireNoError(t, err)
-}
-
-func requireNoError(t *testing.T, err error) {
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-}
-
-func requireError(t *testing.T, err error, msg string) {
-	if err == nil {
-		t.Fatal(msg)
-	}
+	RequireNoError(t, err)
 }
