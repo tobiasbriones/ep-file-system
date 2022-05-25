@@ -5,9 +5,9 @@
 package main
 
 import (
+	"fs/server/io"
 	"log"
 	"net"
-	"server/io"
 )
 
 type Client struct {
