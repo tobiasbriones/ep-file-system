@@ -35,7 +35,7 @@ func TestNewComposedPath(t *testing.T) {
 	composed, err := NewPathFrom(Root)
 	requireNoError(t, err)
 
-	if composed.value != Root {
+	if composed.Value != Root {
 		t.Fatal("Wrong root composed path")
 	}
 
@@ -45,7 +45,7 @@ func TestNewComposedPath(t *testing.T) {
 	)
 	requireNoError(t, err)
 
-	if composed.value != "fs/dir" {
+	if composed.Value != "fs/dir" {
 		t.Fatal("Wrong composed path")
 	}
 
@@ -56,7 +56,7 @@ func TestNewComposedPath(t *testing.T) {
 	)
 	requireNoError(t, err)
 
-	if composed.value != "fs/dir/file.txt" {
+	if composed.Value != "fs/dir/file.txt" {
 		t.Fatal("Wrong composed path")
 	}
 
@@ -79,8 +79,8 @@ func TestPath_Append(t *testing.T) {
 	err = path.Append("fs", "dir", "file.txt")
 	requireNoError(t, err)
 
-	if path.value != "fs/dir/file.txt" {
-		log.Println(path.value)
+	if path.Value != "fs/dir/file.txt" {
+		log.Println(path.Value)
 		t.Fatal("Fail to append path to the root path")
 	}
 
@@ -90,8 +90,8 @@ func TestPath_Append(t *testing.T) {
 	err = path.Append("fs", "dir", "file.txt")
 	requireNoError(t, err)
 
-	if path.value != "usr1/general/fs/dir/file.txt" {
-		log.Println(path.value)
+	if path.Value != "usr1/general/fs/dir/file.txt" {
+		log.Println(path.Value)
 		t.Fatal("Fail to append path")
 	}
 }

@@ -40,5 +40,5 @@ func ReadFileSize(path string) (int64, error) {
 }
 
 func MakeDirIfNotExists(path Path) error {
-	return os.MkdirAll(path.value, os.ModePerm)
+	return os.MkdirAll(path.Value, os.ModePerm)
 }

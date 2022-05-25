@@ -32,7 +32,7 @@ func (i *FileInfo) ReadFileSize(channel string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return ReadFileSize(file.value)
+	return ReadFileSize(file.Value)
 }
 
 func (i *FileInfo) Stream(channel string, bufSize uint, handle Handle) error {
@@ -40,7 +40,7 @@ func (i *FileInfo) Stream(channel string, bufSize uint, handle Handle) error {
 	if err != nil {
 		return err
 	}
-	return StreamLocalFile(file.value, bufSize, handle)
+	return StreamLocalFile(file.Value, bufSize, handle)
 }
 
 func (i *FileInfo) Exists(channel string) (bool, error) {
@@ -48,7 +48,7 @@ func (i *FileInfo) Exists(channel string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if _, err := os.Stat(file.value); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(file.Value); errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	}
 	return true, nil
@@ -59,7 +59,7 @@ func (i *FileInfo) Create(channel string) error {
 	if err != nil {
 		return err
 	}
-	return CreateFile(file.value)
+	return CreateFile(file.Value)
 }
 
 func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
@@ -67,7 +67,7 @@ func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
 	if err != nil {
 		return err
 	}
-	return WriteBuf(file.value, chunk)
+	return WriteBuf(file.Value, chunk)
 }
 
 func (i *FileInfo) ChannelPath(channel string) (Path, error) {

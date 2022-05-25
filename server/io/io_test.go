@@ -9,13 +9,13 @@ import "testing"
 func TestGetPath(t *testing.T) {
 	path, err := getPath("file.txt", DefChannel)
 	requireNoError(t, err)
-	if path.value != "fs/main/file.txt" {
+	if path.Value != "fs/main/file.txt" {
 		t.Fatal("Computed path is wrong")
 	}
 
 	path, err = getPath("dir1/dir2/file.txt", DefChannel)
 	requireNoError(t, err)
-	if path.value != "fs/main/dir1/dir2/file.txt" {
+	if path.Value != "fs/main/dir1/dir2/file.txt" {
 		t.Fatal("Computed path is wrong")
 	}
 }

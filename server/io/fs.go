@@ -47,7 +47,7 @@ func NewDirectoryFromString(value string) (Directory, error) {
 }
 
 type Path struct {
-	value string
+	Value string
 }
 
 func (p *Path) Append(values ...string) error {
@@ -57,16 +57,16 @@ func (p *Path) Append(values ...string) error {
 	}
 	var newValue string
 	if p.IsRoot() {
-		newValue = end.value
+		newValue = end.Value
 	} else {
-		newValue = p.value + Separator + end.value
+		newValue = p.Value + Separator + end.Value
 	}
-	p.value = newValue
+	p.Value = newValue
 	return nil
 }
 
 func (p *Path) IsRoot() bool {
-	return p.value == Root
+	return p.Value == Root
 }
 
 // NewPathFrom constructs a Path from the given tokens. Tokens must be
@@ -89,7 +89,7 @@ func NewPath(value string) (Path, error) {
 	if !isValidPath(value) {
 		return Path{}, errors.New("invalid path")
 	}
-	return Path{value: value}, nil
+	return Path{Value: value}, nil
 }
 
 func isValidPath(value string) bool {
