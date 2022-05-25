@@ -15,7 +15,7 @@ import (
 
 const (
 	DefChannel = "main"
-	fsRootPath = "fs"
+	fsRootPath = ".fs"
 )
 
 type Handle func(buf []byte)
