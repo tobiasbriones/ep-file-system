@@ -10,6 +10,8 @@ import (
 	"fs/server/io"
 )
 
+var Valid = struct{}{}
+
 type State string
 
 const (
@@ -22,12 +24,12 @@ const (
 )
 
 var stateStrings = map[string]struct{}{
-	"start":  valid,
-	"data":   valid,
-	"stream": valid,
-	"eof":    valid,
-	"error":  valid,
-	"done":   valid,
+	"start":  Valid,
+	"data":   Valid,
+	"stream": Valid,
+	"eof":    Valid,
+	"error":  Valid,
+	"done":   Valid,
 }
 
 func ToState(value string) (State, error) {

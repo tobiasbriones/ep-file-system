@@ -17,3 +17,9 @@ func RequireFailureCase(t *testing.T, err error, msg string) {
 		t.Fatal(msg)
 	}
 }
+
+func RequireNoError(e error) {
+	if e != nil {
+		panic(e)
+	}
+}

@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"fs/utils"
 	"net"
 )
 
@@ -22,7 +23,7 @@ func main() {
 	server, err := net.Listen(network, getServerAddress())
 
 	defer server.Close()
-	requireNoError(err)
+	utils.RequireNoError(err)
 	listen(server)
 }
 
