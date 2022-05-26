@@ -1,6 +1,6 @@
 // Copyright (c) 2022 Tobias Briones. All rights reserved.
 // SPDX-License-Identifier: BSD-3-Clause
-// This file is part of https://github.com/tobiasbriones/ep-file-system-server
+// This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
 
 // Package fs Models a file system according to
 // https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system/tree/main/model
