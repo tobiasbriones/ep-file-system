@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fs/process"
 	"net"
 )
 
@@ -21,20 +22,20 @@ func readChunk(conn net.Conn) ([]byte, error) {
 	return b[:n], nil
 }
 
-func writeState(state State, conn net.Conn) error {
-	msg := Message{
+func writeState(state process.State, conn net.Conn) error {
+	msg := process.Message{
 		State: state,
 	}
 	return writeMessage(msg, conn)
 }
 
-func writeMessage(msg Message, conn net.Conn) error {
+func writeMessage(msg process.Message, conn net.Conn) error {
 	enc := json.NewEncoder(conn)
 	return enc.Encode(msg)
 }
 
-func readMessage(conn net.Conn) (Message, error) {
-	var msg Message
+func readMessage(conn net.Conn) (process.Message, error) {
+	var msg process.Message
 	dec := json.NewDecoder(conn)
 	err := dec.Decode(&msg)
 	return msg, err

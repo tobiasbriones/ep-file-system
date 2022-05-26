@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fs/process"
 	"fs/server/io"
 	"fs/utils"
 	"log"
@@ -59,11 +60,11 @@ func TestReceiveSend(t *testing.T) {
 func TestTcpConn(t *testing.T) {
 	info := newTestFileInfo()
 	info.Size = 0 // Don't upload anything, just initiate a connection and wait
-	conn := initiateConn(t, ActionUpload, info)
+	conn := initiateConn(t, process.ActionUpload, info)
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.State != Error { // The file sent is empty, ERROR must be responded.
+	if res.State != process.Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
 }
@@ -72,11 +73,11 @@ func TestTcpConn(t *testing.T) {
 func TestUpload(t *testing.T) {
 	info, err := newTestLocalFileInfo()
 	utils.RequirePassCase(t, err, "Fail to read file info")
-	conn := initiateConn(t, ActionUpload, info)
+	conn := initiateConn(t, process.ActionUpload, info)
 	defer conn.Close()
 
 	res := readResponseMsg(t, conn)
-	if res.State != Data {
+	if res.State != process.Data {
 		t.Fatal("Fail to get state=DATA")
 	}
 	log.Println("State=DATA")
@@ -84,7 +85,7 @@ func TestUpload(t *testing.T) {
 	log.Println("Uploaded")
 
 	res = readResponseMsg(t, conn)
-	if res.State != Eof {
+	if res.State != process.Eof {
 		t.Fatal("Fail to get state=EOF")
 	}
 
@@ -98,15 +99,15 @@ func TestUpload(t *testing.T) {
 //and will write it to "download.pdf" into this source code directory.
 func TestDownload(t *testing.T) {
 	info := newTestFileInfo()
-	conn := initiateConn(t, ActionDownload, info)
+	conn := initiateConn(t, process.ActionDownload, info)
 	defer conn.Close()
 	res := readResponseMsg(t, conn)
-	if res.State != Stream {
+	if res.State != process.Stream {
 		t.Fatal("Fail to get state=STREAM")
 	}
 	payload, err := res.StreamPayload()
 	utils.RequirePassCase(t, err, "Fail to read StreamPayload")
-	err = writeState(Stream, conn)
+	err = writeState(process.Stream, conn)
 	utils.RequirePassCase(t, err, "Fail to write state=STREAM")
 	path := "download.pdf"
 	err = io.CreateFile(path)
@@ -142,10 +143,10 @@ func TestDownloadIfNotExists(t *testing.T) {
 		RelPath: "not-exists",
 		Size:    0,
 	}
-	conn := initiateConn(t, ActionDownload, info)
+	conn := initiateConn(t, process.ActionDownload, info)
 	defer conn.Close()
 	res := readResponseMsg(t, conn)
-	if res.State != Error {
+	if res.State != process.Error {
 		t.Fatal("Fail to get state=ERROR")
 	}
 }
@@ -160,29 +161,29 @@ func upload(t *testing.T, conn *net.TCPConn, path string) {
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {
-	err := writeState(Eof, conn)
+	err := writeState(process.Eof, conn)
 	utils.RequirePassCase(t, err, "Fail to write EOF")
 }
 
-func initiateConn(t *testing.T, action Action, info io.FileInfo) *net.TCPConn {
+func initiateConn(t *testing.T, action process.Action, info io.FileInfo) *net.TCPConn {
 	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
 	utils.RequirePassCase(t, err, "Fail to resolve TCP address")
 
 	conn, err := net.DialTCP(network, nil, tcpAddr)
 	utils.RequirePassCase(t, err, "Fail to establish connection")
 
-	body := StartPayload{
+	body := process.StartPayload{
 		Action:   action,
 		FileInfo: info,
-		Channel:  NewChannel(testChannel),
+		Channel:  process.NewChannel(testChannel),
 	}
 	utils.RequirePassCase(t, err, "Fail to load test FileInfo")
 
-	payload, err := NewPayload(body)
+	payload, err := process.NewPayload(body)
 	utils.RequirePassCase(t, err, "Fail to load create payload")
 
-	msg := Message{
-		State:   Start,
+	msg := process.Message{
+		State:   process.Start,
 		Payload: payload,
 	}
 	b, err := json.Marshal(msg)
@@ -191,8 +192,8 @@ func initiateConn(t *testing.T, action Action, info io.FileInfo) *net.TCPConn {
 	return conn
 }
 
-func readResponseMsg(t *testing.T, conn net.Conn) Message {
-	var msg Message
+func readResponseMsg(t *testing.T, conn net.Conn) process.Message {
+	var msg process.Message
 	dec := json.NewDecoder(conn)
 	err := dec.Decode(&msg)
 	utils.RequirePassCase(t, err, "Fail to read response from server")

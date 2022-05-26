@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fs/process"
 	"fs/server/io"
 	"log"
 	"net"
@@ -12,8 +13,8 @@ import (
 
 type Client struct {
 	conn  net.Conn
-	state State
-	req   StartPayload
+	state process.State
+	req   process.StartPayload
 	count int64
 }
 
@@ -22,7 +23,7 @@ func newClient(
 ) *Client {
 	return &Client{
 		conn:  conn,
-		state: Start,
+		state: process.Start,
 	}
 }
 
@@ -32,13 +33,13 @@ func (c *Client) run() {
 		switch c.state {
 		default:
 			c.listenMessage()
-		case Data:
+		case process.Data:
 			c.listenData()
-		case Stream:
+		case process.Stream:
 			c.listenStream()
-		case Eof:
+		case process.Eof:
 			c.listenEof()
-		case Done, Error:
+		case process.Done, process.Error:
 			log.Println("Exiting client")
 			return
 		}
@@ -55,17 +56,17 @@ func (c *Client) listenMessage() {
 	c.onMessage(msg)
 }
 
-func (c *Client) onMessage(msg Message) {
+func (c *Client) onMessage(msg process.Message) {
 	log.Println("Message received:", msg)
 	switch msg.State {
-	case Start:
+	case process.Start:
 		c.start(msg)
 	default:
 		c.error("Wrong message state")
 	}
 }
 
-func (c *Client) start(msg Message) {
+func (c *Client) start(msg process.Message) {
 	payload, err := msg.StartPayload()
 	if err != nil {
 		c.error("Fail to read StartPayload")
@@ -80,14 +81,14 @@ func (c *Client) start(msg Message) {
 	c.count = 0
 
 	switch payload.Action {
-	case ActionUpload:
+	case process.ActionUpload:
 		c.startUpload(payload)
-	case ActionDownload:
+	case process.ActionDownload:
 		c.startDownload(payload)
 	}
 }
 
-func (c *Client) startUpload(payload StartPayload) {
+func (c *Client) startUpload(payload process.StartPayload) {
 	if payload.Size <= 0 {
 		c.error("File sent is empty")
 		return
@@ -98,8 +99,8 @@ func (c *Client) startUpload(payload StartPayload) {
 		return
 	}
 	log.Println("Payload saved, writing state=DATA", payload)
-	c.state = Data
-	err = writeState(Data, c.conn)
+	c.state = process.Data
+	err = writeState(process.Data, c.conn)
 	if err != nil {
 		c.error("Fail to write state=DATA")
 		return
@@ -110,9 +111,9 @@ func (c *Client) listenData() {
 	chunk, _ := readChunk(c.conn)
 	c.processChunk(chunk)
 	if c.count == c.req.Size {
-		c.state = Eof
+		c.state = process.Eof
 		log.Println("File saved, writing state EOF")
-		err := writeState(Eof, c.conn)
+		err := writeState(process.Eof, c.conn)
 		if err != nil {
 			c.error("Fail to write state=EOF")
 			return
@@ -147,21 +148,21 @@ func (c *Client) processChunk(chunk []byte) {
 	c.count += int64(len(chunk))
 }
 
-func (c *Client) eof(msg Message) {
-	if msg.State != Eof {
+func (c *Client) eof(msg process.Message) {
+	if msg.State != process.Eof {
 		c.error("Expecting EOF")
 		return
 	}
 	log.Println("DONE!")
-	c.state = Done
-	err := writeState(Done, c.conn)
+	c.state = process.Done
+	err := writeState(process.Done, c.conn)
 	if err != nil {
 		c.error("Fail to write state=DONE")
 		return
 	}
 }
 
-func (c *Client) startDownload(payload StartPayload) {
+func (c *Client) startDownload(payload process.StartPayload) {
 	exists, err := c.req.Exists(c.req.Channel.Name)
 	if err != nil {
 		c.error("Fail to read file exists")
@@ -176,26 +177,26 @@ func (c *Client) startDownload(payload StartPayload) {
 		c.error("Fail to read file size")
 		return
 	}
-	payload.Action = ActionDownload
+	payload.Action = process.ActionDownload
 	info := io.FileInfo{
 		RelPath: payload.RelPath,
 		Size:    size,
 	}
 	c.req = payload
-	c.writeStreamState(StreamPayload{FileInfo: info})
+	c.writeStreamState(process.StreamPayload{FileInfo: info})
 }
 
-func (c *Client) writeStreamState(payload StreamPayload) {
-	p, err := NewPayloadFrom(payload)
+func (c *Client) writeStreamState(payload process.StreamPayload) {
+	p, err := process.NewPayloadFrom(payload)
 	if err != nil {
 		c.error("Fail to read payload from StreamPayload")
 		return
 	}
-	msg := Message{
-		State:   Stream,
+	msg := process.Message{
+		State:   process.Stream,
 		Payload: p,
 	}
-	c.state = Stream
+	c.state = process.Stream
 	err = writeMessage(msg, c.conn)
 	if err != nil {
 		c.error("Fail to write state=STREAM")
@@ -211,7 +212,7 @@ func (c *Client) listenStream() {
 		c.error("Fail to read message")
 		return
 	}
-	if msg.State != Stream {
+	if msg.State != process.Stream {
 		c.error("Wrong client state, state=STREAM was expected")
 		return
 	}
@@ -236,8 +237,8 @@ func (c *Client) stream() {
 		return
 	}
 	log.Println("File sent to client, changing state to DONE")
-	c.state = Done
-	err = writeState(Done, c.conn)
+	c.state = process.Done
+	err = writeState(process.Done, c.conn)
 	if err != nil {
 		c.error("Fail to write state=DONE")
 		return
@@ -251,6 +252,6 @@ func (c *Client) overflows(chunk []byte) bool {
 func (c *Client) error(msg string) {
 	// TODO update func to accept msg
 	log.Println("ERROR:", msg)
-	c.state = Error
-	writeState(Error, c.conn)
+	c.state = process.Error
+	writeState(process.Error, c.conn)
 }
