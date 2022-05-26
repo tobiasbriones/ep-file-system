@@ -11,12 +11,10 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 )
 
 const (
 	DefChannel = "main"
-	fsRootPath = ".fs"
 )
 
 type Handle func(buf []byte)
@@ -136,26 +134,4 @@ func stream(
 		}
 	}
 	return bytesNumber, chunksNumber, nil
-}
-
-func getChannelPath(channel string) (fs.Path, error) {
-	// TODO File needs to implement Parent()
-	path, err := fs.NewPathFrom(fsRootPath, channel)
-	if err != nil {
-		return fs.Path{}, err
-	}
-	return path, nil
-}
-
-func getPath(relPath string, channel string) (fs.Path, error) {
-	path, err := fs.NewPathFrom(fsRootPath, channel)
-	if err != nil {
-		return fs.Path{}, err
-	}
-	children := strings.Split(relPath, fs.Separator)
-	err = path.Append(children...)
-	if err != nil {
-		return fs.Path{}, err
-	}
-	return path, nil
 }
