@@ -11,13 +11,13 @@ import (
 
 func TestGetPath(t *testing.T) {
 	path, err := getPath("file.txt", DefChannel)
-	fs.RequirePassCase(t, err)
+	fs.RequirePassCase(t, err, "")
 	if path.Value != "main/file.txt" {
 		t.Fatal("Computed path is wrong")
 	}
 
 	path, err = getPath("dir1/dir2/file.txt", DefChannel)
-	fs.RequirePassCase(t, err)
+	fs.RequirePassCase(t, err, "")
 	if path.Value != "main/dir1/dir2/file.txt" {
 		t.Fatal("Computed path is wrong")
 	}

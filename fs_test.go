@@ -20,20 +20,20 @@ func TestBasics(t *testing.T) {
 
 func TestNewPath(t *testing.T) {
 	_, err := NewPath("")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	// Notice how everything is relative (no initial "/")
 	// Although the path "/" is also valid
 	_, err = NewPath("fs")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	_, err = NewPath("fs/file-1.txt")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 }
 
 func TestNewComposedPath(t *testing.T) {
 	composed, err := NewPathFrom(Root)
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	if composed.Value != Root {
 		t.Fatal("Wrong root composed path")
@@ -43,7 +43,7 @@ func TestNewComposedPath(t *testing.T) {
 		"fs",
 		"dir",
 	)
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	if composed.Value != "fs/dir" {
 		t.Fatal("Wrong composed path")
@@ -54,7 +54,7 @@ func TestNewComposedPath(t *testing.T) {
 		"dir",
 		"file.txt",
 	)
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	if composed.Value != "fs/dir/file.txt" {
 		t.Fatal("Wrong composed path")
@@ -74,10 +74,10 @@ func TestNewComposedPath(t *testing.T) {
 
 func TestPath_Append(t *testing.T) {
 	path, err := NewPath(Root)
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	err = path.Append("fs", "dir", "file.txt")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	if path.Value != "fs/dir/file.txt" {
 		log.Println(path.Value)
@@ -85,10 +85,10 @@ func TestPath_Append(t *testing.T) {
 	}
 
 	path, err = NewPath("usr1/general")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	err = path.Append("fs", "dir", "file.txt")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	if path.Value != "usr1/general/fs/dir/file.txt" {
 		log.Println(path.Value)
@@ -100,11 +100,11 @@ func TestNewFileAndDirectory(t *testing.T) {
 	// There is no difference between File and Directory so far...
 
 	_, err := NewDirectoryFromString("")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	_, err = NewDirectoryFromString("fs")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 
 	_, err = NewFileFromString("fs/file-1.txt")
-	RequirePassCase(t, err)
+	RequirePassCase(t, err, "")
 }

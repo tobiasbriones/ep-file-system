@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fs"
 	"fs/server/io"
 	"log"
 	"net"
@@ -23,7 +24,7 @@ const (
 func TestReceiveSend(t *testing.T) {
 	serverFileInfo := newTestFileInfo()
 	size, err := serverFileInfo.ReadFileSize(io.DefChannel)
-	requirePassedTest(t, err, "Fail to load test file info")
+	fs.RequirePassCase(t, err, "Fail to load test file info")
 
 	downloaded := make([]byte, 0, size)
 	err = serverFileInfo.Stream(
@@ -33,12 +34,12 @@ func TestReceiveSend(t *testing.T) {
 			downloaded = append(downloaded, buf...)
 		},
 	)
-	requirePassedTest(t, err, "Fail to stream file")
+	fs.RequirePassCase(t, err, "Fail to stream file")
 
 	// Upload the file back
 	newPath := "new-file.pdf"
 	err = io.CreateFile(newPath)
-	requirePassedTest(t, err, "Fail to create file new-file.pdf")
+	fs.RequirePassCase(t, err, "Fail to create file new-file.pdf")
 	for i := 0; i < cap(downloaded); i += bufSize {
 		end := i + bufSize
 
@@ -49,7 +50,7 @@ func TestReceiveSend(t *testing.T) {
 
 		// Mimic sending to remote server
 		err = io.WriteBuf(newPath, chunk)
-		requirePassedTest(t, err, "Fail to write chunk")
+		fs.RequirePassCase(t, err, "Fail to write chunk")
 	}
 }
 
@@ -70,7 +71,7 @@ func TestTcpConn(t *testing.T) {
 // Side effect. Requires testLocalFile = "C:\\file.pdf".
 func TestUpload(t *testing.T) {
 	info, err := newTestLocalFileInfo()
-	requirePassedTest(t, err, "Fail to read file info")
+	fs.RequirePassCase(t, err, "Fail to read file info")
 	conn := initiateConn(t, ActionUpload, info)
 	defer conn.Close()
 
@@ -104,12 +105,12 @@ func TestDownload(t *testing.T) {
 		t.Fatal("Fail to get state=STREAM")
 	}
 	payload, err := res.StreamPayload()
-	requirePassedTest(t, err, "Fail to read StreamPayload")
+	fs.RequirePassCase(t, err, "Fail to read StreamPayload")
 	err = writeState(Stream, conn)
-	requirePassedTest(t, err, "Fail to write state=STREAM")
+	fs.RequirePassCase(t, err, "Fail to write state=STREAM")
 	path := "download.pdf"
 	err = io.CreateFile(path)
-	requirePassedTest(t, err, "Fail to create file download.pdf")
+	fs.RequirePassCase(t, err, "Fail to create file download.pdf")
 	size := uint64(payload.Size)
 	count := uint64(0)
 	log.Println(size)
@@ -119,10 +120,10 @@ func TestDownload(t *testing.T) {
 		}
 		b := make([]byte, bufSize)
 		n, err := conn.Read(b)
-		requirePassedTest(t, err, "Fail to read chunk from server")
+		fs.RequirePassCase(t, err, "Fail to read chunk from server")
 		chunk := b[:n]
 		err = io.WriteBuf(path, chunk)
-		requirePassedTest(t, err, "Fail to write chunk to file")
+		fs.RequirePassCase(t, err, "Fail to write chunk to file")
 		count += uint64(n)
 		if n == 0 {
 			t.Fatal("Underflow!")
@@ -153,32 +154,32 @@ func upload(t *testing.T, conn *net.TCPConn, path string) {
 	log.Println("Streaming file to server:", path)
 	err := io.StreamLocalFile(path, bufSize, func(buf []byte) {
 		_, err := conn.Write(buf)
-		requirePassedTest(t, err, "Fail to write chunk to server")
+		fs.RequirePassCase(t, err, "Fail to write chunk to server")
 	})
-	requirePassedTest(t, err, "Fail to stream file")
+	fs.RequirePassCase(t, err, "Fail to stream file")
 }
 
 func eof(t *testing.T, conn *net.TCPConn) {
 	err := writeState(Eof, conn)
-	requirePassedTest(t, err, "Fail to write EOF")
+	fs.RequirePassCase(t, err, "Fail to write EOF")
 }
 
 func initiateConn(t *testing.T, action Action, info io.FileInfo) *net.TCPConn {
 	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
-	requirePassedTest(t, err, "Fail to resolve TCP address")
+	fs.RequirePassCase(t, err, "Fail to resolve TCP address")
 
 	conn, err := net.DialTCP(network, nil, tcpAddr)
-	requirePassedTest(t, err, "Fail to establish connection")
+	fs.RequirePassCase(t, err, "Fail to establish connection")
 
 	body := StartPayload{
 		Action:   action,
 		FileInfo: info,
 		Channel:  NewChannel(testChannel),
 	}
-	requirePassedTest(t, err, "Fail to load test FileInfo")
+	fs.RequirePassCase(t, err, "Fail to load test FileInfo")
 
 	payload, err := NewPayload(body)
-	requirePassedTest(t, err, "Fail to load create payload")
+	fs.RequirePassCase(t, err, "Fail to load create payload")
 
 	msg := Message{
 		State:   Start,
@@ -186,7 +187,7 @@ func initiateConn(t *testing.T, action Action, info io.FileInfo) *net.TCPConn {
 	}
 	b, err := json.Marshal(msg)
 	_, err = conn.Write(b)
-	requirePassedTest(t, err, "Fail to write state=START to the server")
+	fs.RequirePassCase(t, err, "Fail to write state=START to the server")
 	return conn
 }
 
@@ -194,7 +195,7 @@ func readResponseMsg(t *testing.T, conn net.Conn) Message {
 	var msg Message
 	dec := json.NewDecoder(conn)
 	err := dec.Decode(&msg)
-	requirePassedTest(t, err, "Fail to read response from server")
+	fs.RequirePassCase(t, err, "Fail to read response from server")
 	return msg
 }
 

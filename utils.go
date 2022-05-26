@@ -6,9 +6,9 @@ package fs
 
 import "testing"
 
-func RequirePassCase(t *testing.T, err error) {
+func RequirePassCase(t *testing.T, err error, msg string) {
 	if err != nil {
-		t.Fatal(err.Error())
+		t.Fatal(msg, "Error:", err.Error())
 	}
 }
 

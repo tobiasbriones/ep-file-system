@@ -2,12 +2,4 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // This file is part of https://github.com/tobiasbriones/ep-file-system-server
 
-package main
-
-var valid = struct{}{}
-
-func requireNoError(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
+package utils
