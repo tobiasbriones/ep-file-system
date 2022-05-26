@@ -71,12 +71,11 @@ func (c *Client) start(msg Message) {
 		c.error("Fail to read StartPayload")
 		return
 	}
-	channelPath, err := payload.ChannelPath(payload.Channel.Name)
+	err = payload.CreateChannelIfNotExists(payload.Channel.Name)
 	if err != nil {
-		c.error("Fail to read StartPayload Path")
+		c.error("Fail to read StartPayload Path/Create channel")
 		return
 	}
-	err = io.MakeDirIfNotExists(channelPath)
 	c.req = payload
 	c.count = 0
 

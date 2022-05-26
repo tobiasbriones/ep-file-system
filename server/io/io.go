@@ -6,7 +6,6 @@ package io
 
 import (
 	"bufio"
-	"errors"
 	"fs"
 	"io"
 	"log"
@@ -31,7 +30,7 @@ func (i *FileInfo) ReadFileSize(channel string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return ReadFileSize(file.Value)
+	return ReadSize(file)
 }
 
 func (i *FileInfo) Stream(channel string, bufSize uint, handle Handle) error {
@@ -39,7 +38,11 @@ func (i *FileInfo) Stream(channel string, bufSize uint, handle Handle) error {
 	if err != nil {
 		return err
 	}
-	return StreamLocalFile(file.Value, bufSize, handle)
+	path, err := AbsolutePath(file)
+	if err != nil {
+		return err
+	}
+	return StreamLocalFile(path, bufSize, handle)
 }
 
 func (i *FileInfo) Exists(channel string) (bool, error) {
@@ -47,10 +50,7 @@ func (i *FileInfo) Exists(channel string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if _, err := os.Stat(file.Value); errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	}
-	return true, nil
+	return Exists(file)
 }
 
 func (i *FileInfo) Create(channel string) error {
@@ -58,7 +58,7 @@ func (i *FileInfo) Create(channel string) error {
 	if err != nil {
 		return err
 	}
-	return CreateFile(file.Value)
+	return Create(file)
 }
 
 func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
@@ -66,11 +66,19 @@ func (i *FileInfo) WriteChunk(channel string, chunk []byte) error {
 	if err != nil {
 		return err
 	}
-	return WriteBuf(file.Value, chunk)
+	path, err := AbsolutePath(file)
+	if err != nil {
+		return err
+	}
+	return WriteBuf(path, chunk)
 }
 
-func (i *FileInfo) ChannelPath(channel string) (fs.Path, error) {
-	return getChannelPath(channel)
+func (i *FileInfo) CreateChannelIfNotExists(channel string) error {
+	file, err := fs.NewFileFromString(channel)
+	if err != nil {
+		return err
+	}
+	return CreateIfNotExists(file)
 }
 
 func (i *FileInfo) ToFile(channel string) (fs.File, error) {

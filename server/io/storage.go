@@ -23,7 +23,7 @@ func getChannelPath(channel string) (fs.Path, error) {
 }
 
 func getPath(relPath string, channel string) (fs.Path, error) {
-	path, err := fs.NewPathFrom(fsRootPath, channel)
+	path, err := fs.NewPathFrom(channel)
 	if err != nil {
 		return fs.Path{}, err
 	}
@@ -33,4 +33,12 @@ func getPath(relPath string, channel string) (fs.Path, error) {
 		return fs.Path{}, err
 	}
 	return path, nil
+}
+
+func AbsolutePath(file fs.File) (string, error) {
+	root, err := getExecPath()
+	if err != nil {
+		return "", err
+	}
+	return root + fs.Separator + fsRootPath + fs.Separator + file.Value, nil
 }

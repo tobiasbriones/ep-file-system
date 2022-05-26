@@ -31,19 +31,6 @@ func WriteBuf(path string, buf []byte) error {
 	return err
 }
 
-func ReadFileSize(path string) (int64, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return 0, err
-	}
-	defer f.Close()
-	fi, err := f.Stat()
-	if err != nil {
-		return 0, err
-	}
-	return fi.Size(), nil
-}
-
 func MakeDirIfNotExists(path fs.Path) error {
 	return os.MkdirAll(path.Value, os.ModePerm)
 }
