@@ -11,6 +11,8 @@ package io
 import (
 	"fs"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func CreateFile(path string) error {
@@ -44,4 +46,14 @@ func ReadFileSize(path string) (int64, error) {
 
 func MakeDirIfNotExists(path fs.Path) error {
 	return os.MkdirAll(path.Value, os.ModePerm)
+}
+
+func getExecPath() (string, error) {
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	exePath := filepath.Dir(ex)
+	exePath = strings.ReplaceAll(exePath, "\\", fs.Separator)
+	return exePath, nil
 }
