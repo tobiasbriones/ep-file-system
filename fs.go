@@ -24,8 +24,8 @@ const (
 type SizeUnit int
 
 const (
-	KiloByte SizeUnit = iota
-	MegaByte
+	KiloByte SizeUnit = 1_000
+	MegaByte SizeUnit = 1_000_000
 )
 
 // CommonFile Defines a generic file sum type: File or Directory.
@@ -56,6 +56,10 @@ func NewDirectoryFromString(value string) (Directory, error) {
 type FileInfo struct {
 	File
 	Size uint64
+}
+
+func (i FileInfo) GetSize(unit SizeUnit) float64 {
+	return float64(i.Size) / float64(unit)
 }
 
 type Path struct {
