@@ -67,6 +67,10 @@ type OsFile struct {
 	FsRoot string
 }
 
+func (f OsFile) Path() string {
+	return f.FsRoot + Separator + f.Value
+}
+
 type Path struct {
 	Value string
 }
