@@ -46,6 +46,11 @@ func NewDirectoryFromString(value string) (Directory, error) {
 	return Directory{Path: path}, err
 }
 
+type FileInfo struct {
+	File
+	Size uint64
+}
+
 type Path struct {
 	Value string
 }
