@@ -109,3 +109,19 @@ func TestNewFileAndDirectory(t *testing.T) {
 	_, err = NewFileFromString("fs/file-1.txt")
 	utils.RequirePassCase(t, err, "")
 }
+
+func TestFileInfo_GetSize(t *testing.T) {
+	i := FileInfo{
+		File: File{},
+		Size: 5_000,
+	}
+	kb := i.GetSize(KiloByte)
+	mb := i.GetSize(MegaByte)
+
+	if kb != 5 {
+		t.Fatal("Fail to get file size in KiloBytes:", kb)
+	}
+	if mb != 0.005 {
+		t.Fatal("Fail to get file size in MegaBytes:", mb)
+	}
+}
