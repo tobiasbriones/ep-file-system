@@ -42,6 +42,13 @@ func NewFileFromString(value string) (File, error) {
 	return File{Path: path}, err
 }
 
+func (f File) ToOsFile(fsRoot string) OsFile {
+	return OsFile{
+		File:   f,
+		FsRoot: fsRoot,
+	}
+}
+
 // Directory is just a simple Path for this system.
 // It's open to extension with more properties.
 type Directory struct {
