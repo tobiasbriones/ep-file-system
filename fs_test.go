@@ -110,6 +110,15 @@ func TestNewFileAndDirectory(t *testing.T) {
 	utils.RequirePassCase(t, err, "")
 }
 
+func TestFile_ToOsFile(t *testing.T) {
+	f, _ := NewFileFromString("my-channel/file.txt")
+	osFile := f.ToOsFile("/home/fs")
+
+	if osFile.Path() != "/home/fs/my-channel/file.txt" {
+		t.Fatal("Fail to get OS File from File:", osFile.Path())
+	}
+}
+
 func TestFileInfo_GetSize(t *testing.T) {
 	i := FileInfo{
 		File: File{},
