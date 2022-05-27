@@ -7,6 +7,7 @@ package process
 import (
 	"encoding/json"
 	"errors"
+	"fs"
 	"fs/server/io"
 )
 
@@ -135,4 +136,8 @@ type Channel struct {
 
 func NewChannel(name string) Channel {
 	return Channel{Name: name}
+}
+
+func (c Channel) File() (fs.File, error) {
+	return fs.NewFileFromString(c.Name)
 }
