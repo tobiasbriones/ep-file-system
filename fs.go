@@ -21,6 +21,13 @@ const (
 	ValidPathRegex = "^$|\\w+/*\\.*-*"
 )
 
+type SizeUnit int
+
+const (
+	KiloByte SizeUnit = iota
+	MegaByte
+)
+
 // CommonFile Defines a generic file sum type: File or Directory.
 type CommonFile interface{}
 
