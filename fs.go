@@ -62,6 +62,11 @@ func (i FileInfo) GetSize(unit SizeUnit) float64 {
 	return float64(i.Size) / float64(unit)
 }
 
+type OsFile struct {
+	File
+	FsRoot string
+}
+
 type Path struct {
 	Value string
 }
