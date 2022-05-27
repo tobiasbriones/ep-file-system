@@ -125,3 +125,15 @@ func TestFileInfo_GetSize(t *testing.T) {
 		t.Fatal("Fail to get file size in MegaBytes:", mb)
 	}
 }
+
+func TestOsFile_Path(t *testing.T) {
+	f, _ := NewFileFromString("my-channel/file.txt")
+	osFile := OsFile{
+		File:   f,
+		FsRoot: "/home/fs",
+	}
+
+	if osFile.Path() != "/home/fs/my-channel/file.txt" {
+		t.Fatal("Fail to get correct OS File path:", osFile.Path())
+	}
+}
