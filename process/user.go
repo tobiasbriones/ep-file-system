@@ -14,3 +14,18 @@ type User struct {
 	size     uint64
 	count    uint64
 }
+
+func (u User) FileInfo() fs.FileInfo {
+	return fs.FileInfo{
+		File: u.file.File,
+		Size: u.size,
+	}
+}
+
+func (u User) File() fs.OsFile {
+	return u.file
+}
+
+func (u User) Size() uint64 {
+	return u.size
+}
