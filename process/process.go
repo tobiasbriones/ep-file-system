@@ -132,6 +132,10 @@ func (p Process) onStarted() {
 	}
 }
 
+const (
+	DefChannel = "main"
+)
+
 type Channel struct {
 	Name string
 }
