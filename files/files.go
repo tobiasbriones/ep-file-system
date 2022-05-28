@@ -30,11 +30,7 @@ func CreateIfNotExists(file fs.OsFile) error {
 }
 
 func ReadSize(file fs.OsFile) (int64, error) {
-	return ReadFileSize(file.Path())
-}
-
-func ReadFileSize(path string) (int64, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(file.Path())
 	if err != nil {
 		return 0, err
 	}
