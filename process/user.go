@@ -51,6 +51,10 @@ func (u *User) set(payload StartPayload) error {
 	return nil
 }
 
+func (u User) init() error {
+	return u.createChannelIfNotExists()
+}
+
 func (u User) getOsFile() (fs.OsFile, error) {
 	fsFile, err := fs.NewFileFromString(u.channel.Name) // channel/
 	if err != nil {
@@ -61,10 +65,6 @@ func (u User) getOsFile() (fs.OsFile, error) {
 		return fs.OsFile{}, errors.New("invalid file: " + u.file.Value)
 	}
 	return fsFile.ToOsFile(u.osFsRoot), nil
-}
-
-func (u User) init() error {
-	return u.createChannelIfNotExists()
 }
 
 func (u User) createChannelIfNotExists() error {
