@@ -114,7 +114,6 @@ func (u User) startActionDownload() error {
 	}
 	u.size = uint64(size)
 	return nil
-
 }
 
 func (u User) getOsFile() (fs.OsFile, error) {
@@ -150,7 +149,6 @@ func (u User) createFile() error {
 	return files.Create(u.file)
 }
 
-// UploadUser
 func (u User) processChunk(chunk []byte) error {
 	if u.overflows(chunk) {
 		return errors.New("overflow")
@@ -178,5 +176,3 @@ func (u User) stream(size uint, f func(buf []byte)) error {
 	}
 	return nil
 }
-
-// DownloadUser
