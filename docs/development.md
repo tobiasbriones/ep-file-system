@@ -212,7 +212,7 @@ I really want to avoid that fragmentation and `switch`es.
 
 With integer indices I can easily check if the value is valid too.
 
-### What About Under engineering?
+### What About Under-Engineering?
 
 Go like many popular languages are for under-engineering, for ordinary software
 written by ordinary programmers.
