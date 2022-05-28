@@ -40,20 +40,25 @@ func (u User) Size() uint64 {
 	return u.size
 }
 
-func (u *User) set(payload StartPayload) {
+func (u *User) set(payload StartPayload) error {
 	u.channel = payload.Channel
-	u.file, _ = u.getOsFile()
+	file, err := u.getOsFile()
+	if err != nil {
+		return err
+	}
+	u.file = file
 	u.count = 0
+	return nil
 }
 
 func (u User) getOsFile() (fs.OsFile, error) {
 	fsFile, err := fs.NewFileFromString(u.channel.Name) // channel/
 	if err != nil {
-		return fs.OsFile{}, err
+		return fs.OsFile{}, errors.New("invalid channel name: " + u.channel.Name)
 	}
 	err = fsFile.Append(u.file.Value) // channel/file.txt
 	if err != nil {
-		return fs.OsFile{}, err
+		return fs.OsFile{}, errors.New("invalid file: " + u.file.Value)
 	}
 	return fsFile.ToOsFile(u.osFsRoot), nil
 }
