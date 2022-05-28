@@ -123,6 +123,15 @@ func (p Process) Data(chunk []byte) error {
 	return nil
 }
 
+func (p Process) Stream(size uint, f func(buf []byte)) error {
+	err := p.user.stream(size, f)
+	if err != nil {
+		return err
+	}
+	p.state = Done
+	return nil
+}
+
 func (p Process) onStarted() {
 	switch p.action {
 	case ActionUpload:
