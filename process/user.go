@@ -15,6 +15,12 @@ type User struct {
 	count    uint64
 }
 
+func newUser(osFsRoot string) User {
+	return User{
+		osFsRoot: osFsRoot,
+	}
+}
+
 func (u User) FileInfo() fs.FileInfo {
 	return fs.FileInfo{
 		File: u.file.File,
