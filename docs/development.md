@@ -433,3 +433,23 @@ It's annoying, they kind of tell you "I'm paying you to build this website, so
 you have 5 days to finish it", but in reality software engineering is about
 being a *domain expert* to understand the domain problem and then being a
 *developer* to build the domain solution.
+
+### My Domain
+
+Just check how I perfectly applied this expertise on me: I'm a software engineer
+with domain on math, so that is, a math software engineer. That means I can also
+be a "mediator" (like OOP programmers would say) between mathematicians and
+software engineers to build mathematical software or any other related project.
+
+Computer scientists are bad at engineering and engineers are terrible at math or
+anything where you need intellectual conscious skills. If I wouldn't exist then
+mathematicians would be doomed to write boring proofs in PDF files (no
+indexable, useless nowadays), using proprietary crap software from the 90s, and
+nonsense horrible "Alexandria math library" (they even explicitly say their "
+math lib" is the hugest monolith and feel proud about it, they don't know what
+they do because they're building tools but are not engineers)
+while engineers are doomed to write toy scientific software with wrong tools
+like Python or Microsoft Excel.
+
+Once again I prove we don't need managers and buzzwords but autonomous engineers
+instead.
