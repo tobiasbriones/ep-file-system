@@ -109,6 +109,20 @@ func (p Process) Start(payload StartPayload) error {
 	return nil
 }
 
+func (p Process) Data(chunk []byte) error {
+	if p.state != Data {
+		return errors.New("invalid state: " + string(p.state))
+	}
+	err := p.user.processChunk(chunk)
+	if err != nil {
+		return err
+	}
+	if p.user.count == int64(p.user.size) {
+		p.state = Eof
+	}
+	return nil
+}
+
 func (p Process) onStarted() {
 	switch p.action {
 	case ActionUpload:
