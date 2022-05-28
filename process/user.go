@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fs"
 	"fs/files"
+	"log"
 )
 
 // User Contains all the FSM implementation details.
@@ -90,6 +91,7 @@ func (u User) startActionUpload(payload StartPayload) error {
 	}
 	err := u.createFile()
 	if err != nil {
+		log.Println(err)
 		return errors.New("fail to create file")
 	}
 	return nil
@@ -98,13 +100,16 @@ func (u User) startActionUpload(payload StartPayload) error {
 func (u User) startActionDownload() error {
 	exists, err := files.Exists(u.file)
 	if err != nil {
+		log.Println(err)
 		return errors.New("fail to read file exists")
 	}
 	if !exists {
+		log.Println(err)
 		return errors.New("requested file does not exist")
 	}
 	size, err := files.ReadSize(u.file)
 	if err != nil {
+		log.Println(err)
 		return errors.New("fail to read file size")
 	}
 	u.size = uint64(size)
@@ -115,10 +120,12 @@ func (u User) startActionDownload() error {
 func (u User) getOsFile() (fs.OsFile, error) {
 	fsFile, err := fs.NewFileFromString(u.channel.Name) // channel/
 	if err != nil {
+		log.Println(err)
 		return fs.OsFile{}, errors.New("invalid channel name: " + u.channel.Name)
 	}
 	err = fsFile.Append(u.file.Value) // channel/file.txt
 	if err != nil {
+		log.Println(err)
 		return fs.OsFile{}, errors.New("invalid file: " + u.file.Value)
 	}
 	return fsFile.ToOsFile(u.osFsRoot), nil
@@ -127,11 +134,13 @@ func (u User) getOsFile() (fs.OsFile, error) {
 func (u User) createChannelIfNotExists() error {
 	channel, err := u.channel.File()
 	if err != nil {
+		log.Println(err)
 		return errors.New("invalid channel")
 	}
 	channelFile := channel.ToOsFile(u.osFsRoot)
 	err = files.CreateIfNotExists(channelFile)
 	if err != nil {
+		log.Println(err)
 		return errors.New("fail to read StartPayload Path/Create channel")
 	}
 	return nil
@@ -151,6 +160,7 @@ func (u User) processChunk(chunk []byte) error {
 	}
 	err := files.WriteBuf(u.file, chunk)
 	if err != nil {
+		log.Println(err)
 		return errors.New("fail to write chunk")
 	}
 	u.count += int64(len(chunk))
