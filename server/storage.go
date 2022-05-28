@@ -4,6 +4,19 @@
 
 package main
 
+import (
+	"fs"
+	"fs/files"
+)
+
 const (
 	fsRoot = ".fs"
 )
+
+func getOsFsRoot() (string, error) {
+	path, err := files.GetExecPath()
+	if err != nil {
+		return "", err
+	}
+	return path + fs.Separator + fsRoot, nil
+}
