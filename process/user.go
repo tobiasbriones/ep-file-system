@@ -35,3 +35,21 @@ func (u User) File() fs.OsFile {
 func (u User) Size() uint64 {
 	return u.size
 }
+
+func (u *User) set(payload StartPayload) {
+	u.channel = payload.Channel
+	u.file, _ = u.getOsFile()
+	u.count = 0
+}
+
+func (u User) getOsFile() (fs.OsFile, error) {
+	fsFile, err := fs.NewFileFromString(u.channel.Name) // channel/
+	if err != nil {
+		return fs.OsFile{}, err
+	}
+	err = fsFile.Append(u.file.Value) // channel/file.txt
+	if err != nil {
+		return fs.OsFile{}, err
+	}
+	return fsFile.ToOsFile(u.osFsRoot), nil
+}
