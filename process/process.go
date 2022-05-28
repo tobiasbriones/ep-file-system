@@ -99,6 +99,25 @@ func (p Process) User() User {
 	return p.user
 }
 
+func (p Process) Start(payload StartPayload) error {
+	p.action = payload.Action
+	err := p.user.start(payload)
+	if err != nil {
+		return err
+	}
+	p.onStarted()
+	return nil
+}
+
+func (p Process) onStarted() {
+	switch p.action {
+	case ActionUpload:
+		p.state = Data
+	case ActionDownload:
+		p.state = Stream
+	}
+}
+
 type Channel struct {
 	Name string
 }
