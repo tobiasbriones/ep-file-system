@@ -137,7 +137,7 @@ func (u User) createFile() error {
 	return files.Create(u.file)
 }
 
-// DownloadUser
+// UploadUser
 func (u User) processChunk(chunk []byte) error {
 	if u.overflows(chunk) {
 		return errors.New("overflow")
