@@ -453,3 +453,24 @@ Microsoft Excel.
 
 Once again I prove we don't need managers and buzzwords but autonomous engineers
 instead.
+
+### Large Refactorization
+
+If you don't refactor constantly the code you find, the project cost will
+explode really quick turning into an extremely coupled system.
+
+Large refactorizations are pretty tiring, is something that will make you
+exhausted because of the large cognitive load to keep tests working and the
+older code working too.
+
+Another tip that I can give is not to underestimate the initial system design
+which will avoid making large refactorizations later.
+
+When designing system architectures we need a domain expert (e.g. someone who
+has build file systems before), if I would've thought a little more about the
+modules of this application the cost of development would've been lower since I
+would have scaled those packages or modules since the beginning instead of
+making larger refactorizations later.
+
+Some systems are not well known, keeping the balance between under-engineering
+and over-engineering is a determinant art in software engineering.
