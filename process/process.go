@@ -103,6 +103,7 @@ func (p Process) Start(payload StartPayload) error {
 	p.action = payload.Action
 	err := p.user.start(payload)
 	if err != nil {
+		p.error()
 		return err
 	}
 	p.onStarted()
@@ -115,6 +116,7 @@ func (p Process) Data(chunk []byte) error {
 	}
 	err := p.user.processChunk(chunk)
 	if err != nil {
+		p.error()
 		return err
 	}
 	if p.user.count == int64(p.user.size) {
@@ -126,6 +128,7 @@ func (p Process) Data(chunk []byte) error {
 func (p Process) Stream(size uint, f func(buf []byte)) error {
 	err := p.user.stream(size, f)
 	if err != nil {
+		p.error()
 		return err
 	}
 	p.state = Done
@@ -139,6 +142,10 @@ func (p Process) onStarted() {
 	case ActionDownload:
 		p.state = Stream
 	}
+}
+
+func (p Process) error() {
+	p.state = Error
 }
 
 const (
