@@ -40,19 +40,72 @@ func (u User) Size() uint64 {
 	return u.size
 }
 
-func (u *User) set(payload StartPayload) error {
+func (u *User) start(payload StartPayload) error {
 	u.channel = payload.Channel
+	u.count = 0
+	err := u.setFile()
+	if err != nil {
+		return err
+	}
+	err = u.createChannelIfNotExists()
+	if err != nil {
+		return err
+	}
+	u.startAction(payload)
+	return nil
+}
+
+func (u User) setFile() error {
 	file, err := u.getOsFile()
 	if err != nil {
 		return err
 	}
 	u.file = file
-	u.count = 0
 	return nil
 }
 
-func (u User) init() error {
-	return u.createChannelIfNotExists()
+func (u User) startAction(payload StartPayload) {
+	switch payload.Action {
+	case ActionUpload:
+		err := u.startActionUpload(payload)
+		if err != nil {
+			return
+		}
+	case ActionDownload:
+		err := u.startActionDownload()
+		if err != nil {
+			return
+		}
+	}
+}
+
+func (u User) startActionUpload(payload StartPayload) error {
+	u.size = payload.Size
+	if u.size <= 0 {
+		return errors.New("file sent is empty")
+	}
+	err := u.createFile()
+	if err != nil {
+		return errors.New("fail to create file")
+	}
+	return nil
+}
+
+func (u User) startActionDownload() error {
+	exists, err := files.Exists(u.file)
+	if err != nil {
+		return errors.New("fail to read file exists")
+	}
+	if !exists {
+		return errors.New("requested file does not exist")
+	}
+	size, err := files.ReadSize(u.file)
+	if err != nil {
+		return errors.New("fail to read file size")
+	}
+	u.size = uint64(size)
+	return nil
+
 }
 
 func (u User) getOsFile() (fs.OsFile, error) {
@@ -78,4 +131,8 @@ func (u User) createChannelIfNotExists() error {
 		return errors.New("fail to read StartPayload Path/Create channel")
 	}
 	return nil
+}
+
+func (u User) createFile() error {
+	return files.Create(u.file)
 }
