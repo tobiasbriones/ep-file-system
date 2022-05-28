@@ -76,17 +76,27 @@ func Actions() []string {
 type Process struct {
 	state  State
 	action Action
-	file   fs.OsFile
-	size   uint64
+	user   User
 }
 
-func NewProcess(action Action, info fs.FileInfo, fsOsRoot string) Process {
+func NewProcess(osFsRoot string) Process {
 	return Process{
 		state:  Start,
-		action: action,
-		file:   info.ToOsFile(fsOsRoot),
-		size:   info.Size,
+		action: 0,
+		user:   newUser(osFsRoot),
 	}
+}
+
+func (p Process) State() State {
+	return p.state
+}
+
+func (p Process) Action() Action {
+	return p.action
+}
+
+func (p Process) User() User {
+	return p.user
 }
 
 type Channel struct {
