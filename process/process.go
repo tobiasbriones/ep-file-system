@@ -100,6 +100,9 @@ func (p Process) User() User {
 }
 
 func (p *Process) Start(payload StartPayload) error {
+	if !(p.state == Start || p.state == Done || p.state == Error) {
+		return errors.New("invalid state: " + string(p.state))
+	}
 	p.action = payload.Action
 	err := p.user.start(payload)
 	if err != nil {
@@ -126,6 +129,9 @@ func (p *Process) Data(chunk []byte) error {
 }
 
 func (p *Process) Stream(size uint, f func(buf []byte)) error {
+	if p.state != Stream {
+		return errors.New("invalid state: " + string(p.state))
+	}
 	err := p.user.stream(size, f)
 	if err != nil {
 		p.Error()
