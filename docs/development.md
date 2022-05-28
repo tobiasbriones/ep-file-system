@@ -412,3 +412,24 @@ from the beginning?
 I can't over-engineer to tell that I write the best code since the beginning of
 all the projects, I can't under-engineer eiter because that would turn into a
 problem factory soon. A senior like me just knows what to do in each situation.
+
+## Refactorize Before It's Too Late
+
+I often have to take significant time to refactor the code base because I know
+from experience that the more issues that are carried the more cyclomatic
+complexity and expensive further developments will be.
+
+They can't fire you if you do "useless" things like refactoring or writing
+better code, an autonomous engineer knows what to do, so don't let managers or
+stakeholders tell you what to do, you have communication skills and technical
+ones, but managers don't have any other skill than being people friendly if at
+all.
+
+A professional developer or engineer will put system constraints clearly, don't
+be shy on doing things right. Shame on them if they don't want it so, capitalist
+just want to sell, and they might think this is like traditional engineering
+where you have a table with formulas, so you can deliver projects "on time".
+It's annoying, they kind of tell you "I'm paying you to build this website, so
+you have 5 days to finish it", but in reality software engineering is about
+being a *domain expert* to understand the domain problem and then being a
+*developer* to build the domain solution.
