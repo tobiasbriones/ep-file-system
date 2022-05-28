@@ -4,7 +4,11 @@
 
 package process
 
-import "fs"
+import (
+	"errors"
+	"fs"
+	"fs/files"
+)
 
 // User Contains all the FSM implementation details.
 type User struct {
@@ -52,4 +56,21 @@ func (u User) getOsFile() (fs.OsFile, error) {
 		return fs.OsFile{}, err
 	}
 	return fsFile.ToOsFile(u.osFsRoot), nil
+}
+
+func (u User) init() error {
+	return u.createChannelIfNotExists()
+}
+
+func (u User) createChannelIfNotExists() error {
+	channel, err := u.channel.File()
+	if err != nil {
+		return errors.New("invalid channel")
+	}
+	channelFile := channel.ToOsFile(u.osFsRoot)
+	err = files.CreateIfNotExists(channelFile)
+	if err != nil {
+		return errors.New("fail to read StartPayload Path/Create channel")
+	}
+	return nil
 }
