@@ -145,7 +145,7 @@ func (p *Process) Error() {
 	p.state = Error
 }
 
-func (p Process) onStarted() {
+func (p *Process) onStarted() {
 	switch p.action {
 	case ActionUpload:
 		p.state = Data
