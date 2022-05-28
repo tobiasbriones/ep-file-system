@@ -80,6 +80,15 @@ type Process struct {
 	size   uint64
 }
 
+func NewProcess(action Action, info fs.FileInfo, fsOsRoot string) Process {
+	return Process{
+		state:  Start,
+		action: action,
+		file:   info.ToOsFile(fsOsRoot),
+		size:   info.Size,
+	}
+}
+
 type Channel struct {
 	Name string
 }
