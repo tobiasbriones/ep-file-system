@@ -6,7 +6,7 @@ package process
 
 import (
 	"encoding/json"
-	"fs/server/io"
+	"fs"
 )
 
 type Message struct {
@@ -52,12 +52,12 @@ func (p Payload) UpdatePayload() (UpdatePayload, error) {
 
 type StartPayload struct {
 	Action
-	io.FileInfo
+	fs.FileInfo
 	Channel Channel
 }
 
 type StreamPayload struct {
-	io.FileInfo
+	fs.FileInfo
 }
 
 type UpdatePayload struct {
