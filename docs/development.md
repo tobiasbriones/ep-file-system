@@ -313,7 +313,7 @@ copy-paste the game model to the game module and to the server module.
 This must be because Go is aimed for microservices and each module has to be
 small and most important undependable deployable.
 
-That's why I had said that you can't build monoliths with Go. 
+That's why I had said that you can't build monoliths with Go.
 
 ### Where's the Domain Model Then?
 
@@ -332,7 +332,7 @@ independently-deployable modules.
 With Java, I would create different Java/Gradle modules in the root of the
 project and import them as required. I can get to be circular, but it's not too
 bad. That way I can build *modular* monoliths that are pretty useful in
-development. Check the 
+development. Check the
 [other FS](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system)
 source code for seeing this.
 
