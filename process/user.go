@@ -16,7 +16,7 @@ type User struct {
 	channel  Channel
 	osFsRoot string
 	size     uint64
-	count    uint64
+	count    int64
 }
 
 func newUser(osFsRoot string) User {
@@ -135,4 +135,24 @@ func (u User) createChannelIfNotExists() error {
 
 func (u User) createFile() error {
 	return files.Create(u.file)
+}
+
+// DownloadUser
+func (u User) processChunk(chunk []byte) error {
+	if u.overflows(chunk) {
+		return errors.New("overflow")
+	}
+	if len(chunk) == 0 {
+		return errors.New("underflow")
+	}
+	err := files.WriteBuf(u.file, chunk)
+	if err != nil {
+		return errors.New("fail to write chunk")
+	}
+	u.count += int64(len(chunk))
+	return nil
+}
+
+func (u User) overflows(chunk []byte) bool {
+	return u.count+int64(len(chunk)) > int64(u.size)
 }
