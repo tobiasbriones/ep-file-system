@@ -73,6 +73,13 @@ func Actions() []string {
 	}
 }
 
+type Process struct {
+	state  State
+	action Action
+	file   fs.OsFile
+	size   uint64
+}
+
 type Channel struct {
 	Name string
 }
