@@ -51,7 +51,10 @@ func (u *User) start(payload StartPayload) error {
 	if err != nil {
 		return err
 	}
-	u.startAction(payload)
+	err = u.startAction(payload)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -64,19 +67,20 @@ func (u User) setFile() error {
 	return nil
 }
 
-func (u User) startAction(payload StartPayload) {
+func (u User) startAction(payload StartPayload) error {
 	switch payload.Action {
 	case ActionUpload:
 		err := u.startActionUpload(payload)
 		if err != nil {
-			return
+			return err
 		}
 	case ActionDownload:
 		err := u.startActionDownload()
 		if err != nil {
-			return
+			return err
 		}
 	}
+	return nil
 }
 
 func (u User) startActionUpload(payload StartPayload) error {
@@ -156,3 +160,13 @@ func (u User) processChunk(chunk []byte) error {
 func (u User) overflows(chunk []byte) bool {
 	return u.count+int64(len(chunk)) > int64(u.size)
 }
+
+func (u User) stream(size uint, f func(buf []byte)) error {
+	err := files.Stream(u.file, size, f)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DownloadUser
