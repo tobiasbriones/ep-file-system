@@ -51,3 +51,14 @@ func GetExecPath() (string, error) {
 	exePath = strings.ReplaceAll(exePath, "\\", fs.Separator)
 	return exePath, nil
 }
+
+func WriteBuf(file fs.OsFile, buf []byte) error {
+	path := file.Path()
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(buf)
+	f.Close()
+	return err
+}
