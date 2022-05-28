@@ -141,6 +141,14 @@ func (p *Process) Stream(size uint, f func(buf []byte)) error {
 	return nil
 }
 
+func (p *Process) Done() error {
+	if !(p.state == Eof) {
+		return errors.New("invalid state: " + string(p.state))
+	}
+	p.state = Done
+	return nil
+}
+
 func (p *Process) Error() {
 	p.state = Error
 }
