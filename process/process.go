@@ -122,7 +122,7 @@ func (p *Process) Data(chunk []byte) error {
 		p.Error()
 		return err
 	}
-	if p.user.count == int64(p.user.size) {
+	if p.user.count == int64(p.user.req.info.Size) {
 		p.state = Eof
 	}
 	return nil

@@ -13,10 +13,9 @@ import (
 
 // User Contains all the FSM implementation details.
 type User struct {
+	req      req
 	file     fs.OsFile
-	channel  Channel
 	osFsRoot string
-	size     uint64
 	count    int64
 }
 
@@ -27,22 +26,15 @@ func newUser(osFsRoot string) User {
 }
 
 func (u User) FileInfo() fs.FileInfo {
-	return fs.FileInfo{
-		File: u.file.File,
-		Size: u.size,
-	}
+	return u.req.info
 }
 
 func (u User) File() fs.OsFile {
 	return u.file
 }
 
-func (u User) Size() uint64 {
-	return u.size
-}
-
 func (u *User) start(payload StartPayload) error {
-	u.channel = payload.Channel
+	u.req.set(payload)
 	u.count = 0
 	err := u.setFile()
 	if err != nil {
@@ -59,19 +51,19 @@ func (u *User) start(payload StartPayload) error {
 	return nil
 }
 
-func (u User) setFile() error {
-	file, err := u.getOsFile()
+func (u *User) setFile() error {
+	file, err := u.req.file()
 	if err != nil {
 		return err
 	}
-	u.file = file
+	u.file = file.ToOsFile(u.osFsRoot)
 	return nil
 }
 
 func (u User) startAction(payload StartPayload) error {
 	switch payload.Action {
 	case ActionUpload:
-		err := u.startActionUpload(payload)
+		err := u.startActionUpload()
 		if err != nil {
 			return err
 		}
@@ -84,9 +76,8 @@ func (u User) startAction(payload StartPayload) error {
 	return nil
 }
 
-func (u User) startActionUpload(payload StartPayload) error {
-	u.size = payload.Size
-	if u.size <= 0 {
+func (u User) startActionUpload() error {
+	if u.req.info.Size <= 0 {
 		return errors.New("file sent is empty")
 	}
 	err := u.createFile()
@@ -112,26 +103,12 @@ func (u User) startActionDownload() error {
 		log.Println(err)
 		return errors.New("fail to read file size")
 	}
-	u.size = uint64(size)
+	u.req.setFileSize(uint64(size))
 	return nil
 }
 
-func (u User) getOsFile() (fs.OsFile, error) {
-	fsFile, err := fs.NewFileFromString(u.channel.Name) // channel/
-	if err != nil {
-		log.Println(err)
-		return fs.OsFile{}, errors.New("invalid channel name: " + u.channel.Name)
-	}
-	err = fsFile.Append(u.file.Value) // channel/file.txt
-	if err != nil {
-		log.Println(err)
-		return fs.OsFile{}, errors.New("invalid file: " + u.file.Value)
-	}
-	return fsFile.ToOsFile(u.osFsRoot), nil
-}
-
 func (u User) createChannelIfNotExists() error {
-	channel, err := u.channel.File()
+	channel, err := u.req.channel.File()
 	if err != nil {
 		log.Println(err)
 		return errors.New("invalid channel")
@@ -149,7 +126,7 @@ func (u User) createFile() error {
 	return files.Create(u.file)
 }
 
-func (u User) processChunk(chunk []byte) error {
+func (u *User) processChunk(chunk []byte) error {
 	if u.overflows(chunk) {
 		return errors.New("overflow")
 	}
@@ -166,7 +143,7 @@ func (u User) processChunk(chunk []byte) error {
 }
 
 func (u User) overflows(chunk []byte) bool {
-	return u.count+int64(len(chunk)) > int64(u.size)
+	return u.count+int64(len(chunk)) > int64(u.req.info.Size)
 }
 
 func (u User) stream(size uint, f func(buf []byte)) error {
@@ -175,4 +152,32 @@ func (u User) stream(size uint, f func(buf []byte)) error {
 		return err
 	}
 	return nil
+}
+
+type req struct {
+	info    fs.FileInfo
+	channel Channel
+}
+
+func (r *req) set(payload StartPayload) {
+	r.info = payload.FileInfo
+	r.channel = payload.Channel
+}
+
+func (r req) setFileSize(size uint64) {
+	r.info.Size = size
+}
+
+func (r req) file() (fs.File, error) {
+	f, err := fs.NewFileFromString(r.channel.Name) // {channel}
+	if err != nil {
+		log.Println(err)
+		return fs.File{}, errors.New("invalid channel name: " + r.channel.Name)
+	}
+	err = f.Append(r.info.Value) // {channel}/{file.txt}
+	if err != nil {
+		log.Println(err)
+		return fs.File{}, errors.New("invalid file: " + r.info.Value)
+	}
+	return f, nil
 }
