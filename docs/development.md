@@ -447,9 +447,9 @@ mathematicians would be doomed to write boring proofs in PDF files (no
 indexable, useless nowadays), using proprietary crap software from the 90s, and
 nonsense horrible "Alexandria math library" (they even explicitly say their "
 math lib" is the hugest monolith and feel proud about it, they don't know what
-they do because they're building tools but are not engineers)
-while engineers are doomed to write toy scientific software with wrong tools
-like Python or Microsoft Excel.
+they do because they're building tools but are not engineers) while engineers
+are doomed to write toy scientific software with wrong tools like Python or
+Microsoft Excel.
 
 Once again I prove we don't need managers and buzzwords but autonomous engineers
 instead.
