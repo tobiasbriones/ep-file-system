@@ -5,8 +5,11 @@
 package files
 
 import (
+	"bufio"
 	"errors"
 	"fs"
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,4 +64,64 @@ func WriteBuf(file fs.OsFile, buf []byte) error {
 	_, err = f.Write(buf)
 	f.Close()
 	return err
+}
+
+type Handle func(buf []byte)
+
+func Stream(file fs.OsFile, bufSize uint, handle Handle) error {
+	path := file.Path()
+	f, err := os.Open(path)
+	if err != nil {
+		log.Printf("Fail to read file %v: %v\n", path, err.Error())
+		return errors.New("fail to read file")
+	}
+	defer f.Close()
+	buf := make([]byte, 0, bufSize)
+	reader := bufio.NewReader(f)
+	bytesTotal, chunksTotal, err := stream(reader, buf, handle)
+
+	if err != nil {
+		log.Println(
+			"Streaming completed.\n",
+			"File:",
+			path,
+			"Bytes:",
+			bytesTotal,
+			"Chunks:", chunksTotal,
+		)
+	}
+	return err
+}
+
+func stream(
+	reader *bufio.Reader,
+	buf []byte,
+	handle Handle,
+) (int64, int64, error) {
+	bytesTotal := int64(0)
+	chunksTotal := int64(0)
+
+	for {
+		n, err := reader.Read(buf[:cap(buf)])
+
+		buf = buf[:n]
+		if n == 0 {
+			if err == nil {
+				continue
+			}
+			if err == io.EOF {
+				break
+			}
+			return 0, 0, err
+		}
+		chunksTotal++
+		bytesTotal += int64(len(buf))
+
+		handle(buf)
+
+		if err != nil && err != io.EOF {
+			return 0, 0, err
+		}
+	}
+	return bytesTotal, chunksTotal, nil
 }
