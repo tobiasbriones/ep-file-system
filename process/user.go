@@ -26,7 +26,7 @@ func newUser(osFsRoot string) User {
 }
 
 func (u User) FileInfo() fs.FileInfo {
-	return u.req.info
+	return *u.req.info
 }
 
 func (u User) File() fs.OsFile {
@@ -155,16 +155,19 @@ func (u User) stream(size uint, f func(buf []byte)) error {
 }
 
 type req struct {
-	info    fs.FileInfo
+	info    *fs.FileInfo
 	channel Channel
 }
 
 func (r *req) set(payload StartPayload) {
-	r.info = payload.FileInfo
+	r.info = &fs.FileInfo{
+		File: payload.FileInfo.File,
+		Size: payload.Size,
+	}
 	r.channel = payload.Channel
 }
 
-func (r req) setFileSize(size uint64) {
+func (r *req) setFileSize(size uint64) {
 	r.info.Size = size
 }
 
