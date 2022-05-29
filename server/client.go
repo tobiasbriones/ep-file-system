@@ -45,7 +45,7 @@ func (c *Client) run() {
 		case u := <-c.change:
 			c.sendUpdate(u)
 		case <-c.quit:
-			log.Println("Exiting client")
+			c.unregister <- c
 			return
 		default:
 			c.next()
@@ -67,8 +67,10 @@ func (c *Client) next() {
 		c.listenStream()
 	case process.Eof:
 		c.listenEof()
-	case process.Done, process.Error:
-		c.quit <- struct{}{}
+	case process.Error:
+		go func() {
+			c.quit <- struct{}{}
+		}()
 	}
 }
 
