@@ -10,13 +10,22 @@ import (
 )
 
 func listen(server net.Listener) {
+	osFsRoot := loadRoot()
 	for {
 		conn, err := server.Accept()
 		if err != nil {
 			log.Println("Fail to accept client")
 			continue
 		}
-		client := newClient(conn)
+		client := newClient(conn, osFsRoot)
 		go client.run()
 	}
+}
+
+func loadRoot() string {
+	osFsRoot, err := getOsFsRoot()
+	if err != nil {
+		panic("fail to load OS FS Root")
+	}
+	return osFsRoot
 }
