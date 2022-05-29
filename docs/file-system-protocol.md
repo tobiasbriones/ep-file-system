@@ -89,6 +89,8 @@ The system requires the following modules:
 - **process**: IO implementation of the FS, including the main FSM for streaming
   files (Go).
 - **server**: TCP server implementation (Go).
+- **files**: Functions implementing operations on domain files (Go).
+- **utils**: Umbrella functions to help build the system (Go). 
 - **client**: Android client app (Kotlin).
 - **admin**: Basic admin dashboard (Vue.js).
 
