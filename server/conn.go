@@ -22,6 +22,13 @@ func readChunk(conn net.Conn) ([]byte, error) {
 	return b[:n], nil
 }
 
+func writeResponse(res Response, conn net.Conn) error {
+	msg := Message{
+		Response: res,
+	}
+	return writeMessage(msg, conn)
+}
+
 func writeState(state process.State, conn net.Conn) error {
 	msg := Message{
 		State: state,

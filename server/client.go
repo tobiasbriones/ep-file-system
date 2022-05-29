@@ -11,37 +11,64 @@ import (
 )
 
 type Client struct {
-	conn    net.Conn
-	process process.Process
+	conn       net.Conn
+	process    process.Process
+	id         uint // Current ID assigned by the Hub
+	register   chan *Client
+	unregister chan *Client
+	change     chan UpdatePayload
+	quit       chan struct{}
 }
 
 func newClient(
 	conn net.Conn,
 	osFsRoot string,
+	register chan *Client,
+	unregister chan *Client,
 ) *Client {
 	return &Client{
-		conn:    conn,
-		process: process.NewProcess(osFsRoot),
+		conn:       conn,
+		process:    process.NewProcess(osFsRoot),
+		register:   register,
+		unregister: unregister,
+		change:     make(chan UpdatePayload),
+		quit:       make(chan struct{}),
 	}
 }
 
 func (c *Client) run() {
 	defer c.conn.Close()
+	c.connect()
 	log.Println("Client connected")
 	for {
-		switch c.process.State() {
-		default:
-			c.listenMessage()
-		case process.Data:
-			c.listenData()
-		case process.Stream:
-			c.listenStream()
-		case process.Eof:
-			c.listenEof()
-		case process.Done, process.Error:
+		select {
+		case u := <-c.change:
+			c.sendUpdate(u)
+		case <-c.quit:
 			log.Println("Exiting client")
 			return
+		default:
+			c.next()
 		}
+	}
+}
+
+func (c *Client) connect() {
+	c.register <- c
+}
+
+func (c *Client) next() {
+	switch c.process.State() {
+	default:
+		c.listenMessage()
+	case process.Data:
+		c.listenData()
+	case process.Stream:
+		c.listenStream()
+	case process.Eof:
+		c.listenEof()
+	case process.Done, process.Error:
+		c.quit <- struct{}{}
 	}
 }
 
@@ -202,6 +229,24 @@ func (c *Client) stream() {
 	err = writeState(process.Done, c.conn)
 	if err != nil {
 		c.error("Fail to write state=DONE")
+		return
+	}
+}
+
+func (c *Client) sendUpdate(u UpdatePayload) {
+	p, err := NewPayloadFrom(u)
+	if err != nil {
+		log.Println(err)
+		c.error("Fail to send update")
+		return
+	}
+	msg := Message{
+		Payload: p,
+	}
+	err = writeMessage(msg, c.conn)
+	if err != nil {
+		log.Println(err)
+		c.error("Fail to send update")
 		return
 	}
 }

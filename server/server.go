@@ -20,13 +20,21 @@ const (
 
 func listen(server net.Listener) {
 	osFsRoot := loadRoot()
+	hub := NewHub()
+
+	go hub.run()
 	for {
 		conn, err := server.Accept()
 		if err != nil {
 			log.Println("Fail to accept client")
 			continue
 		}
-		client := newClient(conn, osFsRoot)
+		client := newClient(
+			conn,
+			osFsRoot,
+			hub.register,
+			hub.unregister,
+		)
 		go client.run()
 	}
 }
