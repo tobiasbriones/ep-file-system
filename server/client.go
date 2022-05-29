@@ -6,6 +6,7 @@ package main
 
 import (
 	"fs/process"
+	"io"
 	"log"
 	"net"
 )
@@ -68,9 +69,7 @@ func (c *Client) next() {
 	case process.Eof:
 		c.listenEof()
 	case process.Error:
-		go func() {
-			c.quit <- struct{}{}
-		}()
+		c.sendQuit()
 	}
 }
 
@@ -78,8 +77,7 @@ func (c *Client) listenMessage() {
 	log.Println("Listening for client message")
 	msg, err := readMessage(c.conn)
 	if err != nil {
-		log.Println("Fail to read message:", err)
-		c.error("fail to read message")
+		c.handleReadError(err, "fail to read message")
 		return
 	}
 	c.onMessage(msg)
@@ -131,8 +129,12 @@ func (c *Client) onActionDownloadStarted() {
 }
 
 func (c *Client) listenData() {
-	chunk, _ := readChunk(c.conn)
-	err := c.process.Data(chunk)
+	chunk, err := readChunk(c.conn)
+	if err != nil {
+		c.handleReadError(err, "fail to read chunk")
+		return
+	}
+	err = c.process.Data(chunk)
 	if err != nil {
 		c.error(err.Error())
 		return
@@ -154,7 +156,7 @@ func (c *Client) listenEof() {
 	log.Println("Listening for EOF")
 	msg, err := readMessage(c.conn)
 	if err != nil {
-		c.error("fail to read message")
+		c.handleReadError(err, "fail to read EOF message")
 		return
 	}
 	c.eof(msg)
@@ -200,7 +202,7 @@ func (c *Client) listenStream() {
 	log.Println("Listening for client STREAM signal")
 	msg, err := readMessage(c.conn)
 	if err != nil {
-		c.error("fail to read message")
+		c.handleReadError(err, "fail to read status STREAM")
 		return
 	}
 	if msg.State != process.Stream {
@@ -251,6 +253,22 @@ func (c *Client) sendUpdate(u UpdatePayload) {
 		c.error("Fail to send update")
 		return
 	}
+}
+
+func (c *Client) handleReadError(err error, msg string) {
+	if err == io.EOF {
+		log.Println("Communication closed by the client")
+		c.sendQuit()
+		return
+	}
+	log.Println(msg, err)
+	c.error(msg)
+}
+
+func (c *Client) sendQuit() {
+	go func() {
+		c.quit <- struct{}{}
+	}()
 }
 
 func (c *Client) error(msg string) {

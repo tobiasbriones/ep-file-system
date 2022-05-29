@@ -8,6 +8,11 @@ import (
 	"encoding/json"
 	"fs/process"
 	"net"
+	"time"
+)
+
+const (
+	readTimeOut = 20 * time.Second
 )
 
 func readChunk(conn net.Conn) ([]byte, error) {
@@ -42,8 +47,12 @@ func writeMessage(msg Message, conn net.Conn) error {
 }
 
 func readMessage(conn net.Conn) (Message, error) {
+	err := conn.SetReadDeadline(time.Now().Add(readTimeOut))
+	if err != nil {
+		return Message{}, err
+	}
 	var msg Message
 	dec := json.NewDecoder(conn)
-	err := dec.Decode(&msg)
+	err = dec.Decode(&msg)
 	return msg, err
 }
