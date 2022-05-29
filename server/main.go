@@ -1,6 +1,6 @@
 // Copyright (c) 2022 Tobias Briones. All rights reserved.
 // SPDX-License-Identifier: BSD-3-Clause
-// This file is part of https://github.com/tobiasbriones/ep-file-system-server
+// This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
 
 // Entry point for the file system server.
 //
@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"fs/utils"
 	"net"
 )
 
@@ -22,7 +23,7 @@ func main() {
 	server, err := net.Listen(network, getServerAddress())
 
 	defer server.Close()
-	requireNoError(err)
+	utils.RequireNoError(err)
 	listen(server)
 }
 

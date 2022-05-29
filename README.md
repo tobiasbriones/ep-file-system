@@ -1,10 +1,10 @@
-# Example Project: File System Server
+# Example Project: TCP File System
 
 Example Project for a Go File System server that broadcasts to Android clients.
 
 ## About
 
-**Example Project: File System Server**
+**Example Project: TCP File System**
 
 Example Project for a Go File System server that broadcasts to Android clients.
 
