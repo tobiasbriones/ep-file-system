@@ -271,12 +271,12 @@ const (
 )
 
 var stateStrings = map[string]struct{}{
-    "start":  valid,
-    "data":   valid,
-    "stream": valid,
-    "eof":    valid,
-    "error":  valid,
-    "done":   valid,
+    "start":  Valid,
+    "data":   Valid,
+    "stream": Valid,
+    "eof":    Valid,
+    "error":  Valid,
+    "done":   Valid,
 }
 
 func ToState(value string) (State, error) {
@@ -292,7 +292,7 @@ for the boilerplate of Go Sets. Go doesn't have Sets, they're just Maps with
 true everywhere. Use the empty `struct` instead of bool.
 
 ```go
-var valid = struct{}{}
+var Valid = struct{}{}
 ```
 
 That approach should be used for quit channel signals too for the reasons stated
