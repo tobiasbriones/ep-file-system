@@ -9,6 +9,15 @@ import (
 	"net"
 )
 
+type Response int
+
+const (
+	Connect = iota
+	Quit
+	Update
+	Ok
+)
+
 func listen(server net.Listener) {
 	osFsRoot := loadRoot()
 	for {
