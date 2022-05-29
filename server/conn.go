@@ -23,19 +23,19 @@ func readChunk(conn net.Conn) ([]byte, error) {
 }
 
 func writeState(state process.State, conn net.Conn) error {
-	msg := process.Message{
+	msg := Message{
 		State: state,
 	}
 	return writeMessage(msg, conn)
 }
 
-func writeMessage(msg process.Message, conn net.Conn) error {
+func writeMessage(msg Message, conn net.Conn) error {
 	enc := json.NewEncoder(conn)
 	return enc.Encode(msg)
 }
 
-func readMessage(conn net.Conn) (process.Message, error) {
-	var msg process.Message
+func readMessage(conn net.Conn) (Message, error) {
+	var msg Message
 	dec := json.NewDecoder(conn)
 	err := dec.Decode(&msg)
 	return msg, err

@@ -56,7 +56,7 @@ func (c *Client) listenMessage() {
 	c.onMessage(msg)
 }
 
-func (c *Client) onMessage(msg process.Message) {
+func (c *Client) onMessage(msg Message) {
 	log.Println("Message received with state:", msg.State)
 	switch msg.State {
 	case process.Start:
@@ -66,7 +66,7 @@ func (c *Client) onMessage(msg process.Message) {
 	}
 }
 
-func (c *Client) start(msg process.Message) {
+func (c *Client) start(msg Message) {
 	payload, err := msg.StartPayload()
 	if err != nil {
 		c.error("fail to read StartPayload")
@@ -131,7 +131,7 @@ func (c *Client) listenEof() {
 	c.eof(msg)
 }
 
-func (c *Client) eof(msg process.Message) {
+func (c *Client) eof(msg Message) {
 	if msg.State != process.Eof {
 		c.error("expecting EOF")
 		return
@@ -150,12 +150,12 @@ func (c *Client) eof(msg process.Message) {
 }
 
 func (c *Client) writeStreamState(payload process.StreamPayload) {
-	p, err := process.NewPayloadFrom(payload)
+	p, err := NewPayloadFrom(payload)
 	if err != nil {
 		c.error("Fail to read payload from StreamPayload")
 		return
 	}
-	msg := process.Message{
+	msg := Message{
 		State:   process.Stream,
 		Payload: p,
 	}

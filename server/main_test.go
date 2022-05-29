@@ -209,10 +209,10 @@ func initiateConn(
 	}
 	utils.RequirePassCase(t, err, "Fail to load test FileInfo")
 
-	payload, err := process.NewPayload(body)
+	payload, err := NewPayload(body)
 	utils.RequirePassCase(t, err, "Fail to load create payload")
 
-	msg := process.Message{
+	msg := Message{
 		State:   process.Start,
 		Payload: payload,
 	}
@@ -222,8 +222,8 @@ func initiateConn(
 	return conn
 }
 
-func readResponseMsg(t *testing.T, conn net.Conn) process.Message {
-	var msg process.Message
+func readResponseMsg(t *testing.T, conn net.Conn) Message {
+	var msg Message
 	dec := json.NewDecoder(conn)
 	err := dec.Decode(&msg)
 	utils.RequirePassCase(t, err, "Fail to read response from server")
