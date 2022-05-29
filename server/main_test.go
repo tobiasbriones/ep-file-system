@@ -20,6 +20,7 @@ import (
 	"log"
 	"net"
 	"testing"
+	"time"
 )
 
 const (
@@ -90,6 +91,13 @@ func TestTcpConn(t *testing.T) {
 	res := readResponseMsg(t, conn)
 	if res.State != process.Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
+	}
+	resPayload := Payload{Data: res.Data}
+
+	// res.State is Error so this conversion is safe
+	payload, _ := resPayload.ErrorPayload()
+	if payload.Message != "file sent is empty" {
+		t.Fatal("Fail to get error message", string(res.Data))
 	}
 }
 
@@ -177,6 +185,32 @@ func TestDownloadIfNotExists(t *testing.T) {
 	}
 }
 
+// Tests if the server closes the connection after the read timeout is consumed.
+func TestTcpTimeout(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skip long running test: TCP timeout")
+	}
+	info := newTestFileInfo()
+	osFile := info.ToOsFile(testFsClientRoot) // .../.test_fs/client/file.pdf
+	err := loadFileSize(&info, osFile)
+	utils.RequirePassCase(t, err, "Fail to read file info")
+	conn := initiateConn(t, process.ActionUpload, info)
+	defer conn.Close()
+
+	res := readResponseMsg(t, conn)
+	if res.State != process.Data {
+		t.Fatal("Fail to get state=DATA")
+	}
+
+	// Server is waiting for client chunks ...
+	time.Sleep(readTimeOut + 1)
+
+	res = readResponseMsg(t, conn)
+	if res.State != process.Error {
+		t.Fatal("fail to get state ERROR after timeout")
+	}
+}
+
 func upload(t *testing.T, conn *net.TCPConn, file fs.OsFile) {
 	log.Println("Streaming file to server:", file.Path())
 	err := files.Stream(file, bufSize, func(buf []byte) {
@@ -209,10 +243,10 @@ func initiateConn(
 	}
 	utils.RequirePassCase(t, err, "Fail to load test FileInfo")
 
-	payload, err := process.NewPayload(body)
+	payload, err := NewPayload(body)
 	utils.RequirePassCase(t, err, "Fail to load create payload")
 
-	msg := process.Message{
+	msg := Message{
 		State:   process.Start,
 		Payload: payload,
 	}
@@ -222,8 +256,8 @@ func initiateConn(
 	return conn
 }
 
-func readResponseMsg(t *testing.T, conn net.Conn) process.Message {
-	var msg process.Message
+func readResponseMsg(t *testing.T, conn net.Conn) Message {
+	var msg Message
 	dec := json.NewDecoder(conn)
 	err := dec.Decode(&msg)
 	utils.RequirePassCase(t, err, "Fail to read response from server")

@@ -6,42 +6,70 @@ package main
 
 import (
 	"fs/process"
+	"io"
 	"log"
 	"net"
 )
 
 type Client struct {
-	conn    net.Conn
-	process process.Process
+	conn       net.Conn
+	process    process.Process
+	id         uint // Current ID assigned by the Hub
+	register   chan *Client
+	unregister chan *Client
+	change     chan UpdatePayload
+	quit       chan struct{}
 }
 
 func newClient(
 	conn net.Conn,
 	osFsRoot string,
+	register chan *Client,
+	unregister chan *Client,
 ) *Client {
 	return &Client{
-		conn:    conn,
-		process: process.NewProcess(osFsRoot),
+		conn:       conn,
+		process:    process.NewProcess(osFsRoot),
+		register:   register,
+		unregister: unregister,
+		change:     make(chan UpdatePayload),
+		quit:       make(chan struct{}),
 	}
 }
 
 func (c *Client) run() {
 	defer c.conn.Close()
+	c.connect()
 	log.Println("Client connected")
 	for {
-		switch c.process.State() {
-		default:
-			c.listenMessage()
-		case process.Data:
-			c.listenData()
-		case process.Stream:
-			c.listenStream()
-		case process.Eof:
-			c.listenEof()
-		case process.Done, process.Error:
-			log.Println("Exiting client")
+		select {
+		case u := <-c.change:
+			c.sendUpdate(u)
+		case <-c.quit:
+			c.unregister <- c
 			return
+		default:
+			c.next()
 		}
+	}
+}
+
+func (c *Client) connect() {
+	c.register <- c
+}
+
+func (c *Client) next() {
+	switch c.process.State() {
+	default:
+		c.listenMessage()
+	case process.Data:
+		c.listenData()
+	case process.Stream:
+		c.listenStream()
+	case process.Eof:
+		c.listenEof()
+	case process.Error:
+		c.sendQuit()
 	}
 }
 
@@ -49,14 +77,13 @@ func (c *Client) listenMessage() {
 	log.Println("Listening for client message")
 	msg, err := readMessage(c.conn)
 	if err != nil {
-		log.Println("Fail to read message:", err)
-		c.error("fail to read message")
+		c.handleReadError(err, "fail to read message")
 		return
 	}
 	c.onMessage(msg)
 }
 
-func (c *Client) onMessage(msg process.Message) {
+func (c *Client) onMessage(msg Message) {
 	log.Println("Message received with state:", msg.State)
 	switch msg.State {
 	case process.Start:
@@ -66,7 +93,7 @@ func (c *Client) onMessage(msg process.Message) {
 	}
 }
 
-func (c *Client) start(msg process.Message) {
+func (c *Client) start(msg Message) {
 	payload, err := msg.StartPayload()
 	if err != nil {
 		c.error("fail to read StartPayload")
@@ -102,8 +129,12 @@ func (c *Client) onActionDownloadStarted() {
 }
 
 func (c *Client) listenData() {
-	chunk, _ := readChunk(c.conn)
-	err := c.process.Data(chunk)
+	chunk, err := readChunk(c.conn)
+	if err != nil {
+		c.handleReadError(err, "fail to read chunk")
+		return
+	}
+	err = c.process.Data(chunk)
 	if err != nil {
 		c.error(err.Error())
 		return
@@ -125,13 +156,13 @@ func (c *Client) listenEof() {
 	log.Println("Listening for EOF")
 	msg, err := readMessage(c.conn)
 	if err != nil {
-		c.error("fail to read message")
+		c.handleReadError(err, "fail to read EOF message")
 		return
 	}
 	c.eof(msg)
 }
 
-func (c *Client) eof(msg process.Message) {
+func (c *Client) eof(msg Message) {
 	if msg.State != process.Eof {
 		c.error("expecting EOF")
 		return
@@ -150,12 +181,12 @@ func (c *Client) eof(msg process.Message) {
 }
 
 func (c *Client) writeStreamState(payload process.StreamPayload) {
-	p, err := process.NewPayloadFrom(payload)
+	p, err := NewPayloadFrom(payload)
 	if err != nil {
 		c.error("Fail to read payload from StreamPayload")
 		return
 	}
-	msg := process.Message{
+	msg := Message{
 		State:   process.Stream,
 		Payload: p,
 	}
@@ -171,7 +202,7 @@ func (c *Client) listenStream() {
 	log.Println("Listening for client STREAM signal")
 	msg, err := readMessage(c.conn)
 	if err != nil {
-		c.error("fail to read message")
+		c.handleReadError(err, "fail to read status STREAM")
 		return
 	}
 	if msg.State != process.Stream {
@@ -206,9 +237,42 @@ func (c *Client) stream() {
 	}
 }
 
+func (c *Client) sendUpdate(u UpdatePayload) {
+	p, err := NewPayloadFrom(u)
+	if err != nil {
+		log.Println(err)
+		c.error("Fail to send update")
+		return
+	}
+	msg := Message{
+		Payload: p,
+	}
+	err = writeMessage(msg, c.conn)
+	if err != nil {
+		log.Println(err)
+		c.error("Fail to send update")
+		return
+	}
+}
+
+func (c *Client) handleReadError(err error, msg string) {
+	if err == io.EOF {
+		log.Println("Communication closed by the client")
+		c.sendQuit()
+		return
+	}
+	log.Println(msg, err)
+	c.error(msg)
+}
+
+func (c *Client) sendQuit() {
+	go func() {
+		c.quit <- struct{}{}
+	}()
+}
+
 func (c *Client) error(msg string) {
-	// TODO update func to accept msg
 	log.Println("ERROR:", msg)
 	c.process.Error()
-	writeState(process.Error, c.conn)
+	writeErrorState(msg, c.conn)
 }
