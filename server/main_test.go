@@ -4,6 +4,13 @@
 
 package main
 
+// This test suite consists of side effect test cases for using the TCP file
+// system. Test file system requirements have to be provided, and the results
+// can also be checked in that test file system. The test file system is
+// defined as the server/.test_fs directory and the root app file system into
+// its server directory. Channels are direct children of the FS root.
+// Author: Tobias Briones
+
 import (
 	"encoding/json"
 	"fs"
