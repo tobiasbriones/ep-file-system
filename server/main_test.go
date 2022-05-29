@@ -20,6 +20,7 @@ import (
 	"log"
 	"net"
 	"testing"
+	"time"
 )
 
 const (
@@ -174,6 +175,32 @@ func TestDownloadIfNotExists(t *testing.T) {
 	res := readResponseMsg(t, conn)
 	if res.State != process.Error {
 		t.Fatal("Fail to get state=ERROR")
+	}
+}
+
+// Tests if the server closes the connection after the read timeout is consumed.
+func TestTcpTimeout(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skip long running test: TCP timeout")
+	}
+	info := newTestFileInfo()
+	osFile := info.ToOsFile(testFsClientRoot) // .../.test_fs/client/file.pdf
+	err := loadFileSize(&info, osFile)
+	utils.RequirePassCase(t, err, "Fail to read file info")
+	conn := initiateConn(t, process.ActionUpload, info)
+	defer conn.Close()
+
+	res := readResponseMsg(t, conn)
+	if res.State != process.Data {
+		t.Fatal("Fail to get state=DATA")
+	}
+
+	// Server is waiting for client chunks ...
+	time.Sleep(readTimeOut + 1)
+
+	res = readResponseMsg(t, conn)
+	if res.State != process.Error {
+		t.Fatal("fail to get state ERROR after timeout")
 	}
 }
 
