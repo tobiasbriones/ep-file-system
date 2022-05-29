@@ -61,5 +61,5 @@ type StreamPayload struct {
 }
 
 type UpdatePayload struct {
-	change bool // Rudimentary signal to test broadcast
+	Change bool // Rudimentary signal to test broadcast
 }
