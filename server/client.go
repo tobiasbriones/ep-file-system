@@ -272,8 +272,7 @@ func (c *Client) sendQuit() {
 }
 
 func (c *Client) error(msg string) {
-	// TODO update func to accept msg
 	log.Println("ERROR:", msg)
 	c.process.Error()
-	writeState(process.Error, c.conn)
+	writeErrorState(msg, c.conn)
 }

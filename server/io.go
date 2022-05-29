@@ -52,10 +52,20 @@ func (p Payload) UpdatePayload() (UpdatePayload, error) {
 	return payload, err
 }
 
+func (p Payload) ErrorPayload() (ErrorPayload, error) {
+	payload := ErrorPayload{}
+	err := json.Unmarshal(p.Data, &payload)
+	return payload, err
+}
+
 type StreamPayload struct {
 	fs.FileInfo
 }
 
 type UpdatePayload struct {
 	Change bool // Rudimentary signal to test broadcast
+}
+
+type ErrorPayload struct {
+	Message string
 }

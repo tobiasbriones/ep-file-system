@@ -41,6 +41,16 @@ func writeState(state process.State, conn net.Conn) error {
 	return writeMessage(msg, conn)
 }
 
+func writeErrorState(errorMsg string, conn net.Conn) error {
+	payload := ErrorPayload{Message: errorMsg}
+	p, _ := NewPayloadFrom(payload)
+	msg := Message{
+		State:   process.Error,
+		Payload: p,
+	}
+	return writeMessage(msg, conn)
+}
+
 func writeMessage(msg Message, conn net.Conn) error {
 	enc := json.NewEncoder(conn)
 	return enc.Encode(msg)

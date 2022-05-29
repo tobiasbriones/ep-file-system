@@ -92,6 +92,13 @@ func TestTcpConn(t *testing.T) {
 	if res.State != process.Error { // The file sent is empty, ERROR must be responded.
 		t.Fatal("Fail to establish the TCP connection to the server")
 	}
+	resPayload := Payload{Data: res.Data}
+
+	// res.State is Error so this conversion is safe
+	payload, _ := resPayload.ErrorPayload()
+	if payload.Message != "file sent is empty" {
+		t.Fatal("Fail to get error message", string(res.Data))
+	}
 }
 
 // Requires client file ".../.test_fs/client/file.pdf" to upload it to the
