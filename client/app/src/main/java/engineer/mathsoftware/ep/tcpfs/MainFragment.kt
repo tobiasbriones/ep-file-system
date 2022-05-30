@@ -8,8 +8,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentMainBinding
+import kotlinx.coroutines.launch
 
 const val PICKFILE_REQUEST_CODE = 1
 
@@ -72,9 +75,21 @@ class MainFragment : Fragment() {
 
     private fun readFileToUpload(data: Uri?) {
         var bytes = ByteArray(0)
+        val file = data?.let {
+            DocumentFile.fromSingleUri(requireContext(), it)
+        }?.name.toString()
         if (data != null) {
-            context?.let { bytes = read(it.contentResolver, data) }
+            bytes = read(requireContext().contentResolver, data)
         }
-        Log.d("UPLOAD", bytes.size.toString())
+        val client = Client()
+        client.file = file
+
+        lifecycleScope.launch {
+            client.connect()
+            Log.d("UPLOAD", "Connected...")
+            client.upload(bytes)
+            client.disconnect()
+            Log.d("UPLOAD", "Done, Disconnected...")
+        }
     }
 }

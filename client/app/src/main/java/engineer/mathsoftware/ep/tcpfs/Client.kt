@@ -3,6 +3,9 @@ package engineer.mathsoftware.ep.tcpfs
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.PrintWriter
 import java.net.ConnectException
 import java.net.InetAddress
 import java.net.Socket
@@ -36,7 +39,8 @@ class Client {
             try {
                 socket = Socket(address, PORT)
                 Log.d("UPLOAD", "Connection established")
-            }catch (e: ConnectException) {
+            }
+            catch (e: ConnectException) {
                 Log.d("UPLOAD", e.message.toString())
             }
         }
@@ -44,5 +48,42 @@ class Client {
 
     fun disconnect() {
         socket.close()
+    }
+
+    suspend fun upload(bytes: ByteArray) {
+        val msg = getStartMessage(Action.UPLOAD, bytes.size)
+        withContext(Dispatchers.IO) {
+            PrintWriter(socket.getOutputStream()).use {
+                it.print(msg)
+                Log.d("UPLOAD", msg.toString())
+            }
+        }
+    }
+
+    private fun getStartMessage(action: Action, size: Int = 0): JSONObject {
+        val payload = getStartPayload(action, size)
+        val ser = JSONObject()
+        ser.put("State", State.START)
+        ser.put("Data", payload)
+        return ser
+    }
+
+    private fun getStartPayload(action: Action, size: Int = 0): JSONArray {
+        val payload = """
+            {
+                "Action": ${action.ordinal},
+                "Value": $file,
+                "Size": $size,
+                "Channel": {
+                    "Name": $channel
+                }
+            }
+        """.trimIndent()
+        var json = JSONObject(payload)
+        val arr = JSONArray()
+        json.toString().toByteArray().forEach {
+            arr.put(it)
+        }
+        return arr
     }
 }
