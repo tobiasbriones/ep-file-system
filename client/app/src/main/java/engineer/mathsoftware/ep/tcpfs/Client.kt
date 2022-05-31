@@ -76,7 +76,7 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
-    suspend fun upload(bytes: ByteArray) {
+    suspend fun upload(bytes: ByteArray, l: (progress: Float) -> Unit) {
         withContext(Dispatchers.IO) {
             try {
                 var msg = getStartMessage(Action.UPLOAD, bytes.size)
@@ -86,7 +86,7 @@ class Client(private val socket: Socket, private val conn: Conn) {
                 var state = conn.readState()
                 println("STATE: $state")
 
-                conn.stream(bytes)
+                conn.stream(bytes, l)
                 state = conn.readState()
                 println("Received status: $state")
 

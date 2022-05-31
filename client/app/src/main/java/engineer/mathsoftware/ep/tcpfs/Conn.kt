@@ -74,7 +74,7 @@ class Conn(private val socket: Socket) {
         return Integer.parseInt(res)
     }
 
-    fun stream(bytes: ByteArray) {
+    fun stream(bytes: ByteArray, l: (progress: Float) -> Unit) {
         val size = bytes.size
         val os = socket.getOutputStream()
         var count = 0
@@ -87,6 +87,8 @@ class Conn(private val socket: Socket) {
             )
             os.write(chunk)
             count += SERVER_BUF_SIZE
+            val p = if (count >= size) 1.0f else count.toFloat() / size.toFloat()
+            l(p)
         }
         println("Finished sending chunks: $count")
     }

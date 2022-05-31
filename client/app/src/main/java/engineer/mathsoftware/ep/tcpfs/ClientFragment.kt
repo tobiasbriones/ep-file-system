@@ -145,7 +145,10 @@ class ClientFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 client.file = file
-                client.upload(bytes)
+                client.upload(bytes) {
+                    val percentage = it * 100
+                    binding.infoText.text = "Uploading $percentage%"
+                }
                 handleFileUploaded()
             }
             catch (e: SocketException) {
