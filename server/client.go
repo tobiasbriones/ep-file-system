@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
 )
 
 type Client struct {
@@ -114,6 +115,12 @@ func (c *Client) onCommand(cmd map[string]string) {
 		err := writeFiles(c.conn, channel)
 		if err != nil {
 			c.error("fail to send list of files")
+			return
+		}
+	case "CID":
+		_, err := c.conn.Write([]byte(strconv.Itoa(int(c.id))))
+		if err != nil {
+			c.error("fail to send client ID")
 			return
 		}
 	default:
