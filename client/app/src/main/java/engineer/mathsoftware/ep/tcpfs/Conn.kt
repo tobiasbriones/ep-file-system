@@ -4,9 +4,17 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.Socket
 
 class Conn(private val socket: Socket) {
+    private val reader = BufferedReader(
+        InputStreamReader(
+            socket.getInputStream()
+        )
+    )
 
     fun stream(bytes: ByteArray) {
         val size = bytes.size
@@ -23,5 +31,12 @@ class Conn(private val socket: Socket) {
             count += SERVER_BUF_SIZE
         }
         println("Finished sending chunks: $count")
+    }
+
+    fun readState(): String {
+        val res = reader.readLine()
+        val ser = JSONObject(res)
+        return ser.get("State")
+            .toString()
     }
 }

@@ -61,48 +61,30 @@ class Client(private val socket: Socket, private val conn: Conn) {
     suspend fun upload(bytes: ByteArray) {
         withContext(Dispatchers.IO) {
             try {
-                val reader = BufferedReader(
-                    InputStreamReader(
-                        socket.getInputStream()
-                    )
-                )
                 var msg = getStartMessage(Action.UPLOAD, bytes.size)
 
-                // writer.println(msg)
                 socket.getOutputStream()
                     .write(
                         msg.toString()
                             .toByteArray()
                     )
                 println("Start message sent")
-                var res = reader.readLine()
-
-                println("response $res")
-                var ser = JSONObject(res)
-                var state = ser.get("State")
+                var state = conn.readState()
                 println("STATE: $state")
 
-                // Upload
                 conn.stream(bytes)
-
-                res = reader.readLine()
-                ser = JSONObject(res)
-                state = ser.get("State")
+                state = conn.readState()
                 println("Received status: $state")
-
 
                 msg = getEofMessage()
                 println(msg)
-                // writer.println(msg)
                 socket.getOutputStream()
                     .write(
                         msg.toString()
                             .toByteArray()
                     )
 
-                res = reader.readLine()
-                ser = JSONObject(res)
-                state = ser.get("State")
+                state = conn.readState()
                 println("Received status: $state")
             }
             catch (e: JSONException) {
