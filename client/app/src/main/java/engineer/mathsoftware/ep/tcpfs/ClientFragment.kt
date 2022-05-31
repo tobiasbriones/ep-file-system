@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentClientBinding
 import kotlinx.coroutines.launch
+import java.net.SocketException
 
 class ClientFragment : Fragment() {
     private var _binding: FragmentClientBinding? = null
@@ -110,8 +111,14 @@ class ClientFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            client.file = file
-            client.upload(bytes)
+            try {
+                client.file = file
+                client.upload(bytes)
+            }
+            catch (e: SocketException) {
+                println("ERROR: ${e.message}")
+                handleConnectionFailed()
+            }
         }
     }
 }
