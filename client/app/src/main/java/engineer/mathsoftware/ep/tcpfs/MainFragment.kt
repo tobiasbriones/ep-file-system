@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentMainBinding
 import kotlinx.coroutines.launch
+import org.json.JSONException
 
 const val PICKFILE_REQUEST_CODE = 1
 
@@ -84,8 +85,13 @@ class MainFragment : Fragment() {
                 client = c
             }
 
-            val channels = client.readChannels()
-            println(channels)
+            try {
+                val channels = client.readChannels()
+                println(channels.joinToString(", "))
+            }
+            catch (e: JSONException) {
+                println(e.message)
+            }
         }
     }
 
