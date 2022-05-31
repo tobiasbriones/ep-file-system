@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fs"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -43,6 +44,20 @@ func ReadSize(file fs.OsFile) (int64, error) {
 		return 0, err
 	}
 	return fi.Size(), nil
+}
+
+// ReadFileNames returns a list of file names that are children of the given
+// file.
+func ReadFileNames(file fs.OsFile) ([]string, error) {
+	files, err := ioutil.ReadDir(file.Path())
+	if err != nil {
+		return nil, err
+	}
+	var list []string
+	for _, f := range files {
+		list = append(list, f.Name())
+	}
+	return list, nil
 }
 
 func GetExecPath() (string, error) {

@@ -75,7 +75,7 @@ func (c *Client) next() {
 
 func (c *Client) listenMessage() {
 	log.Println("Listening for client message")
-	msg, err := readMessage(c.conn)
+	msg, err := readMessage(c.conn, longReadTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read message")
 		return
@@ -89,7 +89,35 @@ func (c *Client) onMessage(msg Message) {
 	case process.Start:
 		c.start(msg)
 	default:
-		c.error("wrong message state")
+		if msg.Command != nil {
+			c.onCommand(msg.Command)
+		} else {
+			c.error("wrong message state")
+		}
+	}
+}
+
+func (c *Client) onCommand(cmd map[string]string) {
+	req := cmd["REQ"]
+
+	switch req {
+	case "LIST_CHANNELS":
+		err := writeChannels(c.conn)
+		if err != nil {
+			c.error("fail to send list of channels")
+			return
+		}
+	case "LIST_FILES":
+		// TODO channel := c.process.User().Channel()
+		channelName := cmd["CHANNEL"]
+		channel := process.NewChannel(channelName)
+		err := writeFiles(c.conn, channel)
+		if err != nil {
+			c.error("fail to send list of files")
+			return
+		}
+	default:
+		c.error("invalid command request")
 	}
 }
 
@@ -154,7 +182,7 @@ func (c *Client) onChunkProcessed() {
 
 func (c *Client) listenEof() {
 	log.Println("Listening for EOF")
-	msg, err := readMessage(c.conn)
+	msg, err := readMessage(c.conn, readTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read EOF message")
 		return
@@ -200,7 +228,7 @@ func (c *Client) writeStreamState(payload process.StreamPayload) {
 
 func (c *Client) listenStream() {
 	log.Println("Listening for client STREAM signal")
-	msg, err := readMessage(c.conn)
+	msg, err := readMessage(c.conn, readTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read status STREAM")
 		return

@@ -185,6 +185,70 @@ func TestDownloadIfNotExists(t *testing.T) {
 	}
 }
 
+func TestChannelList(t *testing.T) {
+	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
+	utils.RequirePassCase(t, err, "Fail to resolve TCP address")
+	conn, err := net.DialTCP(network, nil, tcpAddr)
+	defer conn.Close()
+	utils.RequirePassCase(t, err, "Fail to establish connection")
+
+	// Send command
+	cmd := make(map[string]string)
+	cmd["REQ"] = "LIST_CHANNELS"
+	msg := Message{
+		Command: cmd,
+	}
+	b, err := json.Marshal(msg)
+	_, err = conn.Write(b)
+	utils.RequirePassCase(t, err, "Fail to write command to the server")
+
+	// Receive response
+	var channels []string
+	dec := json.NewDecoder(conn)
+	err = dec.Decode(&channels)
+	if err != nil {
+		return
+	}
+
+	// Check at least has the main, and test channels
+	if !utils.StringSliceContains(channels, "main") {
+		t.Fatal("Channel list does not contain channel: main")
+	}
+	if !utils.StringSliceContains(channels, "test") {
+		t.Fatal("Channel list does not contain channel: test")
+	}
+}
+
+func TestFileList(t *testing.T) {
+	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
+	utils.RequirePassCase(t, err, "Fail to resolve TCP address")
+	conn, err := net.DialTCP(network, nil, tcpAddr)
+	defer conn.Close()
+	utils.RequirePassCase(t, err, "Fail to establish connection")
+
+	// Send command
+	cmd := make(map[string]string)
+	cmd["REQ"] = "LIST_FILES"
+	cmd["CHANNEL"] = testChannel
+	msg := Message{
+		Command: cmd,
+	}
+	b, err := json.Marshal(msg)
+	_, err = conn.Write(b)
+	utils.RequirePassCase(t, err, "Fail to write command to the server")
+
+	// Receive response
+	var fileList []string
+	dec := json.NewDecoder(conn)
+	err = dec.Decode(&fileList)
+	if err != nil {
+		return
+	}
+
+	// Check
+	log.Println("Files on channel test:", fileList)
+}
+
 // Tests if the server closes the connection after the read timeout is consumed.
 func TestTcpTimeout(t *testing.T) {
 	if testing.Short() {

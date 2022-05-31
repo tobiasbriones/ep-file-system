@@ -13,6 +13,15 @@ const (
 	fsRoot = ".fs"
 )
 
+func getFsRootFile() (fs.OsFile, error) {
+	path, err := files.GetExecPath()
+	if err != nil {
+		return fs.OsFile{}, err
+	}
+	f, _ := fs.NewFileFromString(fsRoot)
+	return f.ToOsFile(path), nil
+}
+
 func getOsFsRoot() (string, error) {
 	path, err := files.GetExecPath()
 	if err != nil {
