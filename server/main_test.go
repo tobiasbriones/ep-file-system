@@ -249,6 +249,34 @@ func TestFileList(t *testing.T) {
 	log.Println("Files on channel test:", fileList)
 }
 
+func TestCommandId(t *testing.T) {
+	tcpAddr, err := net.ResolveTCPAddr(network, getServerAddress())
+	utils.RequirePassCase(t, err, "Fail to resolve TCP address")
+	conn, err := net.DialTCP(network, nil, tcpAddr)
+	defer conn.Close()
+	utils.RequirePassCase(t, err, "Fail to establish connection")
+
+	// Send command
+	cmd := make(map[string]string)
+	cmd["REQ"] = "CID"
+	msg := Message{
+		Command: cmd,
+	}
+	b, err := json.Marshal(msg)
+	_, err = conn.Write(b)
+	utils.RequirePassCase(t, err, "Fail to write command to the server")
+
+	// Receive response
+	buf := make([]byte, 32)
+	n, err := conn.Read(buf)
+	if err != nil {
+		t.Fatal("Fail to read CID: ", err)
+	}
+
+	// Check
+	log.Println("Client ID:", string(buf[:n]))
+}
+
 // Tests if the server closes the connection after the read timeout is consumed.
 func TestTcpTimeout(t *testing.T) {
 	if testing.Short() {
