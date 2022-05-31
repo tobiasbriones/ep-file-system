@@ -104,8 +104,8 @@ class ClientFragment : Fragment() {
     private fun readCID() {
         lifecycleScope.launch {
             val cid = client.readCID()
-            println(cid)
             binding.clientText.text = "Client #$cid"
+            binding.channelText.text = "Channel: ${client.channel}"
         }
     }
 

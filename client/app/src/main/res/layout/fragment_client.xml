@@ -15,11 +15,12 @@
 
     <LinearLayout
         android:id="@+id/upload_layout"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         >
+
         <Button
             android:id="@+id/button_upload"
             android:layout_width="match_parent"
@@ -36,18 +37,24 @@
         />
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         >
-
         <TextView
             android:id="@+id/clientText"
             android:text="Client"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
             app:drawableStartCompat="@android:drawable/presence_online"
+            />
+        <TextView
+            android:id="@+id/channelText"
+            android:text="Channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             />
     </LinearLayout>
 
