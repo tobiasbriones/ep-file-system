@@ -17,7 +17,7 @@ class Conn(private val socket: Socket) {
         )
     )
 
-    fun readChannels(): Array<String> {
+    fun readChannels(): List<String> {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -34,7 +34,7 @@ class Conn(private val socket: Socket) {
         val channels = Array(jsonArray.length()) {
             jsonArray.getString(it)
         }
-        return channels
+        return channels.toList()
     }
 
     fun stream(bytes: ByteArray) {

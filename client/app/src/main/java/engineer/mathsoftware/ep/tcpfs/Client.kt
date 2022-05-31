@@ -58,7 +58,7 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
-    suspend fun readChannels() : Array<String> {
+    suspend fun readChannels() : List<String> {
         return withContext(Dispatchers.IO) {
             return@withContext conn.readChannels()
         }
