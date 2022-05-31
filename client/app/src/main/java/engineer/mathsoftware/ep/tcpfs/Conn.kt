@@ -37,6 +37,27 @@ class Conn(private val socket: Socket) {
         return channels.toList()
     }
 
+    fun readFiles(channel: String): List<String> {
+        val os = socket.getOutputStream()
+        val msg = JSONObject()
+        val cmd = JSONObject()
+
+        cmd.put("REQ", "LIST_FILES")
+        cmd.put("CHANNEL", channel)
+        msg.put("Command", cmd)
+
+        os.write(
+            msg.toString()
+                .toByteArray()
+        )
+        val res = reader.readLine()
+        val jsonArray = JSONArray(res)
+        val channels = Array(jsonArray.length()) {
+            jsonArray.getString(it)
+        }
+        return channels.toList()
+    }
+
     fun stream(bytes: ByteArray) {
         val size = bytes.size
         val os = socket.getOutputStream()

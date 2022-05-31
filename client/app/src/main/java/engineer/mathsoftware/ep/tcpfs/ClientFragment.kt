@@ -85,6 +85,14 @@ class ClientFragment : Fragment() {
         if (channel != null) {
             client.channel = channel
         }
+        readFiles()
+    }
+
+    private fun readFiles() {
+        lifecycleScope.launch {
+            val files = client.readFiles()
+            println(files.joinToString (", "))
+        }
     }
 
     private fun disconnect() {

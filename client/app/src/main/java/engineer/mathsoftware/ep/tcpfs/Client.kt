@@ -64,6 +64,12 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
+    suspend fun readFiles() : List<String> {
+        return withContext(Dispatchers.IO) {
+            return@withContext conn.readFiles(channel)
+        }
+    }
+
     suspend fun upload(bytes: ByteArray) {
         withContext(Dispatchers.IO) {
             try {
