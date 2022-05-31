@@ -80,3 +80,18 @@ func writeChannels(conn net.Conn) error {
 	enc := json.NewEncoder(conn)
 	return enc.Encode(channels)
 }
+
+func writeFiles(conn net.Conn, channel process.Channel) error {
+	root, err := getFsRootFile()
+	if err != nil {
+		return err
+	}
+	dir, _ := channel.File()
+	channelFile := dir.ToOsFile(root.Path())
+	fileList, err := files.ReadDirectories(channelFile)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(conn)
+	return enc.Encode(fileList)
+}

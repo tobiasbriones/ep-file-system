@@ -107,6 +107,15 @@ func (c *Client) onCommand(cmd map[string]string) {
 			c.error("fail to send list of channels")
 			return
 		}
+	case "LIST_FILES":
+		// TODO channel := c.process.User().Channel()
+		channelName := cmd["CHANNEL"]
+		channel := process.NewChannel(channelName)
+		err := writeFiles(c.conn, channel)
+		if err != nil {
+			c.error("fail to send list of files")
+			return
+		}
 	default:
 		c.error("invalid command request")
 	}
