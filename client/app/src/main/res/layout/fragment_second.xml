@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 Tobias Briones. All rights reserved.
+  ~ SPDX-License-Identifier: BSD-3-Clause
+  ~ This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
+  -->
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"

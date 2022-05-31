@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 Tobias Briones. All rights reserved.
+  ~ SPDX-License-Identifier: BSD-3-Clause
+  ~ This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
+  -->
+
 <resources>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
