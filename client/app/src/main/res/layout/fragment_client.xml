@@ -4,23 +4,22 @@
   ~ This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp"
     tools:context=".ClientFragment"
     >
 
     <LinearLayout
+        android:id="@+id/upload_layout"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:layout_editor_absoluteY="1dp"
-        tools:layout_editor_absoluteX="1dp"
+        android:layout_alignParentTop="true"
         >
-
         <Button
             android:id="@+id/button_upload"
             android:layout_width="match_parent"
@@ -31,6 +30,25 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fileList"
-        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/upload_layout"
         />
-</LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        >
+
+        <TextView
+            android:id="@+id/clientText"
+            android:text="Client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:drawableStartCompat="@android:drawable/presence_online"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
