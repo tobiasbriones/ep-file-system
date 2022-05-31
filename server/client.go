@@ -89,7 +89,26 @@ func (c *Client) onMessage(msg Message) {
 	case process.Start:
 		c.start(msg)
 	default:
-		c.error("wrong message state")
+		if msg.Command != nil {
+			c.onCommand(msg.Command)
+		} else {
+			c.error("wrong message state")
+		}
+	}
+}
+
+func (c *Client) onCommand(cmd map[string]string) {
+	req := cmd["REQ"]
+
+	switch req {
+	case "LIST_CHANNELS":
+		err := writeChannels(c.conn)
+		if err != nil {
+			c.error("fail to send list of channels")
+			return
+		}
+	default:
+		c.error("invalid command request")
 	}
 }
 
