@@ -19,4 +19,5 @@
     <string name="upload">Upload</string>
     <string name="subscribe_to_channel_title">Subscribe to a channel</string>
     <string name="upload_title">Upload a File</string>
+    <string name="files_title">List of Files</string>
 </resources>
