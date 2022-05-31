@@ -4,13 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentMainBinding
 import kotlinx.coroutines.launch
 
@@ -21,6 +21,7 @@ const val PICKFILE_REQUEST_CODE = 1
  */
 class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
+    private lateinit var client: Client
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -41,6 +42,7 @@ class MainFragment : Fragment() {
         binding.buttonUpload.setOnClickListener {
             chooseFileToUpload()
         }
+        connect()
     }
 
     override fun onDestroyView() {
@@ -65,6 +67,20 @@ class MainFragment : Fragment() {
         }
     }
 
+    private fun connect() {
+        lifecycleScope.launch {
+            val c = Client.newInstance()
+
+            if (c == null) {
+                handleConnectionFailed()
+            }
+            else {
+                println("connected")
+                client = c
+            }
+        }
+    }
+
     private fun chooseFileToUpload() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -81,15 +97,20 @@ class MainFragment : Fragment() {
         if (data != null) {
             bytes = read(requireContext().contentResolver, data)
         }
-        val client = Client()
-        client.file = file
 
         lifecycleScope.launch {
-            client.connect()
-            Log.d("UPLOAD", "Connected...")
+            client.file = file
             client.upload(bytes)
-            client.disconnect()
-            Log.d("UPLOAD", "Done, Disconnected...")
         }
+    }
+
+    private fun handleConnectionFailed() {
+        Snackbar.make(
+            requireView(),
+            "Fail to connect",
+            Snackbar.LENGTH_LONG
+        )
+            .setAction("Action", null)
+            .show()
     }
 }
