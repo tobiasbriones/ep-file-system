@@ -75,7 +75,7 @@ func (c *Client) next() {
 
 func (c *Client) listenMessage() {
 	log.Println("Listening for client message")
-	msg, err := readMessage(c.conn)
+	msg, err := readMessage(c.conn, longReadTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read message")
 		return
@@ -182,7 +182,7 @@ func (c *Client) onChunkProcessed() {
 
 func (c *Client) listenEof() {
 	log.Println("Listening for EOF")
-	msg, err := readMessage(c.conn)
+	msg, err := readMessage(c.conn, readTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read EOF message")
 		return
@@ -228,7 +228,7 @@ func (c *Client) writeStreamState(payload process.StreamPayload) {
 
 func (c *Client) listenStream() {
 	log.Println("Listening for client STREAM signal")
-	msg, err := readMessage(c.conn)
+	msg, err := readMessage(c.conn, readTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read status STREAM")
 		return

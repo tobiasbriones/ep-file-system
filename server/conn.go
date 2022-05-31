@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	readTimeOut = 20 * time.Second
+	readTimeOut     = 20 * time.Second
+	longReadTimeOut = 20 * time.Minute
 )
 
 func readChunk(conn net.Conn) ([]byte, error) {
@@ -57,8 +58,8 @@ func writeMessage(msg Message, conn net.Conn) error {
 	return enc.Encode(msg)
 }
 
-func readMessage(conn net.Conn) (Message, error) {
-	err := conn.SetReadDeadline(time.Now().Add(readTimeOut))
+func readMessage(conn net.Conn, timeout time.Duration) (Message, error) {
+	err := conn.SetReadDeadline(time.Now().Add(timeout))
 	if err != nil {
 		return Message{}, err
 	}
