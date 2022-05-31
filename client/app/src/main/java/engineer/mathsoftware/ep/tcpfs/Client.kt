@@ -32,14 +32,14 @@ enum class State {
 const val HOST: String = "10.0.2.2" // This localhost IP works on the emulator
 const val PORT: Int = 8080
 
-class Client(private val socket: Socket) {
+class Client(private val socket: Socket, private val conn: Conn) {
     companion object {
         suspend fun newInstance(): Client? {
             return withContext(Dispatchers.IO) {
                 try {
                     val address = InetAddress.getByName(HOST)
                     val socket = Socket(address, PORT)
-                    Client(socket)
+                    Client(socket, Conn(socket))
                 }
                 catch (e: ConnectException) {
                     println("ERROR: " + e.message.toString())
@@ -83,20 +83,7 @@ class Client(private val socket: Socket) {
                 println("STATE: $state")
 
                 // Upload
-                val size = bytes.size
-                var count = 0
-
-                while (count < size) {
-                    var end = count + SERVER_BUF_SIZE - 1
-                    end = if (end >= size) size - 1 else end
-                    val chunk = bytes.sliceArray(
-                        IntRange(count, end)
-                    )
-                    socket.getOutputStream()
-                        .write(chunk)
-                    count += SERVER_BUF_SIZE
-                }
-                println("Finished sending chunks: $count")
+                conn.stream(bytes)
 
                 res = reader.readLine()
                 ser = JSONObject(res)

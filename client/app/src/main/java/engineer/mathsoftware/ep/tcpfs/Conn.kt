@@ -3,3 +3,25 @@
 // This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
 
 package engineer.mathsoftware.ep.tcpfs
+
+import java.net.Socket
+
+class Conn(private val socket: Socket) {
+
+    fun stream(bytes: ByteArray) {
+        val size = bytes.size
+        val os = socket.getOutputStream()
+        var count = 0
+
+        while (count < size) {
+            var end = count + SERVER_BUF_SIZE - 1
+            end = if (end >= size) size - 1 else end
+            val chunk = bytes.sliceArray(
+                IntRange(count, end)
+            )
+            os.write(chunk)
+            count += SERVER_BUF_SIZE
+        }
+        println("Finished sending chunks: $count")
+    }
+}
