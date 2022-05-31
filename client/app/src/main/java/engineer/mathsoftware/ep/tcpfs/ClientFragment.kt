@@ -98,6 +98,7 @@ class ClientFragment : Fragment() {
             client.channel = channel
         }
         readCID()
+        readFiles()
     }
 
     private fun readCID() {
@@ -105,7 +106,6 @@ class ClientFragment : Fragment() {
             val cid = client.readCID()
             println(cid)
             binding.clientText.text = "Client #$cid"
-            readFiles()
         }
     }
 
