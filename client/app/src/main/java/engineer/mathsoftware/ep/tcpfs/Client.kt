@@ -58,6 +58,12 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
+    suspend fun readChannels() :JSONArray{
+        return withContext(Dispatchers.IO) {
+            return@withContext conn.readChannels()
+        }
+    }
+
     suspend fun upload(bytes: ByteArray) {
         withContext(Dispatchers.IO) {
             try {

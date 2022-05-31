@@ -83,6 +83,9 @@ class MainFragment : Fragment() {
                 println("connected")
                 client = c
             }
+
+            val channels = client.readChannels()
+            println(channels)
         }
     }
 

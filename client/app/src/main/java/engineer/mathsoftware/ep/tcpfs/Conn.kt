@@ -4,6 +4,7 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -15,6 +16,23 @@ class Conn(private val socket: Socket) {
             socket.getInputStream()
         )
     )
+
+    fun readChannels(): JSONArray {
+        val os = socket.getOutputStream()
+        val msg = JSONObject()
+        val cmd = JSONObject()
+
+        cmd.put("REQ", "LIST_CHANNELS")
+        msg.put("Command", cmd)
+
+        os.write(
+            msg.toString()
+                .toByteArray()
+        )
+        val res = reader.readLine()
+        println(res)
+        return JSONArray(res)
+    }
 
     fun stream(bytes: ByteArray) {
         val size = bytes.size
