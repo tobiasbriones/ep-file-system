@@ -62,13 +62,9 @@ class Client(private val socket: Socket, private val conn: Conn) {
         withContext(Dispatchers.IO) {
             try {
                 var msg = getStartMessage(Action.UPLOAD, bytes.size)
-
-                socket.getOutputStream()
-                    .write(
-                        msg.toString()
-                            .toByteArray()
-                    )
+                conn.writeMessage(msg)
                 println("Start message sent")
+
                 var state = conn.readState()
                 println("STATE: $state")
 
@@ -77,12 +73,8 @@ class Client(private val socket: Socket, private val conn: Conn) {
                 println("Received status: $state")
 
                 msg = getEofMessage()
-                println(msg)
-                socket.getOutputStream()
-                    .write(
-                        msg.toString()
-                            .toByteArray()
-                    )
+                conn.writeMessage(msg)
+                println("EOF message sent")
 
                 state = conn.readState()
                 println("Received status: $state")

@@ -39,4 +39,12 @@ class Conn(private val socket: Socket) {
         return ser.get("State")
             .toString()
     }
+
+    fun writeMessage(msg: JSONObject) {
+        val os = socket.getOutputStream()
+        os.write(
+            msg.toString()
+                .toByteArray()
+        )
+    }
 }
