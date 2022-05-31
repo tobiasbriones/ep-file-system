@@ -14,12 +14,15 @@ import android.view.ViewGroup
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentClientBinding
 import kotlinx.coroutines.launch
 import java.net.SocketException
 
 class ClientFragment : Fragment() {
+    private val files = ArrayList<String>()
     private var _binding: FragmentClientBinding? = null
+    private lateinit var filesAdapter: FilesAdapter
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -36,6 +39,8 @@ class ClientFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        filesAdapter = FilesAdapter(files) { download(it) }
+        initFileList()
         binding.buttonUpload.setOnClickListener {
             chooseFileToUpload()
         }
@@ -65,6 +70,13 @@ class ClientFragment : Fragment() {
         }
     }
 
+    private fun initFileList() {
+        val recyclerView = binding.fileList
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = filesAdapter
+    }
+
     private fun connect() {
         lifecycleScope.launch {
             val c = Client.newInstance()
@@ -90,8 +102,10 @@ class ClientFragment : Fragment() {
 
     private fun readFiles() {
         lifecycleScope.launch {
-            val files = client.readFiles()
-            println(files.joinToString (", "))
+            val res = client.readFiles()
+            files.clear()
+            files.addAll(res)
+            filesAdapter.notifyDataSetChanged()
         }
     }
 
@@ -122,6 +136,19 @@ class ClientFragment : Fragment() {
             try {
                 client.file = file
                 client.upload(bytes)
+            }
+            catch (e: SocketException) {
+                println("ERROR: ${e.message}")
+                handleConnectionFailed()
+            }
+        }
+    }
+
+    private fun download(file: String) {
+        lifecycleScope.launch {
+            try {
+                client.file = file
+                // TODO client.download()
             }
             catch (e: SocketException) {
                 println("ERROR: ${e.message}")

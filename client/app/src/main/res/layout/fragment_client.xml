@@ -28,4 +28,9 @@
             android:text="@string/upload"
             />
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fileList"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        />
 </LinearLayout>
