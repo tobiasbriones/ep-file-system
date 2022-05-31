@@ -48,6 +48,7 @@ class MainFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        disconnect()
     }
 
     override fun onActivityResult(
@@ -78,6 +79,12 @@ class MainFragment : Fragment() {
                 println("connected")
                 client = c
             }
+        }
+    }
+
+    private fun disconnect() {
+        lifecycleScope.launch {
+            client.disconnect()
         }
     }
 

@@ -49,6 +49,12 @@ class Client(private val socket: Socket) {
     var file: String = ""
     private var channel: String = "test"
 
+    suspend fun disconnect() {
+        withContext(Dispatchers.IO) {
+            socket.close()
+        }
+    }
+
     suspend fun upload(bytes: ByteArray) {
         withContext(Dispatchers.IO) {
             try {
