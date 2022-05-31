@@ -18,6 +18,10 @@ const (
 )
 
 func readChunk(conn net.Conn) ([]byte, error) {
+	err := conn.SetReadDeadline(time.Now().Add(readTimeOut))
+	if err != nil {
+		return nil, err
+	}
 	b := make([]byte, bufSize)
 	n, err := conn.Read(b)
 
