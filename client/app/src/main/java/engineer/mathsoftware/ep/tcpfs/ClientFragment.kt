@@ -74,7 +74,15 @@ class ClientFragment : Fragment() {
             else {
                 println("connected")
                 client = c
+                handleConnectionOpened()
             }
+        }
+    }
+
+    private fun handleConnectionOpened() {
+        val channel = arguments?.getString("channel")
+        if (channel != null) {
+            client.channel = channel
         }
     }
 

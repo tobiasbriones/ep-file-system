@@ -50,7 +50,7 @@ class Client(private val socket: Socket, private val conn: Conn) {
     }
 
     var file: String = ""
-    private var channel: String = "test"
+    var channel: String = "test"
 
     suspend fun disconnect() {
         withContext(Dispatchers.IO) {
