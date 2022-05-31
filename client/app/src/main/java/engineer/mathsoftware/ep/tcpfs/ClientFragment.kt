@@ -106,6 +106,7 @@ class ClientFragment : Fragment() {
             val cid = client.readCID()
             binding.clientText.text = "Client #$cid"
             binding.channelText.text = "Channel: ${client.channel}"
+            binding.infoText.text = "Connected"
         }
     }
 
@@ -145,12 +146,17 @@ class ClientFragment : Fragment() {
             try {
                 client.file = file
                 client.upload(bytes)
+                handleFileUploaded()
             }
             catch (e: SocketException) {
                 println("ERROR: ${e.message}")
                 handleConnectionFailed()
             }
         }
+    }
+
+    private fun handleFileUploaded() {
+        binding.infoText.text = "File uploaded: ${client.file}"
     }
 
     private fun download(file: String) {
