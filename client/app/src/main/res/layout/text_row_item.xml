@@ -9,6 +9,8 @@
     android:layout_height="wrap_content"
     android:padding="16dp"
     android:gravity="center_vertical"
+    android:clickable="true"
+    android:background="?android:selectableItemBackground"
     >
 
     <TextView
