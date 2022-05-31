@@ -73,7 +73,7 @@ func writeChannels(conn net.Conn) error {
 	if err != nil {
 		return err
 	}
-	channels, err := files.ReadDirectories(root)
+	channels, err := files.ReadFileNames(root)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func writeFiles(conn net.Conn, channel process.Channel) error {
 	}
 	dir, _ := channel.File()
 	channelFile := dir.ToOsFile(root.Path())
-	fileList, err := files.ReadDirectories(channelFile)
+	fileList, err := files.ReadFileNames(channelFile)
 	if err != nil {
 		return err
 	}

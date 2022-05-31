@@ -46,9 +46,9 @@ func ReadSize(file fs.OsFile) (int64, error) {
 	return fi.Size(), nil
 }
 
-// ReadDirectories returns a list of file names that are children of the given
+// ReadFileNames returns a list of file names that are children of the given
 // file.
-func ReadDirectories(file fs.OsFile) ([]string, error) {
+func ReadFileNames(file fs.OsFile) ([]string, error) {
 	files, err := ioutil.ReadDir(file.Path())
 	if err != nil {
 		return nil, err
