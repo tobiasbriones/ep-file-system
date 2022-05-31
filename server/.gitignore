@@ -1,1 +1,4 @@
 .test_fs/
+
+# If you run the server into this directory
+.fs/
