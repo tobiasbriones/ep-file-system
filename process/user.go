@@ -33,6 +33,10 @@ func (u User) File() fs.OsFile {
 	return u.file
 }
 
+func (u User) Channel() Channel {
+	return u.req.channel
+}
+
 func (u *User) start(payload StartPayload) error {
 	u.req.set(payload)
 	u.count = 0

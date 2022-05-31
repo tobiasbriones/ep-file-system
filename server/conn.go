@@ -13,10 +13,15 @@ import (
 )
 
 const (
-	readTimeOut = 20 * time.Second
+	readTimeOut     = 20 * time.Second
+	longReadTimeOut = 20 * time.Minute
 )
 
 func readChunk(conn net.Conn) ([]byte, error) {
+	err := conn.SetReadDeadline(time.Now().Add(readTimeOut))
+	if err != nil {
+		return nil, err
+	}
 	b := make([]byte, bufSize)
 	n, err := conn.Read(b)
 
@@ -57,8 +62,8 @@ func writeMessage(msg Message, conn net.Conn) error {
 	return enc.Encode(msg)
 }
 
-func readMessage(conn net.Conn) (Message, error) {
-	err := conn.SetReadDeadline(time.Now().Add(readTimeOut))
+func readMessage(conn net.Conn, timeout time.Duration) (Message, error) {
+	err := conn.SetReadDeadline(time.Now().Add(timeout))
 	if err != nil {
 		return Message{}, err
 	}
@@ -73,10 +78,25 @@ func writeChannels(conn net.Conn) error {
 	if err != nil {
 		return err
 	}
-	channels, err := files.ReadDirectories(root)
+	channels, err := files.ReadFileNames(root)
 	if err != nil {
 		return err
 	}
 	enc := json.NewEncoder(conn)
 	return enc.Encode(channels)
+}
+
+func writeFiles(conn net.Conn, channel process.Channel) error {
+	root, err := getFsRootFile()
+	if err != nil {
+		return err
+	}
+	dir, _ := channel.File()
+	channelFile := dir.ToOsFile(root.Path())
+	fileList, err := files.ReadFileNames(channelFile)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(conn)
+	return enc.Encode(fileList)
 }
