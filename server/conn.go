@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fs/files"
 	"fs/process"
 	"net"
 	"time"
@@ -65,4 +66,17 @@ func readMessage(conn net.Conn) (Message, error) {
 	dec := json.NewDecoder(conn)
 	err = dec.Decode(&msg)
 	return msg, err
+}
+
+func writeChannels(conn net.Conn) error {
+	root, err := getFsRootFile()
+	if err != nil {
+		return err
+	}
+	channels, err := files.ReadDirectories(root)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(conn)
+	return enc.Encode(channels)
 }

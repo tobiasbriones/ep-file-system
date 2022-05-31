@@ -11,6 +11,7 @@ import (
 )
 
 type Message struct {
+	Command map[string]string
 	Response
 	process.State
 	Payload
