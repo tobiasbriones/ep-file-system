@@ -97,7 +97,16 @@ class ClientFragment : Fragment() {
         if (channel != null) {
             client.channel = channel
         }
-        readFiles()
+        readCID()
+    }
+
+    private fun readCID() {
+        lifecycleScope.launch {
+            val cid = client.readCID()
+            println(cid)
+            binding.clientText.text = "Client #$cid"
+            readFiles()
+        }
     }
 
     private fun readFiles() {

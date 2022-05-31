@@ -70,6 +70,12 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
+    suspend fun readCID() : Int {
+        return withContext(Dispatchers.IO) {
+            return@withContext conn.readCID()
+        }
+    }
+
     suspend fun upload(bytes: ByteArray) {
         withContext(Dispatchers.IO) {
             try {

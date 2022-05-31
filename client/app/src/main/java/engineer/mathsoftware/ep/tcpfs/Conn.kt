@@ -58,6 +58,22 @@ class Conn(private val socket: Socket) {
         return channels.toList()
     }
 
+    fun readCID(): Int {
+        val os = socket.getOutputStream()
+        val msg = JSONObject()
+        val cmd = JSONObject()
+
+        cmd.put("REQ", "CID")
+        msg.put("Command", cmd)
+
+        os.write(
+            msg.toString()
+                .toByteArray()
+        )
+        val res = reader.readLine()
+        return Integer.parseInt(res)
+    }
+
     fun stream(bytes: ByteArray) {
         val size = bytes.size
         val os = socket.getOutputStream()
