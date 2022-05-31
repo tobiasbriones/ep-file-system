@@ -10,7 +10,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ChannelsAdapter(private val dataSet: List<String>) :
+class ChannelsAdapter(
+    private val dataSet: List<String>,
+    private val l: (channel: String) -> Unit
+) :
     RecyclerView.Adapter<ChannelsAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -32,6 +35,7 @@ class ChannelsAdapter(private val dataSet: List<String>) :
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.textView.text = dataSet[position]
+        viewHolder.itemView.setOnClickListener { l(dataSet[position]) }
     }
 
     override fun getItemCount() = dataSet.size

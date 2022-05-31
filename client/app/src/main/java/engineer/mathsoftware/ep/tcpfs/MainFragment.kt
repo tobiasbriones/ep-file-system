@@ -14,8 +14,8 @@ import android.view.ViewGroup
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBindings
 import com.google.android.material.snackbar.Snackbar
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentMainBinding
@@ -47,7 +47,7 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        channelsAdapter = ChannelsAdapter(channels)
+        channelsAdapter = ChannelsAdapter(channels) {subscribe(it)}
         initChannelList()
 
         // binding.buttonUpload.setOnClickListener {
@@ -112,6 +112,10 @@ class MainFragment : Fragment() {
         lifecycleScope.launch {
             client.disconnect()
         }
+    }
+
+    private fun subscribe(channel: String) {
+        findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
     }
 
     private fun chooseFileToUpload() {
