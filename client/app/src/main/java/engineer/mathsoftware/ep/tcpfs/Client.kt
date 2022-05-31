@@ -27,7 +27,6 @@ enum class State {
 
 const val HOST: String = "10.0.2.2" // This localhost IP works on the emulator
 const val PORT: Int = 8080
-const val URI: String = "http://$HOST:$PORT"
 
 class Client(private val socket: Socket) {
     companion object {
