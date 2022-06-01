@@ -68,15 +68,18 @@ class MainFragment : Fragment() {
             else {
                 println("connected")
                 client = c
+                handleConnected()
             }
+        }
+    }
 
-            try {
-                val channels = client.readChannels()
-                loadChannels(channels)
-            }
-            catch (e: JSONException) {
-                println(e.message)
-            }
+    private suspend fun handleConnected() {
+        try {
+            val channels = client.readChannels()
+            loadChannels(channels)
+        }
+        catch (e: JSONException) {
+            println(e.message)
         }
     }
 
