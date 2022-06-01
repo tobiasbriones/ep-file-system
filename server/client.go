@@ -40,7 +40,7 @@ func newClient(
 
 func (c *Client) run() {
 	defer c.conn.Close()
-	c.connect()
+	c.connect() // TODO synchronize, wait for completing signal register
 	log.Println("Client connected")
 	for {
 		select {
@@ -174,7 +174,6 @@ func (c *Client) listenData() {
 		c.error(err.Error())
 		return
 	}
-	c.onChunkProcessed()
 }
 
 func (c *Client) onChunkProcessed() {
