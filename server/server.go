@@ -22,6 +22,7 @@ func listen(server net.Listener) {
 	osFsRoot := loadRoot()
 	hub := NewHub()
 
+	log.Println("Server running on:", osFsRoot)
 	go hub.run()
 	for {
 		conn, err := server.Accept()
