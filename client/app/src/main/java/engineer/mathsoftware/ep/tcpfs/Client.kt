@@ -118,7 +118,20 @@ class Client(private val socket: Socket, private val conn: Conn) {
 
                 msg = getStreamMessage()
                 conn.writeMessage(msg)
-                conn.downstream(size, l)
+
+                val array = conn.downstream(size, l)
+
+                if (array.size != size) {
+                    println("ERROR: Overflow")
+                }
+
+                msg = getEofMessage()
+                conn.writeMessage(msg)
+
+                val done = conn.readMessage()
+                println("State: ${done["State"]}")
+
+                array
             }
             catch (e: JSONException) {
                 println("ERROR: fail to read server response: " + e.message)
