@@ -118,7 +118,7 @@ func (c *Client) onCommand(cmd map[string]string) {
 			return
 		}
 	case "CID":
-		_, err := c.conn.Write([]byte(strconv.Itoa(int(c.id))))
+		_, err := c.conn.Write([]byte(strconv.Itoa(int(c.id)) + "\n"))
 		if err != nil {
 			c.error("fail to send client ID")
 			return
