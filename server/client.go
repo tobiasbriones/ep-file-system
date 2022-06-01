@@ -68,7 +68,7 @@ func (c *Client) next() {
 	case process.Stream:
 		c.listenStream()
 	case process.Eof:
-		c.listenEof()
+		c.handleEof()
 	case process.Error:
 		c.sendQuit()
 	}
@@ -188,14 +188,27 @@ func (c *Client) onChunkProcessed() {
 	}
 }
 
-func (c *Client) listenEof() {
-	log.Println("Listening for EOF")
+func (c *Client) handleEof() {
+	err := c.writeEofState()
+	if err != nil {
+		c.error("fail to write EOF state")
+		return
+	}
+	log.Println("State EOF sent, waiting for EOF message")
 	msg, err := readMessage(c.conn, readTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read EOF message")
 		return
 	}
 	c.eof(msg)
+}
+
+func (c *Client) writeEofState() error {
+	err := writeState(process.Eof, c.conn)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) eof(msg Message) {
