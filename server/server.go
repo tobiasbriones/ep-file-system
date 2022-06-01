@@ -35,6 +35,7 @@ func listen(server net.Listener) {
 			osFsRoot,
 			hub.register,
 			hub.unregister,
+			hub.change,
 		)
 		go client.run()
 	}

@@ -34,7 +34,7 @@ func (h *Hub) run() {
 		case c := <-h.unregister:
 			h.unregisterClient(c)
 		case <-h.change:
-			h.broadcastChange()
+			go h.broadcastChange()
 		case <-h.quit:
 			h.unregisterAll()
 			return
@@ -64,6 +64,6 @@ func (h *Hub) unregisterClient(c *Client) {
 func (h *Hub) broadcastChange() {
 	payload := UpdatePayload{Change: true}
 	for _, client := range h.clients {
-		client.change <- payload
+		client.notify <- payload
 	}
 }
