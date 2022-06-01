@@ -124,7 +124,7 @@ func TestUpload(t *testing.T) {
 		t.Fatal("Fail to get state=EOF")
 	}
 
-	log.Println("State=EOF", res)
+	log.Println("State=EOF")
 	eof(t, conn)
 	res = readResponseMsg(t, conn)
 	log.Println(res.State)
@@ -150,27 +150,38 @@ func TestDownload(t *testing.T) {
 	utils.RequirePassCase(t, err, "Fail to create file download.pdf")
 	size := payload.Size
 	count := uint64(0)
+
+	writeChunk := func(chunk []byte) {
+		err = files.WriteBuf(osFile, chunk)
+		utils.RequirePassCase(t, err, "Fail to write chunk to file")
+	}
 	for {
-		if count >= size {
-			break
-		}
 		b := make([]byte, bufSize)
 		n, err := conn.Read(b)
 		utils.RequirePassCase(t, err, "Fail to read chunk from server")
-		chunk := b[:n]
-		err = files.WriteBuf(osFile, chunk)
-		utils.RequirePassCase(t, err, "Fail to write chunk to file")
 		count += uint64(n)
+
+		if count >= size { // Last chunk
+			diff := count - size
+			n = n - int(diff)
+			chunk := b[:n]
+			writeChunk(chunk)
+			break
+		}
+		chunk := b[:n]
+		writeChunk(chunk)
 		if n == 0 {
 			t.Fatal("Underflow!")
 		}
 	}
 
-	// TODO The download works 100%, but extra bytes are written so gives overflow
-	//log.Println(count)
-	//if count != size {
-	//	t.Fatal("Overflow!")
-	//}
+	msg, err := readMessage(conn, readTimeOut)
+	if err != nil {
+		t.Fatal("fail to read STATUS=EOF")
+	}
+	if msg.State != process.Eof {
+		t.Fatal("fail to read STATUS=EOF, it might be overflow")
+	}
 }
 
 // Requires not to have a file "not-exists.txt" in the server test channel.
