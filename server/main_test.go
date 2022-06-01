@@ -136,14 +136,20 @@ func TestDownload(t *testing.T) {
 	info := newTestFileInfo()
 	conn := initiateConn(t, process.ActionDownload, info)
 	defer conn.Close()
+
+	// Receive state STREAM with payload
 	res := readResponseMsg(t, conn)
 	if res.State != process.Stream {
 		t.Fatal("Fail to get state=STREAM")
 	}
 	payload, err := res.StreamPayload()
 	utils.RequirePassCase(t, err, "Fail to read StreamPayload")
+
+	// Write state STREAM to confirm
 	err = writeState(process.Stream, conn)
 	utils.RequirePassCase(t, err, "Fail to write state=STREAM")
+
+	// Get local file ready
 	file, _ := fs.NewFileFromString("download.pdf")
 	osFile := file.ToOsFile(testFsClientRoot) // .../.fs/client/download.pdf
 	err = files.Create(osFile)
@@ -155,31 +161,40 @@ func TestDownload(t *testing.T) {
 		err = files.WriteBuf(osFile, chunk)
 		utils.RequirePassCase(t, err, "Fail to write chunk to file")
 	}
+
+	// Read stream chunks from the server
 	for {
 		b := make([]byte, bufSize)
 		n, err := conn.Read(b)
 		utils.RequirePassCase(t, err, "Fail to read chunk from server")
 		count += uint64(n)
 
-		if count >= size { // Last chunk
-			diff := count - size
-			n = n - int(diff)
-			chunk := b[:n]
-			writeChunk(chunk)
-			break
-		}
 		chunk := b[:n]
 		writeChunk(chunk)
-		if n == 0 {
+		if n == 0 { // TODO Underflow should be handled differently now :/
 			t.Fatal("Underflow!")
+		}
+		if count >= size {
+			break
 		}
 	}
 
+	if count != size {
+		t.Fatal("Overflow")
+	}
+
+	// Confirm received with state EOF
+	err = writeState(process.Eof, conn)
+	if err != nil {
+		t.Fatal("fail to write STATUS=EOF")
+	}
+
+	// And then get state DONE
 	msg, err := readMessage(conn, readTimeOut)
 	if err != nil {
-		t.Fatal("fail to read STATUS=EOF")
+		t.Fatal("fail to read STATUS=DONE")
 	}
-	if msg.State != process.Eof {
+	if msg.State != process.Done {
 		t.Fatal("fail to read STATUS=EOF, it might be overflow")
 	}
 }

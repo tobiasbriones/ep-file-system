@@ -273,12 +273,22 @@ func (c *Client) stream() {
 			}
 		},
 	)
-
 	if err != nil {
 		c.error("fail to stream file: " + err.Error())
 		return
 	}
-	log.Println("File sent to client, changing state to DONE")
+	log.Println("File sent to client, waiting for client state EOF")
+	msg, err := readMessage(c.conn, readTimeOut)
+	if err != nil {
+		c.error("Server error, fail to read state=EOF")
+		return
+	}
+	if msg.State != process.Eof {
+		c.error("Fail to read state=EOF")
+		return
+	}
+
+	log.Println("Sending state DONE")
 	err = writeState(process.Done, c.conn)
 	if err != nil {
 		c.error("Fail to write state=DONE")
