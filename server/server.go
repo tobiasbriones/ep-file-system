@@ -36,6 +36,7 @@ func listen(server net.Listener) {
 			hub.register,
 			hub.unregister,
 			hub.change,
+			hub.list,
 		)
 		go client.run()
 	}

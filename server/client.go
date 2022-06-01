@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fs/process"
 	"io"
 	"log"
@@ -20,6 +21,7 @@ type Client struct {
 	unregister chan *Client
 	change     chan struct{}
 	notify     chan UpdatePayload
+	list       chan *Client
 	quit       chan struct{}
 }
 
@@ -29,6 +31,7 @@ func newClient(
 	register chan *Client,
 	unregister chan *Client,
 	change chan struct{},
+	list chan *Client,
 ) *Client {
 	return &Client{
 		conn:       conn,
@@ -36,6 +39,7 @@ func newClient(
 		register:   register,
 		unregister: unregister,
 		change:     change,
+		list:       list,
 		notify:     make(chan UpdatePayload),
 		quit:       make(chan struct{}),
 	}
@@ -137,6 +141,9 @@ func (c *Client) onCommand(cmd map[string]string) {
 			c.error("fail to send client ID")
 			return
 		}
+	case "CONNECTED_USERS":
+		// Send a signal to send the list of users to this client
+		c.list <- c
 	default:
 		c.error("invalid command request")
 	}
@@ -338,6 +345,11 @@ func (c *Client) sendUpdate(u UpdatePayload) {
 		c.error("Fail to send update")
 		return
 	}
+}
+
+func (c *Client) sendList(clients []string) {
+	enc := json.NewEncoder(c.conn)
+	enc.Encode(clients)
 }
 
 func (c *Client) handleReadError(err error, msg string) {
