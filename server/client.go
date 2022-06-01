@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fs/process"
 	"io"
 	"log"
@@ -18,7 +19,9 @@ type Client struct {
 	id         uint // Current ID assigned by the Hub
 	register   chan *Client
 	unregister chan *Client
-	change     chan UpdatePayload
+	change     chan struct{}
+	notify     chan UpdatePayload
+	list       chan *Client
 	quit       chan struct{}
 }
 
@@ -27,13 +30,17 @@ func newClient(
 	osFsRoot string,
 	register chan *Client,
 	unregister chan *Client,
+	change chan struct{},
+	list chan *Client,
 ) *Client {
 	return &Client{
 		conn:       conn,
 		process:    process.NewProcess(osFsRoot),
 		register:   register,
 		unregister: unregister,
-		change:     make(chan UpdatePayload),
+		change:     change,
+		list:       list,
+		notify:     make(chan UpdatePayload),
 		quit:       make(chan struct{}),
 	}
 }
@@ -42,10 +49,10 @@ func (c *Client) run() {
 	defer c.conn.Close()
 	c.connect() // TODO synchronize, wait for completing signal register
 	log.Println("Client connected")
+
+	go c.runNotification()
 	for {
 		select {
-		case u := <-c.change:
-			c.sendUpdate(u)
 		case <-c.quit:
 			c.unregister <- c
 			return
@@ -57,6 +64,17 @@ func (c *Client) run() {
 
 func (c *Client) connect() {
 	c.register <- c
+}
+
+func (c *Client) runNotification() {
+	for {
+		select {
+		case u := <-c.notify:
+			c.sendUpdate(u)
+		case <-c.quit:
+			return
+		}
+	}
 }
 
 func (c *Client) next() {
@@ -123,6 +141,9 @@ func (c *Client) onCommand(cmd map[string]string) {
 			c.error("fail to send client ID")
 			return
 		}
+	case "CONNECTED_USERS":
+		// Send a signal to send the list of users to this client
+		c.list <- c
 	default:
 		c.error("invalid command request")
 	}
@@ -227,6 +248,12 @@ func (c *Client) eof(msg Message) {
 		c.error("fail to write state=DONE")
 		return
 	}
+
+	// If a file was uploaded, notify
+	if c.process.Action() == process.ActionUpload {
+		log.Println("File was uploaded, sending notification")
+		c.change <- struct{}{}
+	}
 }
 
 func (c *Client) writeStreamState(payload process.StreamPayload) {
@@ -297,6 +324,11 @@ func (c *Client) stream() {
 }
 
 func (c *Client) sendUpdate(u UpdatePayload) {
+	// Only allow sending updates when client is on hold to not mess with the
+	// FSM process, e.g. in the middle when downloading a file
+	if c.process.State() != process.Start {
+		return
+	}
 	p, err := NewPayloadFrom(u)
 	if err != nil {
 		log.Println(err)
@@ -304,7 +336,8 @@ func (c *Client) sendUpdate(u UpdatePayload) {
 		return
 	}
 	msg := Message{
-		Payload: p,
+		Response: Update,
+		Payload:  p,
 	}
 	err = writeMessage(msg, c.conn)
 	if err != nil {
@@ -312,6 +345,11 @@ func (c *Client) sendUpdate(u UpdatePayload) {
 		c.error("Fail to send update")
 		return
 	}
+}
+
+func (c *Client) sendList(clients []string) {
+	enc := json.NewEncoder(c.conn)
+	enc.Encode(clients)
 }
 
 func (c *Client) handleReadError(err error, msg string) {
