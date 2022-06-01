@@ -139,6 +139,7 @@ func (c *Client) start(msg Message) {
 		c.error(err.Error())
 		return
 	}
+	log.Println("Accepting request:", payload)
 	c.onProcessStarted()
 }
 
