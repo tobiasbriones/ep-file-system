@@ -303,6 +303,52 @@ func TestCommandId(t *testing.T) {
 	log.Println("Client ID:", string(buf[:n]))
 }
 
+// Makes a simple test when a goroutine uploads a file while another client is
+// on hold, so it receives an update message. It might not pass sometimes due
+// to the side effects.
+func TestBroadcast(t *testing.T) {
+	var update = make(chan struct{})
+	var fail = make(chan struct{})
+
+	go func() {
+		// Connect and keep on hold state START
+		tcpAddr, _ := net.ResolveTCPAddr(network, getServerAddress())
+		conn, _ := net.DialTCP(network, nil, tcpAddr)
+
+		log.Println("HOLD: Connection established")
+		msg, _ := readMessage(conn, readTimeOut)
+		log.Println("Received msg:", msg)
+		if msg.Response != Update {
+			fail <- struct{}{}
+			return
+		}
+		update <- struct{}{}
+	}()
+	go func() {
+		time.Sleep(1 * time.Second)
+
+		// Upload a file to change the FS, channel test
+		info := newTestFileInfo()
+		osFile := info.ToOsFile(testFsClientRoot) // .../.test_fs/client/file.pdf
+		loadFileSize(&info, osFile)
+		conn := initiateConn(t, process.ActionUpload, info)
+		defer conn.Close()
+		readResponseMsg(t, conn) // State DATA
+		upload(t, conn, osFile)
+		readResponseMsg(t, conn) // State EOF
+		eof(t, conn)
+		readResponseMsg(t, conn) // State DONE
+		log.Println("UPLOAD: File sent")
+	}()
+
+	select {
+	case <-update:
+		log.Println("Update received")
+	case <-fail:
+		t.Fatal("Fail to receive update from server")
+	}
+}
+
 // Tests if the server closes the connection after the read timeout is consumed.
 func TestTcpTimeout(t *testing.T) {
 	if testing.Short() {
