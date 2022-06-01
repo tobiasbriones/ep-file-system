@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fs/files"
 	"fs/process"
 	"io"
 	"log"
@@ -120,6 +121,25 @@ func (c *Client) onCommand(cmd map[string]string) {
 	req := cmd["REQ"]
 
 	switch req {
+	case "CREATE_CHANNEL":
+		channelName := cmd["CHANNEL"]
+		file, err := getFsRootFile()
+		if err != nil {
+			log.Println(err)
+			c.error("server error")
+			return
+		}
+		err = file.Append(channelName)
+		if err != nil {
+			c.error("invalid channel")
+			return
+		}
+		err = files.CreateIfNotExists(file)
+		if err != nil {
+			log.Println(err)
+			c.error("server error")
+			return
+		}
 	case "LIST_CHANNELS":
 		err := writeChannels(c.conn)
 		if err != nil {
