@@ -157,6 +157,7 @@ func (c *Client) onActionUploadStarted() {
 		c.error("Fail to write state=DATA")
 		return
 	}
+	log.Println("State DATA sent")
 }
 
 func (c *Client) onActionDownloadStarted() {
