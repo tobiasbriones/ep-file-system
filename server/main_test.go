@@ -124,7 +124,7 @@ func TestUpload(t *testing.T) {
 		t.Fatal("Fail to get state=EOF")
 	}
 
-	log.Println("State=EOF", res)
+	log.Println("State=EOF")
 	eof(t, conn)
 	res = readResponseMsg(t, conn)
 	log.Println(res.State)
@@ -136,41 +136,67 @@ func TestDownload(t *testing.T) {
 	info := newTestFileInfo()
 	conn := initiateConn(t, process.ActionDownload, info)
 	defer conn.Close()
+
+	// Receive state STREAM with payload
 	res := readResponseMsg(t, conn)
 	if res.State != process.Stream {
 		t.Fatal("Fail to get state=STREAM")
 	}
 	payload, err := res.StreamPayload()
 	utils.RequirePassCase(t, err, "Fail to read StreamPayload")
+
+	// Write state STREAM to confirm
 	err = writeState(process.Stream, conn)
 	utils.RequirePassCase(t, err, "Fail to write state=STREAM")
+
+	// Get local file ready
 	file, _ := fs.NewFileFromString("download.pdf")
 	osFile := file.ToOsFile(testFsClientRoot) // .../.fs/client/download.pdf
 	err = files.Create(osFile)
 	utils.RequirePassCase(t, err, "Fail to create file download.pdf")
 	size := payload.Size
 	count := uint64(0)
+
+	writeChunk := func(chunk []byte) {
+		err = files.WriteBuf(osFile, chunk)
+		utils.RequirePassCase(t, err, "Fail to write chunk to file")
+	}
+
+	// Read stream chunks from the server
 	for {
-		if count >= size {
-			break
-		}
 		b := make([]byte, bufSize)
 		n, err := conn.Read(b)
 		utils.RequirePassCase(t, err, "Fail to read chunk from server")
-		chunk := b[:n]
-		err = files.WriteBuf(osFile, chunk)
-		utils.RequirePassCase(t, err, "Fail to write chunk to file")
 		count += uint64(n)
-		if n == 0 {
+
+		chunk := b[:n]
+		writeChunk(chunk)
+		if n == 0 { // TODO Underflow should be handled differently now :/
 			t.Fatal("Underflow!")
+		}
+		if count >= size {
+			break
 		}
 	}
 
-	// TODO The download works 100%, but extra bytes are written so gives overflow
-	//log.Println(count)
-	//if count != size {
-	//	t.Fatal("Overflow!")
-	//}
+	if count != size {
+		t.Fatal("Overflow")
+	}
+
+	// Confirm received with state EOF
+	err = writeState(process.Eof, conn)
+	if err != nil {
+		t.Fatal("fail to write STATUS=EOF")
+	}
+
+	// And then get state DONE
+	msg, err := readMessage(conn, readTimeOut)
+	if err != nil {
+		t.Fatal("fail to read STATUS=DONE")
+	}
+	if msg.State != process.Done {
+		t.Fatal("fail to read STATUS=EOF, it might be overflow")
+	}
 }
 
 // Requires not to have a file "not-exists.txt" in the server test channel.

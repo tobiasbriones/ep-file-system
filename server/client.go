@@ -40,7 +40,7 @@ func newClient(
 
 func (c *Client) run() {
 	defer c.conn.Close()
-	c.connect()
+	c.connect() // TODO synchronize, wait for completing signal register
 	log.Println("Client connected")
 	for {
 		select {
@@ -68,7 +68,7 @@ func (c *Client) next() {
 	case process.Stream:
 		c.listenStream()
 	case process.Eof:
-		c.listenEof()
+		c.handleEof()
 	case process.Error:
 		c.sendQuit()
 	}
@@ -139,6 +139,7 @@ func (c *Client) start(msg Message) {
 		c.error(err.Error())
 		return
 	}
+	log.Println("Accepting request:", payload)
 	c.onProcessStarted()
 }
 
@@ -157,6 +158,7 @@ func (c *Client) onActionUploadStarted() {
 		c.error("Fail to write state=DATA")
 		return
 	}
+	log.Println("State DATA sent")
 }
 
 func (c *Client) onActionDownloadStarted() {
@@ -174,7 +176,6 @@ func (c *Client) listenData() {
 		c.error(err.Error())
 		return
 	}
-	c.onChunkProcessed()
 }
 
 func (c *Client) onChunkProcessed() {
@@ -187,14 +188,27 @@ func (c *Client) onChunkProcessed() {
 	}
 }
 
-func (c *Client) listenEof() {
-	log.Println("Listening for EOF")
+func (c *Client) handleEof() {
+	err := c.writeEofState()
+	if err != nil {
+		c.error("fail to write EOF state")
+		return
+	}
+	log.Println("State EOF sent, waiting for EOF message")
 	msg, err := readMessage(c.conn, readTimeOut)
 	if err != nil {
 		c.handleReadError(err, "fail to read EOF message")
 		return
 	}
 	c.eof(msg)
+}
+
+func (c *Client) writeEofState() error {
+	err := writeState(process.Eof, c.conn)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) eof(msg Message) {
@@ -259,12 +273,22 @@ func (c *Client) stream() {
 			}
 		},
 	)
-
 	if err != nil {
 		c.error("fail to stream file: " + err.Error())
 		return
 	}
-	log.Println("File sent to client, changing state to DONE")
+	log.Println("File sent to client, waiting for client state EOF")
+	msg, err := readMessage(c.conn, readTimeOut)
+	if err != nil {
+		c.error("Server error, fail to read state=EOF")
+		return
+	}
+	if msg.State != process.Eof {
+		c.error("Fail to read state=EOF")
+		return
+	}
+
+	log.Println("Sending state DONE")
 	err = writeState(process.Done, c.conn)
 	if err != nil {
 		c.error("Fail to write state=DONE")
