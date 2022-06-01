@@ -20,6 +20,10 @@ import kotlinx.coroutines.launch
 import java.net.SocketException
 
 class ClientFragment : Fragment() {
+    companion object {
+        private const val PICK_DOWNLOAD_DIR_REQUEST_CODE = 2
+    }
+
     private val files = ArrayList<String>()
     private var _binding: FragmentClientBinding? = null
     private lateinit var filesAdapter: FilesAdapter
@@ -67,6 +71,11 @@ class ClientFragment : Fragment() {
         }
         when (requestCode) {
             PICKFILE_REQUEST_CODE -> readFileToUpload(data.data)
+            PICK_DOWNLOAD_DIR_REQUEST_CODE -> {
+                data?.data?.let { uri ->
+                    startDownload(uri)
+                }
+            }
         }
     }
 
@@ -163,15 +172,33 @@ class ClientFragment : Fragment() {
     }
 
     private fun download(file: String) {
+        client.file = file
+        chooseDownloadFolder()
+    }
+
+    private fun startDownload(uri: Uri) {
         lifecycleScope.launch {
             try {
-                client.file = file
-                // TODO client.download()
+                val array = client.download {
+                    val percentage = it * 100
+                    binding.infoText.text = "Downloading $percentage%"
+                }
+                write(requireContext().contentResolver, uri, array)
+                println("Downloaded ${array.size}")
             }
             catch (e: SocketException) {
                 println("ERROR: ${e.message}")
                 handleConnectionFailed()
             }
         }
+    }
+
+    private fun chooseDownloadFolder() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            putExtra(Intent.EXTRA_TITLE, client.file)
+        }
+        startActivityForResult(intent, PICK_DOWNLOAD_DIR_REQUEST_CODE)
     }
 }

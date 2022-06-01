@@ -9,8 +9,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.ConnectException
 import java.net.InetAddress
 import java.net.Socket
@@ -106,6 +104,33 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
+    suspend fun download(l: (progress: Float) -> Unit): ByteArray {
+        return withContext(Dispatchers.IO) {
+            try {
+                var msg = getStartMessage(Action.DOWNLOAD)
+                conn.writeMessage(msg)
+                println("Start message sent")
+
+                var res = conn.readMessage()
+                var payload = conn.readData(res)
+                val size = payload["Size"].toString().toInt()
+                println("Payload: $payload")
+
+                msg = getStreamMessage()
+                conn.writeMessage(msg)
+                conn.downstream(size, l)
+            }
+            catch (e: JSONException) {
+                println("ERROR: fail to read server response: " + e.message)
+                ByteArray(0)
+            }
+            catch (e: NoSuchElementException) {
+                println("Connection closed: $e.message")
+                ByteArray(0)
+            }
+        }
+    }
+
     private fun getStartMessage(action: Action, size: Int = 0): JSONObject {
         val payload = getStartPayload(action, size)
         val ser = JSONObject()
@@ -118,7 +143,7 @@ class Client(private val socket: Socket, private val conn: Conn) {
         val payload = """
             {
                 "Action": ${action.ordinal},
-                "Value": $file,
+                "Value": "$file",
                 "Size": $size,
                 "Channel": {
                     "Name": $channel
@@ -138,6 +163,13 @@ class Client(private val socket: Socket, private val conn: Conn) {
     private fun getEofMessage(): JSONObject {
         val ser = JSONObject()
         ser.put("State", State.EOF)
+        ser.put("Data", null)
+        return ser
+    }
+
+    private fun getStreamMessage(): JSONObject {
+        val ser = JSONObject()
+        ser.put("State", State.STREAM)
         ser.put("Data", null)
         return ser
     }

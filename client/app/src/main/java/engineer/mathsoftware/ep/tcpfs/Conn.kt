@@ -4,11 +4,13 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import android.util.Base64
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.Socket
+import java.nio.charset.StandardCharsets
 
 class Conn(private val socket: Socket) {
     private val reader = BufferedReader(
@@ -87,17 +89,19 @@ class Conn(private val socket: Socket) {
             )
             os.write(chunk)
             count += SERVER_BUF_SIZE
-            val p = if (count >= size) 1.0f else count.toFloat() / size.toFloat()
-            l(p)
+            l(getPercentage(count, size))
         }
-        println("Finished sending chunks: $count")
     }
 
     fun readState(): String {
-        val res = reader.readLine()
-        val ser = JSONObject(res)
+        val ser = readMessage()
         return ser.get("State")
             .toString()
+    }
+
+    fun readMessage(): JSONObject {
+        val res = reader.readLine()
+        return JSONObject(res)
     }
 
     fun writeMessage(msg: JSONObject) {
@@ -107,4 +111,35 @@ class Conn(private val socket: Socket) {
                 .toByteArray()
         )
     }
+
+    fun readData(msg: JSONObject): JSONObject {
+        val data = msg["Data"].toString()
+        val str = Base64.decode(data, Base64.DEFAULT)
+            .toString(StandardCharsets.UTF_8)
+        return JSONObject(str)
+    }
+
+    fun downstream(size: Int, l: (progress: Float) -> Unit): ByteArray {
+        var array = ByteArray(0)
+        var count = 0
+        while (count < size) {
+            val chunk = readChunk()
+            array += chunk
+            count += chunk.size
+            l(getPercentage(count, size))
+        }
+        return array
+    }
+
+    fun readChunk(): ByteArray {
+        val chunk = ByteArray(SERVER_BUF_SIZE)
+        val n = socket.getInputStream()
+            .read(chunk)
+        return chunk.sliceArray(IntRange(0, n - 1))
+    }
+}
+
+private fun getPercentage(count: Int, size: Int): Float {
+    return if (count >= size) 1.0f
+    else count.toFloat() / size.toFloat()
 }

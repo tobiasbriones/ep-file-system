@@ -19,6 +19,14 @@ fun read(res: ContentResolver, uri: Uri): ByteArray {
     return ByteArray(0)
 }
 
+fun write(res: ContentResolver, uri: Uri, array: ByteArray) {
+    val os = res.openOutputStream(uri)
+    if (os != null) {
+        os.write(array)
+        os.close()
+    }
+}
+
 private fun getBytes(inputStream: InputStream): ByteArray {
     val byteBuffer = ByteArrayOutputStream()
     val buffer = ByteArray(SERVER_BUF_SIZE)
