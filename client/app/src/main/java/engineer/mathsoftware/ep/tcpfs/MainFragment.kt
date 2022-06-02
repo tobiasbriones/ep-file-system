@@ -4,10 +4,13 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -41,6 +44,7 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         channelsAdapter = ChannelsAdapter(channels) { subscribe(it) }
+        binding.fab.setOnClickListener { showCreateChannelDialog() }
         initChannelList()
         connect()
     }
@@ -102,6 +106,36 @@ class MainFragment : Fragment() {
         channels.clear()
         channels.addAll(values)
         channelsAdapter.notifyDataSetChanged()
+    }
+
+    private fun showCreateChannelDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val view = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_input_text, null)
+        val input = view.findViewById<TextView>(R.id.dialogInputText)
+        input.setHint("Enter channel name")
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setTitle("Create Channel")
+        builder.setView(view)
+        builder.setPositiveButton("CREATE") { _, _ ->
+            var channelName = input.text.toString()
+            createChannel(channelName)
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        builder.show()
+    }
+
+    private fun createChannel(channelName: String) {
+        lifecycleScope.launch {
+            client.createChannel(channelName)
+            Snackbar.make(
+                requireView(),
+                "Channel created",
+                Snackbar.LENGTH_LONG
+            )
+                .show()
+            handleConnected() // Reload
+        }
     }
 }
 
