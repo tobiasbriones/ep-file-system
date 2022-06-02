@@ -1,16 +1,24 @@
 <template>
-  Admin Home
+  <div class="px-5 py-4">
+    <AdminUsers :users="users" />
+  </div>
 </template>
 
 <script>
+import AdminUsers from '@/components/Users';
+
 export default {
   name: 'AdminHome',
-  props: {
-    msg: String
+  components: { AdminUsers },
+  data() {
+    return {
+      users: [
+        {
+          id: 1,
+          channel: 'test'
+        }
+      ]
+    };
   }
 };
 </script>
-
-<style scoped>
-
-</style>
