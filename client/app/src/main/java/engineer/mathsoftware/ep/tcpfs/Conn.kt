@@ -53,6 +53,9 @@ class Conn(private val socket: Socket) {
                 .toByteArray()
         )
         val res = reader.readLine()
+        if (res == null || res == "null") {
+            return ArrayList()
+        }
         val jsonArray = JSONArray(res)
         val channels = Array(jsonArray.length()) {
             jsonArray.getString(it)

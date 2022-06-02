@@ -147,7 +147,10 @@ class Client(private val socket: Socket, private val conn: Conn) {
     suspend fun createChannel(channel:String) {
         withContext(Dispatchers.IO) {
             val msg = JSONObject()
-            msg.put("Command", "CREATE_CHANNEL")
+            val cmd = JSONObject()
+            cmd.put("REQ", "CREATE_CHANNEL")
+            cmd.put("CHANNEL", channel)
+            msg.put("Command", cmd)
             conn.writeMessage(msg)
         }
     }
