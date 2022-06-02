@@ -103,6 +103,7 @@ class ClientFragment : Fragment() {
     }
 
     private fun handleConnectionOpened() {
+        if (!this::client.isInitialized) return
         val channel = arguments?.getString("channel")
         if (channel != null) {
             client.channel = channel
@@ -112,6 +113,7 @@ class ClientFragment : Fragment() {
     }
 
     private fun readCID() {
+        if (!this::client.isInitialized) return
         lifecycleScope.launch {
             val cid = client.readCID()
             binding.clientText.text = "Client #$cid"
@@ -121,6 +123,7 @@ class ClientFragment : Fragment() {
     }
 
     private fun disconnect() {
+        if (!this::client.isInitialized) return
         lifecycleScope.launch {
             client.disconnect()
         }
@@ -169,6 +172,7 @@ class ClientFragment : Fragment() {
     }
 
     private fun download(file: String) {
+        if (!this::client.isInitialized) return
         client.file = file
         chooseDownloadFolder()
     }
@@ -210,6 +214,7 @@ class ClientFragment : Fragment() {
     }
 
     private fun readFiles() {
+        if (!this::client.isInitialized) return
         lifecycleScope.launch {
             val res = client.readFiles()
             val size = res.size

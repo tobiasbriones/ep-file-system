@@ -76,6 +76,7 @@ class MainFragment : Fragment() {
     }
 
     private suspend fun handleConnected() {
+        if (!this::client.isInitialized) return
         try {
             val channels = client.readChannels()
             loadChannels(channels)
@@ -95,6 +96,7 @@ class MainFragment : Fragment() {
     }
 
     private fun disconnect() {
+        if (!this::client.isInitialized) return
         lifecycleScope.launch {
             client.disconnect()
         }
@@ -124,6 +126,7 @@ class MainFragment : Fragment() {
     }
 
     private fun createChannel(channelName: String) {
+        if (!this::client.isInitialized) return
         lifecycleScope.launch {
             client.createChannel(channelName)
             Snackbar.make(
