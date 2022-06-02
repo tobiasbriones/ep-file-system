@@ -1,0 +1,17 @@
+<!--
+  ~ Copyright (c) 2022 Tobias Briones. All rights reserved.
+  ~ SPDX-License-Identifier: BSD-3-Clause
+  ~ This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
+  -->
+
+<resources>
+    <string name="app_name">client</string>
+    <string name="action_settings">Settings</string>
+    <string name="main_fragment_label">TCP FS</string>
+    <string name="client_fragment_label">Client</string>
+    <string name="next">Next</string>
+    <string name="upload">Upload</string>
+    <string name="subscribe_to_channel_title">Subscribe to a channel</string>
+    <string name="upload_title">Upload a File</string>
+    <string name="files_title">List of Files</string>
+</resources>

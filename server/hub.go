@@ -4,7 +4,10 @@
 
 package main
 
-import "log"
+import (
+	"log"
+	"strconv"
+)
 
 type Hub struct {
 	clients    map[uint]*Client
@@ -12,6 +15,7 @@ type Hub struct {
 	unregister chan *Client
 	quit       chan struct{}
 	change     chan struct{} // Rudimentary signal to test broadcast
+	list       chan *Client  // Signal to send the list of connected clients
 	cid        uint          // Current ID for clients on this server instance
 }
 
@@ -22,6 +26,7 @@ func NewHub() *Hub {
 		unregister: make(chan *Client),
 		quit:       make(chan struct{}),
 		change:     make(chan struct{}),
+		list:       make(chan *Client),
 		cid:        0,
 	}
 }
@@ -34,7 +39,9 @@ func (h *Hub) run() {
 		case c := <-h.unregister:
 			h.unregisterClient(c)
 		case <-h.change:
-			h.broadcastChange()
+			go h.broadcastChange()
+		case c := <-h.list:
+			go h.listClients(c)
 		case <-h.quit:
 			h.unregisterAll()
 			return
@@ -64,6 +71,14 @@ func (h *Hub) unregisterClient(c *Client) {
 func (h *Hub) broadcastChange() {
 	payload := UpdatePayload{Change: true}
 	for _, client := range h.clients {
-		client.change <- payload
+		client.notify <- payload
 	}
+}
+
+func (h *Hub) listClients(c *Client) {
+	var list []string
+	for _, client := range h.clients {
+		list = append(list, strconv.Itoa(int(client.id)))
+	}
+	c.sendList(list)
 }

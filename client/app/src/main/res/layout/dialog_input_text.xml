@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2022 Tobias Briones. All rights reserved.
+  ~ SPDX-License-Identifier: BSD-3-Clause
+  ~ This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    >
+
+    <EditText
+        android:id="@+id/dialogInputText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="Enter value"
+        android:ems="10"
+        />
+</LinearLayout>
