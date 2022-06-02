@@ -122,6 +122,9 @@ class ClientFragment : Fragment() {
     private fun readFiles() {
         lifecycleScope.launch {
             val res = client.readFiles()
+            val size = res.size
+            binding.filesText
+                .text = "${getString(R.string.files_title)} ($size)"
             files.clear()
             files.addAll(res)
             filesAdapter.notifyDataSetChanged()
