@@ -176,11 +176,14 @@ class ClientFragment : Fragment() {
     private fun startDownload(uri: Uri) {
         lifecycleScope.launch {
             try {
+                var chunksTotal = 0
                 val array = client.download {
                     val percentage = it * 100
                     binding.infoText.text = "Downloading $percentage%"
+                    chunksTotal++
                 }
                 write(requireContext().contentResolver, uri, array)
+                handleFileDownloaded(chunksTotal)
                 println("Downloaded ${array.size}")
             }
             catch (e: SocketException) {
@@ -188,6 +191,13 @@ class ClientFragment : Fragment() {
                 handleConnectionFailed()
             }
         }
+    }
+
+    private fun handleFileDownloaded(chunksTotal: Int) {
+        binding.infoText.text = """
+            File downloaded: ${client.file} | $chunksTotal chunks received
+        """.trimIndent()
+        readFiles()
     }
 
     private fun chooseDownloadFolder() {
