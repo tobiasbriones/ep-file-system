@@ -1,25 +1,17 @@
 <template>
-  <Home />
+  <AppToolbar />
+  <AdminHome />
 </template>
 
 <script>
-import Home from './components/Home.vue';
+import AppToolbar from '@/components/Toolbar';
+import AdminHome from '@/components/Home';
 
 export default {
   name: 'App',
   components: {
-    Home: Home
+    AppToolbar,
+    AdminHome
   }
 };
 </script>
-
-<style>
-#app {
-  margin-top: 60px;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  text-align: center;
-  color: #2c3e50;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-</style>
