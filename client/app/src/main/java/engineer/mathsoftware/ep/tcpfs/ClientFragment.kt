@@ -157,12 +157,14 @@ class ClientFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
+                var chunksTotal = 0
                 client.file = file
                 client.upload(bytes) {
                     val percentage = it * 100
                     binding.infoText.text = "Uploading $percentage%"
+                    chunksTotal++
                 }
-                handleFileUploaded()
+                handleFileUploaded(chunksTotal)
             }
             catch (e: SocketException) {
                 println("ERROR: ${e.message}")
@@ -171,8 +173,10 @@ class ClientFragment : Fragment() {
         }
     }
 
-    private fun handleFileUploaded() {
-        binding.infoText.text = "File uploaded: ${client.file}"
+    private fun handleFileUploaded(chunksTotal: Int) {
+        binding.infoText.text = """
+            File uploaded: ${client.file} | $chunksTotal chunks sent
+        """.trimIndent()
     }
 
     private fun download(file: String) {
