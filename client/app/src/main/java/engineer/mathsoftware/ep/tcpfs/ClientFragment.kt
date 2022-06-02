@@ -120,18 +120,6 @@ class ClientFragment : Fragment() {
         }
     }
 
-    private fun readFiles() {
-        lifecycleScope.launch {
-            val res = client.readFiles()
-            val size = res.size
-            binding.filesText
-                .text = "${getString(R.string.files_title)} ($size)"
-            files.clear()
-            files.addAll(res)
-            filesAdapter.notifyDataSetChanged()
-        }
-    }
-
     private fun disconnect() {
         lifecycleScope.launch {
             client.disconnect()
@@ -177,6 +165,7 @@ class ClientFragment : Fragment() {
         binding.infoText.text = """
             File uploaded: ${client.file} | $chunksTotal chunks sent
         """.trimIndent()
+        readFiles()
     }
 
     private fun download(file: String) {
@@ -208,5 +197,17 @@ class ClientFragment : Fragment() {
             putExtra(Intent.EXTRA_TITLE, client.file)
         }
         startActivityForResult(intent, PICK_DOWNLOAD_DIR_REQUEST_CODE)
+    }
+
+    private fun readFiles() {
+        lifecycleScope.launch {
+            val res = client.readFiles()
+            val size = res.size
+            binding.filesText
+                .text = "${getString(R.string.files_title)} ($size)"
+            files.clear()
+            files.addAll(res)
+            filesAdapter.notifyDataSetChanged()
+        }
     }
 }
