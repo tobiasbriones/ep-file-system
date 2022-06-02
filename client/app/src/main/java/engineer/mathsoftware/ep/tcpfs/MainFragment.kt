@@ -21,8 +21,6 @@ import engineer.mathsoftware.ep.tcpfs.databinding.FragmentMainBinding
 import kotlinx.coroutines.launch
 import org.json.JSONException
 
-const val PICKFILE_REQUEST_CODE = 1
-
 class MainFragment : Fragment() {
     private val channels = ArrayList<String>()
     private var _binding: FragmentMainBinding? = null
