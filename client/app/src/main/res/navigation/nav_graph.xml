@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2022 Tobias Briones. All rights reserved.
+  ~ SPDX-License-Identifier: BSD-3-Clause
+  ~ This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
+  -->
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/FirstFragment"
+    >
+
+    <fragment
+        android:id="@+id/FirstFragment"
+        android:name="engineer.mathsoftware.ep.tcpfs.MainFragment"
+        android:label="@string/main_fragment_label"
+        tools:layout="@layout/fragment_main"
+        >
+
+        <action
+            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            app:destination="@id/SecondFragment"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/SecondFragment"
+        android:name="engineer.mathsoftware.ep.tcpfs.ClientFragment"
+        android:label="@string/client_fragment_label"
+        tools:layout="@layout/fragment_client"
+        >
+
+        <action
+            android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment"
+            />
+    </fragment>
+</navigation>

@@ -212,7 +212,7 @@ I really want to avoid that fragmentation and `switch`es.
 
 With integer indices I can easily check if the value is valid too.
 
-### What About Under engineering?
+### What About Under-Engineering?
 
 Go like many popular languages are for under-engineering, for ordinary software
 written by ordinary programmers.
@@ -271,12 +271,12 @@ const (
 )
 
 var stateStrings = map[string]struct{}{
-    "start":  Valid,
-    "data":   Valid,
-    "stream": Valid,
-    "eof":    Valid,
-    "error":  Valid,
-    "done":   Valid,
+    "start":  valid,
+    "data":   valid,
+    "stream": valid,
+    "eof":    valid,
+    "error":  valid,
+    "done":   valid,
 }
 
 func ToState(value string) (State, error) {
@@ -292,8 +292,185 @@ for the boilerplate of Go Sets. Go doesn't have Sets, they're just Maps with
 true everywhere. Use the empty `struct` instead of bool.
 
 ```go
-var Valid = struct{}{}
+var valid = struct{}{}
 ```
 
 That approach should be used for quit channel signals too for the reasons stated
 above.
+
+## Go Dependency System
+
+Something I have detected is that Go dependencies are linear to avoid circular
+dependencies.
+
+This might be a mess but is a good design decision in the end.
+
+It can be a mess because, for example, in the dungeon game, I have the server
+module and the client or game module. I need to extract the game model logic,
+but I couldn't. I had to do something gross to move forward:
+copy-paste the game model to the game module and to the server module.
+
+This must be because Go is aimed for microservices and each module has to be
+small and most important undependable deployable.
+
+That's why I had said that you can't build monoliths with Go.
+
+### Where's the Domain Model Then?
+
+Everything is relative, as I
+[recently wrote](https://blog.mathsoftware.engineer/everything-is-relative).
+
+The most important layer or module is the app domain. With this dependency
+model, it must go all the way down so the "dependency arrow" goes all the way
+down. The model won't be able to see implementation details and keeps pure this
+way.
+
+I hate it because the domain must be the less verbose system, and must be in the
+top of the project. The problem is that Go should be used for
+independently-deployable modules.
+
+With Java, I would create different Java/Gradle modules in the root of the
+project and import them as required. I can get to be circular, but it's not too
+bad. That way I can build *modular* monoliths that are pretty useful in
+development. Check the
+[other FS](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system)
+source code for seeing this.
+
+## A Development Cycle Can Be Shorter
+
+Analysis this project as case study, I had to release an initial alpha `0.1.0`
+version and then a stable `0.1.0` version for an MVP.
+
+The development was quite agile, and I was able to constantly deliver pull
+requests for docs and dev, and also making releases in short periods of time.
+
+Can these releases be actually used in production environment according to
+Agile? Some of them just can't as they're not stable.
+
+I usually think about the iterative model where I can create a working bicycle
+and add more each iteration, unlike the incremental model that builds the parts
+instead of the whole.
+
+The initial development went a bit more monolith because I decided from the
+beginning to use chunks of bytes to transfer the files, otherwise the system
+would be badly designed. That big feature made the initial development more
+monolithic and far from a stable-deployable MVP.
+
+If I had to create this project again I would defer that feature for later and
+send the whole files at once for the initial releases.
+
+Adding too many features at once also increases the uncertainty, cyclomatic
+complexity, and early testing. That makes refactorization more painful and hard
+to spot.
+
+## Measure Cohesiveness
+
+Cohesive modules do one thing and well done. It's about the same responsibility.
+This is one of the most important engineering principles I teach.
+
+Measure this by finding pieces of code that do not match the single
+responsibility.
+
+For example, the `Client` `struct` was getting a bit out of hands. I checked and
+knew already that it had different type of implementations that are not directly
+related to the module.
+
+The key here is to check specifications. The `Client` is an object that works
+directly with the `net.Conn` object, so it's a networking detail. If I have file
+system, or IO inside there, then is the wrong place for that logic or
+implementation.
+
+Just look at this red flag:
+
+```go
+switch c.state {
+    default:
+    c.listenMessage()
+    case Data:
+    c.listenData()
+    case Stream:
+    c.listenStream()
+    case Eof:
+    c.listenEof()
+    case Done, Error:
+    log.Println("Exiting client")
+    return
+}
+```
+
+I had pushed the `process` domain into this object. That is basically the
+definition of the FSM (something pure from the hardcore domain module), while I
+must have a network implementation detail into this `Client` module instead.
+
+Projects are never perfect, and they evolve from prototypes or initial
+developments. I didn't make a mistake on writing that code that way. We just
+need to write code that can be refactorized.
+
+That answers a question I've seen on the internet: Do seniors write great code
+from the beginning?
+
+I can't over-engineer to tell that I write the best code since the beginning of
+all the projects, I can't under-engineer eiter because that would turn into a
+problem factory soon. A senior like me just knows what to do in each situation.
+
+## Refactorize Before It's Too Late
+
+I often have to take significant time to refactor the code base because I know
+from experience that the more issues that are carried the more cyclomatic
+complexity and expensive further developments will be.
+
+They can't fire you if you do "useless" things like refactoring or writing
+better code, an autonomous engineer knows what to do, so don't let managers or
+stakeholders tell you what to do, you have communication skills and technical
+ones, but managers don't have any other skill than being people friendly if at
+all.
+
+A professional developer or engineer will put system constraints clearly, don't
+be shy on doing things right. Shame on them if they don't want it so, capitalist
+just want to sell, and they might think this is like traditional engineering
+where you have a table with formulas, so you can deliver projects "on time".
+It's annoying, they kind of tell you "I'm paying you to build this website, so
+you have 5 days to finish it", but in reality software engineering is about
+being a *domain expert* to understand the domain problem and then being a
+*developer* to build the domain solution.
+
+### My Domain
+
+Just check how I perfectly applied this expertise on me: I'm a software engineer
+with domain on math, so that is, a math software engineer. That means I can also
+be a "mediator" (like OOP programmers would say) between mathematicians and
+software engineers to build mathematical software or any other related project.
+
+Computer scientists are bad at engineering and engineers are terrible at math or
+anything where you need intellectual conscious skills. If I wouldn't exist then
+mathematicians would be doomed to write boring proofs in PDF files (no
+indexable, useless nowadays), using proprietary crap software from the 90s, and
+nonsense horrible "Alexandria math library" (they even explicitly say their "
+math lib" is the hugest monolith and feel proud about it, they don't know what
+they do because they're building tools but are not engineers) while engineers
+are doomed to write toy scientific software with wrong tools like Python or
+Microsoft Excel.
+
+Once again I prove we don't need managers and buzzwords but autonomous engineers
+instead.
+
+### Large Refactorization
+
+If you don't refactor constantly the code you find, the project cost will
+explode really quick turning into an extremely coupled system.
+
+Large refactorizations are pretty tiring, is something that will make you
+exhausted because of the large cognitive load to keep tests working and the
+older code working too.
+
+Another tip that I can give is not to underestimate the initial system design
+which will avoid making large refactorizations later.
+
+When designing system architectures we need a domain expert (e.g. someone who
+has build file systems before), if I would've thought a little more about the
+modules of this application the cost of development would've been lower since I
+would have scaled those packages or modules since the beginning instead of
+making larger refactorizations later.
+
+Some systems are not well known, keeping the balance between under-engineering
+and over-engineering is a determinant art in software engineering.

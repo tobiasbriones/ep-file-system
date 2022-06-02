@@ -80,3 +80,27 @@ data is coming, then the state keeps at `DATA` until if *finishes*).
 
 A TCP Hub is implemented to register, unregister, and broadcast changes to the
 client.
+
+## System Modules
+
+The system requires the following modules:
+
+- **fs**: Domain root module (Go).
+- **process**: IO implementation of the FS, including the main FSM for streaming
+  files (Go).
+- **server**: TCP server implementation (Go).
+- **files**: Functions implementing operations on domain files (Go).
+- **utils**: Umbrella functions to help build the system (Go). 
+- **client**: Android client app (Kotlin).
+- **admin**: Basic admin dashboard (Vue.js).
+
+The `fs` module is the file system model so that the application can understand
+business logic, while the `process` module provides the physical implementation
+for the FSM for actions like `DOWNLOAD` or `UPLOAD` files acting as a bridge
+amount the `fs` module and external modules like `server`,
+`client` or `admin`.
+
+The `server` module implements the hub of client connections for the network
+layer of the system, and it's consumed by `client`, and `admin`.
+
+Also take into consideration that the project layout is monorepo.
