@@ -474,3 +474,34 @@ making larger refactorizations later.
 
 Some systems are not well known, keeping the balance between under-engineering
 and over-engineering is a determinant art in software engineering.
+
+## Android Client
+
+Mobile development is way too volatile -phenomenon pretty similar to what
+happens to web development-, and I started writing code for Android 9 years
+ago approximately, in the Java good days as I shared in my
+[LinkedIn Post](https://www.linkedin.com/posts/tobiasbriones_android-java-softwaredevelopment-activity-6937099372325203968-gKaS?utm_source=linkedin_share&utm_medium=member_desktop_web)
+and [Tweet](https://twitter.com/tobiasbriones_/status/1532412328989315072?s=20&t=dcoVZWG2Qb7E6eOlH1ufJQ).
+
+Everything has changed many times, but I found my project quite conservative
+when I created it: Activities, Fragments, XML layouts and resources,
+app manifest, Kotlin instead of Java. I didn't start a Jetpack Compose project
+(is what I wanted, but I still have to learn it though) but a normal
+traditional app instead, so that's the reason of such conservatism.
+
+I've been touching Android development over the last 9-10 years, mostly back
+in ~2013, but since then I haven't made bigger developments or learnings.
+I'm particularly interested in Compose as is a modern declarative DSL for
+building UIs, and I have first-class motivation for working with clean DSLs.
+
+Concurrency models have also been a mess in Android, I'll never forget the
+old-school  `AsyncTask` that
+is [deprecated as of API 30](https://developer.android.com/reference/android/os/AsyncTask)
+and also reminds me of old-fashioned Java Swing desktop apps I built. I had
+to learn how to launch coroutines in Android using the `Fragment` I got in hand.
+
+I have to say, that Android has been an inspiration for me to
+design [JDesk](https://jdesk.mathsoftware.engineer)
+-framework I made to make my Swing apps easier- but now those Android
+inspirations and everything else (Swing, JDesk) are just nostalgia. There in
+lays the reason I need to move forward with declarative DSLs. 
