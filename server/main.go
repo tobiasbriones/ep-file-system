@@ -28,5 +28,5 @@ func main() {
 }
 
 func getServerAddress() string {
-	return fmt.Sprintf("localhost:%v", port)
+	return fmt.Sprintf("0.0.0.0:%v", port)
 }
