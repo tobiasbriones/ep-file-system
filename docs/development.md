@@ -505,3 +505,14 @@ design [JDesk](https://jdesk.mathsoftware.engineer)
 -framework I made to make my Swing apps easier- but now those Android
 inspirations and everything else (Swing, JDesk) are just nostalgia. There in
 lays the reason I need to move forward with declarative DSLs. 
+
+### Managing Files
+
+Managing files is, as usual, launching an activity via an `Intent` to show
+the system file picker, so we don't need to explicitly operate on the user
+storage,
+[App data and files \| Android developers](https://developer.android.com/guide/topics/data)
+was enough information to achieve that.
+
+The only permission I required for storage after all was the
+`WRITE_EXTERNAL_STORAGE` one.
