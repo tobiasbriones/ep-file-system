@@ -76,3 +76,16 @@ In the above case, I had overflow when downloading because formal
 communication between the server and client was not established because of
 lack of development time!. That's why upload worked but download had that
 \*little\* issue.
+
+### More Side Effects
+
+As you can see in the image, I was able to open SVG, and PDF files, but not
+PNG files. Some file formats allow to read overflowed files. That's why I
+checked for underflow and overflow in the FSM process since the beginning.
+
+The more you test these pain points, the less nonsense issues you will have
+later. Or in Uncle Bob words "the only way to go fast is to go well", let
+your teams memorize those words, I really mean it.
+
+This is not the first time I apply this obviously, but I have the chance to
+illustrate it here, so now you now.
