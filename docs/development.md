@@ -515,3 +515,24 @@ bytes or numbers. Everything boils down to numbers or math!
 Now going back from the philosophical matrix to the "real world", I have to
 separate those two responsibilities, and take a TCP approach: plain TCP or
 Web Sockets.
+
+### Web Sockets
+
+When building the admin app in Vue.js I learned something I was talking
+about: the client can't implement TCP sockets as that is a vulnerability
+issue (they're too low-level for the browser) so they barely have web
+sockets (incompatible with my impl).
+
+And web sockets send horrible HTTP headers I had to debug:
+
+![WS HTTP Header](ws-http-header.png)
+
+Thus, my server didn't understand the messages.
+
+A solution for this is either to change my implementation to Gorilla Web
+Sockets or to add some proxy to the connection or some Node.js backend as a
+proxy between the web client and the Go TCP server.
+
+Using web clients is fundamental as they're the default clients because
+everything that runs in a browser is accessible to virtually anyone. So why
+use plain TCP sockets?
