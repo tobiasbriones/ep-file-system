@@ -39,3 +39,34 @@ bad. That way I can build *modular* monoliths that are pretty useful in
 development. Check the
 [other FS](https://github.com/tobiasbriones/cp-unah-mm545-distributed-text-file-system)
 source code for seeing this.
+
+## The Final Solution
+
+There's no problem to import modules in Go, just that the `GO_PATH` is other
+than weird, annoying.
+
+Go source code has to go inside the `GO_PATH` because Go is an opinionated
+language. That leads me to send all my source code from the directory I use
+for my projects to the stupid Go path directory, in "the Go way". That makes
+my projects get fragmented by stereotypes -this project has Go source code,
+so it goes to the Go directory-, but anyway.
+
+After getting used to that, everything works as expected. I can design the
+domain model at the root of the project (the less verbose/nested the more
+important), and can do something like the following structure:
+
+- fs (root domain FS module).
+- files
+- process
+- server
+- utils
+
+Where:
+
+- `process`, `server` consume the root `fs` package.
+- `process` consumes sibling `files`.
+- ...
+
+Any import works as long as is seen from the Go path (this project is in
+the Go path) so you can import other packages with its absolute path,
+e.g. `import "fs/files"` where `fs` is the root package of this project.
