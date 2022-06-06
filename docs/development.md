@@ -525,3 +525,20 @@ expensive and unnecessary.
 Domain logic is mostly at the server side while clients are thinner these
 days, so they only need to consume that logic. Using general constructs of
 PLs instead of the domain DSL suffices to implement clients. 
+
+### Managing Concurrency with Coroutines
+
+Writing, testing, and debugging concurrent applications is always challenging,
+even worse with side effects like file systems and network IO.
+
+It's not enough to employ coroutines but also structured concurrency to make
+it possible to implement in Android.
+
+Fortunately we have modern languages like Kotlin and Go that support a good
+application concurrency model, so it's straightforward to write concurrent
+code. On the other hand, Java on it's roadmap is barely delivering project
+Loom with virtual threads
+for [JDK19](https://inside.java/2022/05/16/quality-heads-up) as a preview
+feature, and then structured concurrency. Modern versions of Java are not
+supported by Android at all.
+
