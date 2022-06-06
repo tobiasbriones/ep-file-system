@@ -516,3 +516,12 @@ was enough information to achieve that.
 
 The only permission I required for storage after all was the
 `WRITE_EXTERNAL_STORAGE` one.
+
+### Porting the FS Domain
+
+I don't mean to design a domain to Android or Web as that would be super
+expensive and unnecessary.
+
+Domain logic is mostly at the server side while clients are thinner these
+days, so they only need to consume that logic. Using general constructs of
+PLs instead of the domain DSL suffices to implement clients. 
