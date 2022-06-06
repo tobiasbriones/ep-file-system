@@ -544,6 +544,43 @@ supported by Android at all.
 
 #### Android won't Allow Network Code on the Main Thread
 
-This is something old I've known. If you write slow-running code that is
-going to use the network, the Android app will crash to disallow this bad
+This is something old I've known. If you write slow-running code that is 
+going to use the network, the Android app will crash to disallow this bad 
 practice unless you disable it, but that would be nonsense.
+
+#### Launching and Tracking Coroutines
+
+This is explained in [Improve app performance with Kotlin coroutines \| 
+Android developers](https://developer.android.com/kotlin/coroutines/coroutines-adv)
+, so we have two parts: launching and tracking.
+
+We have three dispatchers to run our coroutine code with main safety: 
+`Dispatchers.Main`, 
+`Dispatchers.IO`, `Dispatchers.Default`. In this case, `Dispatchers.IO` is 
+good. That is the context that has to be used for the coroutine.
+
+To launch a coroutine we need to understand the underlying scope that will 
+define how the coroutine will live. Scopes vary, there are `viewModelScope`, 
+`lifecycleScope`, so inside a `Fragment` we can use the latter.
+
+Code on the client side will look like this:
+
+```kotlin
+suspend fun disconnect() {
+    withContext(Dispatchers.IO) {
+        socket.close()
+    }
+}
+```
+
+And from the UI:
+
+```kotlin
+lifecycleScope.launch {
+    client.disconnect()
+}
+```
+
+When launching a coroutine we get a `Job` that identifies that coroutine, so
+we can cancel it for instance. That is part of the job of the life cycle, so
+we don't leak unnecessary jobs when the app has already closed for example.
