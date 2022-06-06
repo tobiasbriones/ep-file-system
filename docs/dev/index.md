@@ -1,3 +1,7 @@
+<!-- Copyright (c) 2022 Tobias Briones. All rights reserved. -->
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- This file is part of https://github.com/tobiasbriones/ep-tcp-file-system -->
+
 # Development
 
 In this article, I will document the personal experience I had with Go and this
@@ -26,3 +30,13 @@ This way, the loose logic is correctly coupled, and testable.
 
 I always test the domain modules as much as I can to avoid propagating errors
 forward to presentation layers, and avoid system downtimes or failures.
+
+## Navigation
+
+- [Enums in Go](enums-in-go)
+- [EOF Issues](eof-issues)
+- [Go Dependency System](go-dependency-system)
+- [A Development Cycle Can Be Shorter](a-development-cycle-can-be-shorter)
+- [Refactorize Before It's Too Late](refactorize-before-it's-too-late)
+- [Measure Cohesiveness](measure-cohesiveness)
+- [Plain TCP vs Web Sockets](plain-tcp-vs-web-sockets)
