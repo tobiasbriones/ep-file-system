@@ -542,3 +542,8 @@ for [JDK19](https://inside.java/2022/05/16/quality-heads-up) as a preview
 feature, and then structured concurrency. Modern versions of Java are not
 supported by Android at all.
 
+#### Android won't Allow Network Code on the Main Thread
+
+This is something old I've known. If you write slow-running code that is
+going to use the network, the Android app will crash to disallow this bad
+practice unless you disable it, but that would be nonsense.
