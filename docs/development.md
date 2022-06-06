@@ -592,3 +592,8 @@ we don't leak unnecessary jobs when the app has already closed for example.
 
 An old-school problem I still have is when the emulator dies, and the log is 
 not responding because it's on the died emulator!.
+
+### Watch Out Base64
+
+There are two `Base64` APIs and that had me crazy, we have them in  the 
+`android.util` and `java.util` packages. Make sure to import the android one.
