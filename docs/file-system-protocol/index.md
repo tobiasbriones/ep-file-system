@@ -50,20 +50,55 @@ The DTO should look like the following:
 
 ```json
 {
-  "type": "START",
-  "size": 1024,
-  "payload": {}
+  "Command": {},
+  "Response": 0,
+  "State": "START",
+  "Payload": [7, 15, 96]
 }
 ```
+
+Where:
+
+- **Command**: Passes a dynamically typed hashmap or object with each 
+  command signature as key-value pairs.
+- **Response**: Integer constant originally defined in the server to give a 
+  server response status (not that important for now).
+- **State**: The process FSM state that indicates what is being done 
+  (uploading, waiting for EOF, Done, etc.).
+- **Payload**: Payload object defined in the server and serialized into a 
+  raw byte array into this JSON attribute. It might need to use `Base64` to 
+  decode the bytes on the client to read it as a JSON object. The payload data 
+  types are defined on the server when in doubt.
 
 The payload can contain any information needed for that state.
 
 For the special `DATA` state, a JSON array is to be sent as payload instead.
 When the client detects it as array it will know that is a data chunk. The
-existence of the `size` attribute here implies that the status is `DATA` too.
+existence of the `Size` attribute here implies that the status is `DATA` too 
+since the client has to send the file size when uploading it.
 
 The size indicates the length of the chunk or buffer that the client or server
 has to read.
+
+A start payload should look like this:
+
+```json
+{
+  "Action": 0,
+  "FileInfo": {
+    "File": {
+      "Path": {
+        "Value": "file.html"
+      }
+    },
+    "Size": 5000
+  },
+  "Channel": "tobi"
+}
+```
+
+These attributes are embedding in the Go data types, so they are actually 
+flat, e.g. pass `Value` directly as the `File#Path#Value`.
 
 ## System Interaction
 
