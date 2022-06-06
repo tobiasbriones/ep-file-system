@@ -584,3 +584,8 @@ lifecycleScope.launch {
 When launching a coroutine we get a `Job` that identifies that coroutine, so
 we can cancel it for instance. That is part of the job of the life cycle, so
 we don't leak unnecessary jobs when the app has already closed for example.
+
+### Watch Out the Log
+
+An old-school problem I still have is when the emulator dies, and the log is
+not responding because it's on the died emulator!.
