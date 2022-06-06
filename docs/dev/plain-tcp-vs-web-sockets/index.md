@@ -70,14 +70,14 @@ I defined an FSM on steroids or a state system to define the contracts for
 the remote computers. I can't imagine sending files over the network and
 getting the wrong data!, well, I can, and here we have it in the next capture:
 
+### More Side Effects
+
 ![Download Overflow](download-overflow.png)
 
 In the above case, I had overflow when downloading because formal
 communication between the server and client was not established because of
 lack of development time!. That's why upload worked but download had that
 \*little\* issue.
-
-### More Side Effects
 
 As you can see in the image, I was able to open SVG, and PDF files, but not
 PNG files. Some file formats allow to read overflowed files. That's why I
