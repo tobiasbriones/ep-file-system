@@ -63,3 +63,16 @@ proxy between the web client and the Go TCP server.
 Using web clients is fundamental as they're the default clients because
 everything that runs in a browser is accessible to virtually anyone. So why
 use plain TCP sockets?
+
+## Communication is Key
+
+I defined an FSM on steroids or a state system to define the contracts for
+the remote computers. I can't imagine sending files over the network and
+getting the wrong data!, well, I can, and here we have it in the next capture:
+
+![Download Overflow](download-overflow.png)
+
+In the above case, I had overflow when downloading because formal
+communication between the server and client was not established because of
+lack of development time!. That's why upload worked but download had that
+\*little\* issue.
