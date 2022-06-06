@@ -554,6 +554,9 @@ This is explained in [Improve app performance with Kotlin coroutines \|
 Android developers](https://developer.android.com/kotlin/coroutines/coroutines-adv)
 , so we have two parts: launching and tracking.
 
+[Coroutines basics \| Kotlin](https://kotlinlang.org/docs/coroutines-basics.html)
+is another good resource for getting started on Kotlin coroutines.
+
 We have three dispatchers to run our coroutine code with main safety: 
 `Dispatchers.Main`, 
 `Dispatchers.IO`, `Dispatchers.Default`. In this case, `Dispatchers.IO` is 
@@ -587,5 +590,5 @@ we don't leak unnecessary jobs when the app has already closed for example.
 
 ### Watch Out the Log
 
-An old-school problem I still have is when the emulator dies, and the log is
+An old-school problem I still have is when the emulator dies, and the log is 
 not responding because it's on the died emulator!.
