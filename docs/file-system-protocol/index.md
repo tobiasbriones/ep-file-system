@@ -20,19 +20,24 @@ year:
   multiplayer video game fully written in Go employing the Gorilla Web Socket
   and ebiten as game library.
 
-## Statuses
+## State
 
-The communication statuses are to be the following FSM:
+The communication states are to be the following FSM:
 
-- **START**: The server has accepted the client's request and will start to send
-  data.
-- **DATA**: A chunk of data that has to be buffered by the client.
-- **EOF**: End of File to indicate that the file has been completely sent, and
-  finish the communication.
+- **START**: The communication is on hold for starting a new process.
+- **DATA**: Chunks of files are being streamed from the client to the server 
+  (upload).
+- **STREAM**: Chunks of data are being streamed from the server to the 
+  client (download).
+- **EOF**: End of File to indicate that the file has been completely sent or 
+  received, in order to finish the underlying process.
+- **DONE**: Indicates the process has been successfully completed.
 - **ERROR**: The request couldn't be processed.
 
-The `DATA` status should not be explicitly passed or serialized to avoid extra
-boilerplate overhead as many chunks will be sent for large files.
+The `DATA`, or `STREAM` states should not be explicitly passed or serialized to
+avoid the extra boilerplate overhead as many chunks will be sent for large 
+files. They are agreed before sending/receiving the chunks so both server 
+and client have the correct state to handle raw chunk data.
 
 ## Serialization
 
