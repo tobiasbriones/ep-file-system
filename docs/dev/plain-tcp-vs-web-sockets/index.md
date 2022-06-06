@@ -89,3 +89,30 @@ your teams memorize those words, I really mean it.
 
 This is not the first time I apply this obviously, but I have the chance to
 illustrate it here, so now you now.
+
+### TCP and WebSockets are Different
+
+These protocols are both TCP but have different APIs as said above.
+
+TCP is not about sending packets but streaming data. Programmers use to use
+the annoying old-school line feed `\n` to "separate" messages. I hate it, so
+I employed `JSON` objects to communicate between computers and just wait for
+the file chunks as is when transferring files to avoid the unnecessary
+overhead of JSON messages in those network-heavy cases.
+
+So, machines need to have a way to communicate, a.k.a. the custom protocol.
+
+JSON is a great current standard to serialize messages.
+
+After thinking about the general problem, as a mathematician I could only
+think on a superb FSM: I have a finite amount of states in the server and
+client, I can move from one state to another, and the objectives can be
+saved as states.
+
+The nature of a state machine is blocking or linear, unless they're some
+kind of non-deterministic automaton (NDFA) that is in multiple states at once,
+but that's not the case here.
+
+Now the problem ends up whether to use another port for file transferring,
+and the main port for connecting the hub of clients or implementing web
+sockets with an asynchronous message handling. 
