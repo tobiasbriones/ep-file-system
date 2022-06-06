@@ -588,6 +588,12 @@ When launching a coroutine we get a `Job` that identifies that coroutine, so
 we can cancel it for instance. That is part of the job of the life cycle, so
 we don't leak unnecessary jobs when the app has already closed for example.
 
+#### Updating the UI
+
+I still don't have a clear panorama of doing this properly, but I guess I'll
+have to use a `ViewModel` with `MutableLiveData` to post the update values
+(percentage of uploaded/downloaded file progress).
+
 ### Watch Out the Log
 
 An old-school problem I still have is when the emulator dies, and the log is 
