@@ -109,6 +109,11 @@ logic flow for this system:
 
 With that, stakeholders can understand the system architecture.
 
+Note: I have to say, this diagram is a bit out of date as if was the initial 
+design I devised, and the state diagram below depicts this model more 
+accurately. Even though, it still tells us how concurrent users can be seen 
+by the server.
+
 More conceptual or technical documentation can be developed if required, but it
 is important to optimize for the source code as source of truth instead.
 
