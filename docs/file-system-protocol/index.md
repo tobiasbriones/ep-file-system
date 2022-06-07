@@ -113,7 +113,7 @@ More conceptual or technical documentation can be developed if required, but it
 is important to optimize for the source code as source of truth instead.
 
 The file system actions for `UPLOAD` and `DOWNLOAD` are a formal finite state
-machine defined above.
+machine defined below.
 
 ![FS Send Receive State Diagram](fs-send-receive-state-diagram.svg)
 
