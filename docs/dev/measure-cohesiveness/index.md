@@ -66,6 +66,27 @@ more needs to be done to have it complete.
 I need to refactor out those two responsibilities to grow the code well. 
 Otherwise, it starts becoming a ball of mud architecture.
 
+### Clear Obfuscation Off Your Domain
+
+Many think that this is about writing "one function per file", that's not 
+cohesive. You have to define that responsibility as I talk above. You can 
+have greater modules or files but with the same kind of code, so you can 
+straightforwardly navigate over that code that is about the same *concept*.
+
+With that, the code scales well, and I'm not afraid of anything.
+
+Cohesive code is understandable, is exactly what you need unlike OOP fuzzy words
+that add an extra layer of problems to everything. With a terrible code you 
+can't see what you have. With cohesive code you see exactly what you have as 
+you *defined* the *concept* I've been talking about along all this article.
+
+This is like Rust's zero cost abstractions, you don't either think about 
+assembly (if not required), or unnecessary abstractions that obfuscate your 
+logic like garbage collectors, or interpreters. Why do you think critical 
+software has been written in predictable C and not GC languages? We can do 
+the same for our software design, get domain specific as much as you can when 
+tradeoffs allow it.
+
 ## I Found Something Superb
 
 Cohesiveness here is an **abstract computer science measure** unlike buzzwords
