@@ -6,16 +6,15 @@ package main
 
 import (
 	"encoding/json"
-	"fs/files"
 	"fs/process"
 	"io"
 	"log"
 	"net"
-	"strconv"
 )
 
 type Client struct {
 	conn       net.Conn
+	command    command
 	process    process.Process
 	id         uint // Current ID assigned by the Hub
 	register   chan *Client
@@ -34,7 +33,7 @@ func newClient(
 	change chan struct{},
 	list chan *Client,
 ) *Client {
-	return &Client{
+	client := &Client{
 		conn:       conn,
 		process:    process.NewProcess(osFsRoot),
 		register:   register,
@@ -44,6 +43,12 @@ func newClient(
 		notify:     make(chan UpdatePayload),
 		quit:       make(chan struct{}),
 	}
+	client.command = client.newCommand()
+	return client
+}
+
+func (c *Client) newCommand() command {
+	return newCommand(c.conn, c)
 }
 
 func (c *Client) run() {
@@ -110,62 +115,13 @@ func (c *Client) onMessage(msg Message) {
 		c.start(msg)
 	default:
 		if msg.Command != nil {
-			c.onCommand(msg.Command)
+			err := c.command.execute(msg.Command)
+			if err != nil {
+				c.error(err.Error())
+			}
 		} else {
 			c.error("wrong message state")
 		}
-	}
-}
-
-func (c *Client) onCommand(cmd map[string]string) {
-	req := cmd["REQ"]
-
-	switch req {
-	case "CREATE_CHANNEL":
-		channelName := cmd["CHANNEL"]
-		file, err := getFsRootFile()
-		if err != nil {
-			log.Println(err)
-			c.error("server error")
-			return
-		}
-		err = file.Append(channelName)
-		if err != nil {
-			c.error("invalid channel")
-			return
-		}
-		err = files.CreateIfNotExists(file)
-		if err != nil {
-			log.Println(err)
-			c.error("server error")
-			return
-		}
-	case "LIST_CHANNELS":
-		err := writeChannels(c.conn)
-		if err != nil {
-			c.error("fail to send list of channels")
-			return
-		}
-	case "LIST_FILES":
-		// TODO channel := c.process.User().Channel()
-		channelName := cmd["CHANNEL"]
-		channel := process.NewChannel(channelName)
-		err := writeFiles(c.conn, channel)
-		if err != nil {
-			c.error("fail to send list of files")
-			return
-		}
-	case "CID":
-		_, err := c.conn.Write([]byte(strconv.Itoa(int(c.id)) + "\n"))
-		if err != nil {
-			c.error("fail to send client ID")
-			return
-		}
-	case "CONNECTED_USERS":
-		// Send a signal to send the list of users to this client
-		c.list <- c
-	default:
-		c.error("invalid command request")
 	}
 }
 
@@ -386,6 +342,14 @@ func (c *Client) sendQuit() {
 	go func() {
 		c.quit <- struct{}{}
 	}()
+}
+
+func (c Client) cid() uint {
+	return c.id
+}
+
+func (c *Client) requestClientList() {
+	c.list <- c
 }
 
 func (c *Client) error(msg string) {
