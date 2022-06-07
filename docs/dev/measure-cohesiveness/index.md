@@ -52,6 +52,20 @@ I can't over-engineer to tell that I write the best code since the beginning of
 all the projects, I can't under-engineer eiter because that would turn into a
 problem factory soon. A "senior" like me just knows what to do in each situation.
 
+## Two Responsibilities
+
+I've ended up with two responsibilities:
+
+- The server hub for user connections.
+- The process for performing operations on the FS (download, etc.).
+
+A robust production-grade TCP file system is complex, I just have the idea 
+of implementing the example project. Use your imagination to think how much 
+more needs to be done to have it complete.
+
+I need to refactor out those two responsibilities to grow the code well. 
+Otherwise, it starts becoming a ball of mud architecture.
+
 ## I Found Something Superb
 
 Cohesiveness here is an **abstract computer science measure** unlike buzzwords
