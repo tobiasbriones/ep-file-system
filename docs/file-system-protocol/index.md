@@ -188,3 +188,12 @@ along with any additional data attribute required by the command.
 | LIST_FILES      | CHANNEL (files parent)   | Returns a list of files under the given channel.                               |
 | CID             | -                        | Returns the per-server-instance ID that was generated to identify that client. |
 | CONNECTED_USERS | -                        | Returns a list of all connected clients into this server hub instance.         |
+
+## Non-Functional Requirements
+
+There should be non-functional requirements like time out to clean the
+server hub from dead clients.
+
+Currently, there are two read timeouts: short and long. It depends on the
+expectations to use one of the other, e.g. for having a client in hold it
+waits long (20min), but for waiting for a chunk it waits short (20sec).
