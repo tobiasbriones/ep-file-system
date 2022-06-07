@@ -50,7 +50,7 @@ from the beginning?
 
 I can't over-engineer to tell that I write the best code since the beginning of
 all the projects, I can't under-engineer eiter because that would turn into a
-problem factory soon. A senior like me just knows what to do in each situation.
+problem factory soon. A "senior" like me just knows what to do in each situation.
 
 ## I Found Something Superb
 
