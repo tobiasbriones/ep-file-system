@@ -108,6 +108,25 @@ engineer, I don't need a professor with 10 degrees or a manager to tell what
 I have to tell!. Schools, capitalism, etc., are stereotypes with generic 
 rules. We don't need them.
 
+### Take Away
+
+This is like a family in set theory: a set of sets. Or an undefined
+integral: a family of functions. SWE principles tell you accurate
+definitions of how to solve a family of problems so that for a particular
+problem we come out with an accurate way to do the right thing right.
+
+Unlike buzzwords that tell *generic* rules that are not backed by science
+and math.
+
+I always contrast math/FP/CS/formalism vs dev/OOP/buzzwords and the result 
+is the same:
+
+- accurate and domain specific vs generic and general purpose.
+- real engineering vs clowns who get called engineers.
+
+Most software is cheap as I say below, so don't confuse real engineering 
+with daily toy development.
+
 ## Make the Right Thing Right
 
 Incompetent programmers or engineers may say sentences like "duplication is 
