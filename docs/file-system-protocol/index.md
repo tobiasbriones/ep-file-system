@@ -115,7 +115,7 @@ is important to optimize for the source code as source of truth instead.
 The file system actions for `UPLOAD` and `DOWNLOAD` are a formal finite state
 machine defined below.
 
-![FS Send Receive State Diagram](fs-send-receive-state-diagram.svg)
+![FS Send Receive State Diagram](tcp-fs-process-state-diagram.svg)
 
 Invisible transitions are implicitly sent to the same state (e.g. if more 
 data is coming, then the state keeps at `DATA` until if *finishes*).
