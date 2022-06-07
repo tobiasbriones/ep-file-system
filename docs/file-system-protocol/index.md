@@ -125,6 +125,13 @@ machine defined below.
 Invisible transitions are implicitly sent to the same state (e.g. if more 
 data is coming, then the state keeps at `DATA` until if *finishes*).
 
+The next flow diagram shows a normal use case for action `DOWNLOAD`:
+
+![TCP FS Basic Flow](tcp-fs-basic-flow.svg)
+
+Keeping the states consistently on the server and client by allowing a good 
+communication is key.
+
 ### Client Updates
 
 A TCP Hub is implemented to register, unregister, and broadcast changes to the
