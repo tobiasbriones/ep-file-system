@@ -178,3 +178,13 @@ it to the `Command` message attribute:
 ```
 
 along with any additional data attribute required by the command.
+
+### Supported Commands
+
+| **Request**     | **Attr. 1**              | **Description**                                                                |
+|-----------------|--------------------------|--------------------------------------------------------------------------------|
+| CREATE_CHANNEL  | CHANNEL (channel's name) | It creates a new channel. It does not perform any action if already exists.    |
+| LIST_CHANNELS   | -                        | Returns a list of existing channels.                                           |
+| LIST_FILES      | CHANNEL (files parent)   | Returns a list of files under the given channel.                               |
+| CID             | -                        | Returns the per-server-instance ID that was generated to identify that client. |
+| CONNECTED_USERS | -                        | Returns a list of all connected clients into this server hub instance.         |
