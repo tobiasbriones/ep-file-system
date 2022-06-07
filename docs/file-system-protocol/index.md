@@ -105,7 +105,7 @@ flat, e.g. pass `Value` directly as the `File#Path#Value`.
 The following UML Sequence diagram depicts the most important use cases and
 logic flow for this system:
 
-![FS Send Receive](tcp-fs-uml-sequence-diagram.svg)
+![TCP FS UML Sequence Diagram](tcp-fs-uml-sequence-diagram.svg)
 
 With that, stakeholders can understand the system architecture.
 
@@ -120,7 +120,7 @@ is important to optimize for the source code as source of truth instead.
 The file system actions for `UPLOAD` and `DOWNLOAD` are a formal finite state
 machine defined below.
 
-![FS Send Receive State Diagram](tcp-fs-process-state-diagram.svg)
+![TCP FS Process State Diagram](tcp-fs-process-state-diagram.svg)
 
 Invisible transitions are implicitly sent to the same state (e.g. if more 
 data is coming, then the state keeps at `DATA` until if *finishes*).
