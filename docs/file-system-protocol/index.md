@@ -132,11 +132,6 @@ The next flow diagram shows a normal use case for action `DOWNLOAD`:
 Keeping the states consistently on the server and client by allowing a good 
 communication is key.
 
-### Client Updates
-
-A TCP Hub is implemented to register, unregister, and broadcast changes to the
-client.
-
 ## System Modules
 
 The system requires the following modules:
@@ -160,3 +155,8 @@ The `server` module implements the hub of client connections for the network
 layer of the system, and it's consumed by `client`, and `admin`.
 
 Also take into consideration that the project layout is monorepo.
+
+## Client Updates
+
+A TCP Hub is implemented to register, unregister, and broadcast changes to the
+client.
