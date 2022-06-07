@@ -105,7 +105,7 @@ flat, e.g. pass `Value` directly as the `File#Path#Value`.
 The following UML Sequence diagram depicts the most important use cases and
 logic flow for this system:
 
-![FS Send Receive](fs-send-receive.svg)
+![FS Send Receive](tcp-fs-uml-sequence-diagram.svg)
 
 With that, stakeholders can understand the system architecture.
 
