@@ -127,7 +127,29 @@ is the same:
 Most software is cheap as I say below, so don't confuse real engineering 
 with daily toy development.
 
-#### Taking About Clowns
+## Make the Right Thing Right
+
+Incompetent programmers or engineers may say sentences like "duplication is 
+better than the wrong abstraction". That is not an excuse to make things 
+wrong. Something valid is to say "this is a prototype, just get it done" 
+because prototypes are not meant to be correct, they are not engineered a 
+lot, they're made more by frontend developers than actual engineers.
+
+Some say you should write a prototype in a different language (a toy
+scripting language like Ruby, Python, PHP or JS sure) than the final
+language you will use to prevent reusing the prototype. This clarifies the
+difference I emphasized above:
+
+- to build a real system you have to make it right (as far as requires) without
+  ridiculous excuses, and
+- to build prototypes (most software out there) you don't have to mess with
+  wrong abstractions, so you don't have excuses either.
+
+I hope that insight had given you a better perspective to be a professional 
+engineer who acts on behalf computer science rather than excuses and cringe 
+marketing buzzwords like "WET", "DRY", ".NET", etc.
+
+## Taking About Clowns
 
 Those with no skills, even marketers who can edit video and upload it to the
 internet get called engineers by capitalist because that's how they
@@ -135,10 +157,12 @@ brainwash morons to make them believe they're "important" so they have happy
 (non-important) employees.
 
 Even if a job is complete trash like selling cable and internet under the
-sun from door to door, they now call them "selling executives". Capitalists
-are currently the root of most evil, is like Java: everything is money,
-everything (but the 8 primitives) is an "object" (monolith). And guess what,
-money is another *generic* stereotype to brainwash peons.
+sun from door to door with trash salary and no basic human rights, they now
+call them "selling executives". Capitalists are currently the root of most evil,
+is like Java: everything is money, everything (but the 8 primitives) is an "
+object" (monolith). And guess what, money is another *generic* stereotype to
+brainwash peons. Some say "capitalist has allowed great stuff", but the fact 
+that works doesn't mean is must be so. Slaves achieved many things long ago too.
 
 We can have many forms of energy or value instead of money.
 
@@ -164,25 +188,3 @@ months by watching videos. We don't have anything to do with clowns.
 Software engineering is powerful, is beautiful, is the engineering that
 requires the most math and creativity. Others like electrical engineers
 require the most physics for example. Engineering is about direct knowledge.
-
-## Make the Right Thing Right
-
-Incompetent programmers or engineers may say sentences like "duplication is 
-better than the wrong abstraction". That is not an excuse to make things 
-wrong. Something valid is to say "this is a prototype, just get it done" 
-because prototypes are not meant to be correct, they are not engineered a 
-lot, they're made more by frontend developers than actual engineers.
-
-Some say you should write a prototype in a different language (a toy
-scripting language like Ruby, Python, PHP or JS sure) than the final
-language you will use to prevent reusing the prototype. This clarifies the
-difference I emphasized above:
-
-- to build a real system you have to make it right (as far as requires) without
-  ridiculous excuses, and
-- to build prototypes (most software out there) you don't have to mess with
-  wrong abstractions, so you don't have excuses either.
-
-I hope that insight had given you a better perspective to be a professional 
-engineer who acts on behalf computer science rather than excuses and cringe 
-marketing buzzwords like "WET", "DRY", ".NET", etc.
