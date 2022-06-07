@@ -52,6 +52,62 @@ I can't over-engineer to tell that I write the best code since the beginning of
 all the projects, I can't under-engineer eiter because that would turn into a
 problem factory soon. A senior like me just knows what to do in each situation.
 
+## I Found Something Superb
+
+Cohesiveness here is an **abstract computer science measure** unlike buzzwords
+you hear from clowns like YouTubers, marketers, etc.
+
+The Wikipedia article defines it as:
+
+> In computer programming, cohesion refers to the degree to which the
+> elements inside a module belong together. In one sense, it is a measure of the
+> strength of relationship between the methods and data of a class and some
+> unifying purpose or concept served by that class. In another sense, it is a
+> measure of the strength of relationship between the class's methods and data
+> themselves.
+>
+> Source: [Wikipedia](https://en.wikipedia.org/wiki/Cohesion_(computer_science))
+
+That definition is too object-oriented, but it gives the idea.
+
+Notice how is says "and *some* unifying purpose or concept served by that class"
+so that the "*some*" is defined by your objectives or requirements. That's
+why I said cohesiveness is an abstract measure unlike electrical
+engineer formulas you find at universities.
+
+That **powerful observation** I made proves that a software engineer (unlike
+traditional engineers) needs to go through a **case by case basis** to design
+the correct solution for each problem.
+
+That's why we need autonomous engineers and not managers. Manager and its
+bureaucratic derivatives are a smell, isn't it more efficient that an
+autonomous engineer knows how to "manage" himself/herself for his/her agenda
+rather than someone else do it for them? That leads to fragment the
+knowledge from "subordinates" and "managers". Sounds like OOP and their
+patterns, isn't it?
+
+The main different between a traditional engineer and an autonomous software
+engineer regarding correctness[^1] is that they have stable problems already
+solved like the gravity value that doesn't significantly change on earth, but it
+does change. Software engineers have to deep into the domain problem to come
+out with a stable domain solution to that particular domain (anything you can
+imagine as everything runs on software nowadays).
+
+[^1]: Many don't consider SWE as real engineering because of lack of
+    correctness but think about the prototype cases I mentioned in the section 
+    "Make the Right Thing Right"
+
+Building ordinary software doesn't make you an engineer at all but a software
+developer who uses the tools made by engineers, engineering is about
+correctness not about buzzwords or playing at the computer. It's cool, we're 
+also developers, but they are just tools, not engineering as is.
+
+I've been aware of all this, and then in sections like this I have the 
+chance to develop it so others learn from me. Can you see? I'm an autonomous 
+engineer, I don't need a professor with 10 degrees or a manager to tell what 
+I have to tell!. Schools, capitalism, etc., are stereotypes with generic 
+rules. We don't need them.
+
 ## Make the Right Thing Right
 
 Incompetent programmers or engineers may say sentences like "duplication is 
