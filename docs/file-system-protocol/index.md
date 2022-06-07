@@ -160,3 +160,21 @@ Also take into consideration that the project layout is monorepo.
 
 A TCP Hub is implemented to register, unregister, and broadcast changes to the
 client.
+
+## Commands
+
+In addition to the process defined, the server also accepts commands as 
+specified in the data types above.
+
+To call a command, the process must be at state `START` (on hold), and pass 
+it to the `Command` message attribute:
+
+```json
+{
+  "Command": {
+    "REQ": "{your-request}"
+  }
+}
+```
+
+along with any additional data attribute required by the command.
