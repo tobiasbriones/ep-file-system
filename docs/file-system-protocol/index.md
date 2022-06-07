@@ -197,3 +197,8 @@ server hub from dead clients.
 Currently, there are two read timeouts: short and long. It depends on the
 expectations to use one of the other, e.g. for having a client in hold it
 waits long (20min), but for waiting for a chunk it waits short (20sec).
+
+## Tests
+
+A big amount of test cases can be found in the code base. Side effect tests
+for the server are in [/server/main_test.go](../../server/main_test.go).
