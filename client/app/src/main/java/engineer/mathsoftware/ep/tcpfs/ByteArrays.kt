@@ -4,3 +4,8 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+enum class DataType {
+    MESSAGE,
+    ARRAY,
+    RAW
+}
