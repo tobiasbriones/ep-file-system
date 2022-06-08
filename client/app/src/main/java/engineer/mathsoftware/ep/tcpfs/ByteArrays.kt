@@ -4,6 +4,8 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import engineer.mathsoftware.ep.tcpfs.DataType.*
+import org.json.JSONArray
 import org.json.JSONObject
 
 enum class DataType {
@@ -17,3 +19,11 @@ enum class DataType {
 fun ByteArray.parseMessage(): JSONObject {
     return JSONObject(String(this))
 }
+
+
+// It parses this data as a JSONArray assuming this is a generic server
+// response array.
+fun ByteArray.parseArray(): JSONArray {
+    return JSONArray(String(this))
+}
+
