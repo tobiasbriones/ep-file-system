@@ -13,6 +13,16 @@ import (
 	"strconv"
 )
 
+type req string
+
+const (
+	CreateChannel  req = "CREATE_CHANNEL"
+	ListChannels   req = "LIST_CHANNELS"
+	ListFiles      req = "LIST_FILES"
+	CID            req = "CID"
+	ConnectedUsers req = "CONNECTED_USERS"
+)
+
 type command struct {
 	conn net.Conn
 	commandClient
@@ -23,10 +33,10 @@ func newCommand(conn net.Conn, client commandClient) command {
 }
 
 func (c command) execute(cmd map[string]string) error {
-	req := cmd["REQ"]
+	req := req(cmd["REQ"])
 
 	switch req {
-	case "CREATE_CHANNEL":
+	case CreateChannel:
 		channelName := cmd["CHANNEL"]
 		file, err := getFsRootFile()
 		if err != nil {
@@ -42,12 +52,12 @@ func (c command) execute(cmd map[string]string) error {
 			log.Println(err)
 			return errors.New("server error")
 		}
-	case "LIST_CHANNELS":
+	case ListChannels:
 		err := writeChannels(c.conn)
 		if err != nil {
 			return errors.New("fail to send list of channels")
 		}
-	case "LIST_FILES":
+	case ListFiles:
 		// TODO channel := c.process.User().Channel()
 		channelName := cmd["CHANNEL"]
 		channel := process.NewChannel(channelName)
@@ -55,12 +65,12 @@ func (c command) execute(cmd map[string]string) error {
 		if err != nil {
 			return errors.New("fail to send list of files")
 		}
-	case "CID":
+	case CID:
 		_, err := c.conn.Write([]byte(strconv.Itoa(int(c.cid())) + "\n"))
 		if err != nil {
 			return errors.New("fail to send client ID")
 		}
-	case "CONNECTED_USERS":
+	case ConnectedUsers:
 		// Send a signal to send the list of users to this client
 		c.requestClientList()
 	default:
