@@ -19,15 +19,6 @@ enum class Action {
     DOWNLOAD
 }
 
-enum class State {
-    START,
-    DATA,
-    STREAM,
-    EOF,
-    DONE,
-    ERROR
-}
-
 const val PORT: Int = 8080
 
 data class Input(
@@ -203,7 +194,7 @@ class Client(
     private fun getStartMessage(action: Action, size: Int = 0): JSONObject {
         val payload = getStartPayload(action, size)
         val ser = JSONObject()
-        ser.put("State", State.START)
+        ser.put("State", Process.START)
         ser.put("Data", payload)
         return ser
     }
@@ -231,14 +222,14 @@ class Client(
 
     private fun getEofMessage(): JSONObject {
         val ser = JSONObject()
-        ser.put("State", State.EOF)
+        ser.put("State", Process.EOF)
         ser.put("Data", null)
         return ser
     }
 
     private fun getStreamMessage(): JSONObject {
         val ser = JSONObject()
-        ser.put("State", State.STREAM)
+        ser.put("State", Process.STREAM)
         ser.put("Data", null)
         return ser
     }
