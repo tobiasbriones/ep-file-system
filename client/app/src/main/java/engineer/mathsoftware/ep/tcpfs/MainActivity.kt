@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         builder.setPositiveButton("Save") { _, _ ->
             val host = input.text.toString()
             config.saveServerHost(host)
+            recreate()
         }
         builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
         builder.show()
