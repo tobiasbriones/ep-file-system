@@ -37,44 +37,64 @@ func (c command) execute(cmd map[string]string) error {
 
 	switch req {
 	case CreateChannel:
-		channelName := cmd["CHANNEL"]
-		file, err := getFsRootFile()
-		if err != nil {
-			log.Println(err)
-			return errors.New("server error")
-		}
-		err = file.Append(channelName)
-		if err != nil {
-			return errors.New("invalid channel")
-		}
-		err = files.CreateIfNotExists(file)
-		if err != nil {
-			log.Println(err)
-			return errors.New("server error")
-		}
+		return c.createChannel(cmd)
 	case ListChannels:
-		err := writeChannels(c.conn)
-		if err != nil {
-			return errors.New("fail to send list of channels")
-		}
+		return c.listChannels()
 	case ListFiles:
-		// TODO channel := c.process.User().Channel()
-		channelName := cmd["CHANNEL"]
-		channel := process.NewChannel(channelName)
-		err := writeFiles(c.conn, channel)
-		if err != nil {
-			return errors.New("fail to send list of files")
-		}
+		return c.listFiles(cmd)
 	case CID:
-		_, err := c.conn.Write([]byte(strconv.Itoa(int(c.cid())) + "\n"))
-		if err != nil {
-			return errors.New("fail to send client ID")
-		}
+		return c.sendCID()
 	case ConnectedUsers:
 		// Send a signal to send the list of users to this client
 		c.requestClientList()
 	default:
 		return errors.New("invalid command request")
+	}
+	return nil
+}
+
+func (c command) createChannel(cmd map[string]string) error {
+	channelName := cmd["CHANNEL"]
+	file, err := getFsRootFile()
+	if err != nil {
+		log.Println(err)
+		return errors.New("server error")
+	}
+	err = file.Append(channelName)
+	if err != nil {
+		return errors.New("invalid channel")
+	}
+	err = files.CreateIfNotExists(file)
+	if err != nil {
+		log.Println(err)
+		return errors.New("server error")
+	}
+	return nil
+}
+
+func (c command) listChannels() error {
+	err := writeChannels(c.conn)
+	if err != nil {
+		return errors.New("fail to send list of channels")
+	}
+	return nil
+}
+
+func (c command) listFiles(cmd map[string]string) error {
+	// TODO channel := c.process.User().Channel()
+	channelName := cmd["CHANNEL"]
+	channel := process.NewChannel(channelName)
+	err := writeFiles(c.conn, channel)
+	if err != nil {
+		return errors.New("fail to send list of files")
+	}
+	return nil
+}
+
+func (c command) sendCID() error {
+	_, err := c.conn.Write([]byte(strconv.Itoa(int(c.cid())) + "\n"))
+	if err != nil {
+		return errors.New("fail to send client ID")
 	}
 	return nil
 }
