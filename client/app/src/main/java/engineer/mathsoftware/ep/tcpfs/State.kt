@@ -4,6 +4,8 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import engineer.mathsoftware.ep.tcpfs.Process.*
+
 enum class Process {
     START,
     DATA,
@@ -14,5 +16,12 @@ enum class Process {
 }
 
 class State {
+    private var state = START
 
+    fun isInProgress() = !isOnHold()
+
+    fun isOnHold() = when (state) {
+        START, DONE, ERROR -> true
+        else               -> false
+    }
 }
