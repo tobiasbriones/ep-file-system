@@ -4,8 +4,16 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import org.json.JSONObject
+
 enum class DataType {
     MESSAGE,
     ARRAY,
     RAW
+}
+
+// It parses this data as a JSONObject assuming this is a generic server
+// response message.
+fun ByteArray.parseMessage(): JSONObject {
+    return JSONObject(String(this))
 }
