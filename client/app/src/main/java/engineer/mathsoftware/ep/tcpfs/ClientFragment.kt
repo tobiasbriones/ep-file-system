@@ -118,9 +118,11 @@ class ClientFragment : Fragment() {
 
     private fun readCID() {
         if (!this::client.isInitialized) return
+        val host = Config(requireActivity()).getServerHost()
+
         lifecycleScope.launch {
             val cid = client.readCID()
-            binding.clientText.text = "Client #$cid"
+            binding.clientText.text = "Client #$cid @$host"
             binding.channelText.text = "Channel: ${client.channel}"
             binding.infoText.text = "Connected"
         }
