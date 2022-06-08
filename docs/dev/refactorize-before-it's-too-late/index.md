@@ -63,3 +63,50 @@ making larger refactorizations later.
 
 Some systems are not well known, keeping the balance between under-engineering
 and over-engineering is a determinant art in software engineering.
+
+## Bye Comments
+
+I hate comments, they bring many problems and are not part of the syntax.
+That's why we design languages, to express the problem in the language syntax.
+
+OOP is a joke because its design patterns are just comments written as class
+names and boilerplate, but it's useful for building cheap software though.
+
+Look at this refactorization:
+
+```go
+func (c *Client) sendUpdate(u UpdatePayload) {
+    // Only allow sending updates when client is on hold to not mess with the
+    // FSM process, e.g. in the middle when downloading a file
+    if c.state.process.State() != process.Start {
+        return
+    } // ...
+}
+```
+
+versus:
+
+```go
+func (c *Client) sendUpdate(u UpdatePayload) {
+    if c.state.isInProgress() {
+        return
+    } // ...
+}
+```
+
+That looks better now, possible thanks to the refactorization into a more
+cohesive module (the `state` object):
+
+```go
+// Returns true iff the process is not on hold. That is, iff isOnHold is false.
+func (s state) isInProgress() bool {
+    return !s.isOnHold()
+}
+
+// Returns true iff the process is not involved into any action in progress.
+func (s state) isOnHold() bool {
+    return s.process.State() == process.Start
+}
+```
+
+As you can see, writing quality code leads to defining DSLs!.
