@@ -108,10 +108,10 @@ func (c *Client) handleCommand(msg Message) {
 	if msg.Command != nil {
 		err := c.command.execute(msg.Command)
 		if err != nil {
-			writeErrorState(err.Error(), c.conn)
+			c.error(err.Error())
 		}
 	} else {
-		writeErrorState("wrong message state", c.conn)
+		c.error("wrong message state")
 	}
 }
 
@@ -159,4 +159,8 @@ func (c Client) cid() uint {
 
 func (c *Client) requestClientList() {
 	c.list <- c
+}
+
+func (c *Client) error(msg string) {
+	writeErrorState(msg, c.conn)
 }
