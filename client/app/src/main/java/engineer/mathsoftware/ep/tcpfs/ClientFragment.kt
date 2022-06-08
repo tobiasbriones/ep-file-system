@@ -91,9 +91,10 @@ class ClientFragment : Fragment() {
 
     private fun connect() {
         val host = Config(requireActivity()).getServerHost() ?: ""
+        val input = Input(null)
 
         lifecycleScope.launch {
-            val c = Client.newInstance(host)
+            val c = Client.newInstance(host, input)
 
             if (c == null) {
                 handleConnectionFailed()

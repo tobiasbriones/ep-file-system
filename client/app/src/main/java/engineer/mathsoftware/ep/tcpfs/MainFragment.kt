@@ -62,8 +62,10 @@ class MainFragment : Fragment() {
 
     private fun connect() {
         val host = Config(requireActivity()).getServerHost() ?: ""
+        val input = Input(this::onChannelList)
+
         lifecycleScope.launch {
-            val c = Client.newInstance(host)
+            val c = Client.newInstance(host, input)
 
             if (c == null) {
                 handleConnectionFailed()
@@ -79,12 +81,23 @@ class MainFragment : Fragment() {
     private suspend fun handleConnected() {
         if (!this::client.isInitialized) return
         try {
-            val channels = client.readChannels()
-            loadChannels(channels)
+            listen()
+            client.readChannels()
         }
-        catch (e: JSONException) {
+        catch (e: Exception) {
+            handleConnectionFailed()
             println(e.message)
         }
+    }
+
+    private fun listen() {
+        lifecycleScope.launch {
+            client.listen()
+        }
+    }
+
+    private fun onChannelList(channels: List<String>) {
+        loadChannels(channels)
     }
 
     private fun subscribe(channel: String) {

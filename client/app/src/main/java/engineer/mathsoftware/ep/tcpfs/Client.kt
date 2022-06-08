@@ -30,14 +30,22 @@ enum class State {
 
 const val PORT: Int = 8080
 
-class Client(private val socket: Socket, private val conn: Conn) {
+data class Input(
+    val onChannelList: ((channels: List<String>) -> Unit)?
+)
+
+class Client(
+    private val socket: Socket,
+    private val conn: Conn,
+    private val input: Input
+) {
     companion object {
-        suspend fun newInstance(host: String): Client? {
+        suspend fun newInstance(host: String, input: Input): Client? {
             return withContext(Dispatchers.IO) {
                 try {
                     val address = InetAddress.getByName(host)
                     val socket = Socket(address, PORT)
-                    Client(socket, Conn(socket))
+                    Client(socket, Conn(socket), input)
                 }
                 catch (e: ConnectException) {
                     println("ERROR: " + e.message.toString())
@@ -60,9 +68,42 @@ class Client(private val socket: Socket, private val conn: Conn) {
         }
     }
 
-    suspend fun readChannels(): List<String> {
-        return withContext(Dispatchers.IO) {
-            conn.readChannels()
+    suspend fun listen() {
+        withContext(Dispatchers.IO) {
+            try {
+                while (socket.isConnected) {
+                    val data = conn.readNext()
+
+                    // No state yet, just test for MainFragment but breaks
+                    // the other functionalities!
+                    when (val res = data.parse()) {
+                        is DataType.Message -> onMessage(res.value)
+                        is DataType.Array   -> onArray(res.value)
+                    }
+                }
+            }
+            catch (e: Exception) {
+                println("ERROR: $e")
+            }
+        }
+    }
+
+    private fun onMessage(msg: JSONObject) {
+        println(msg)
+    }
+
+    private suspend fun onArray(array: JSONArray) {
+        // TODO Arrays are used for the list of clients, I must make this
+        // type safe by embedding it into a message object
+        withContext(Dispatchers.Main) {
+            val channels = parseCommandListChannels(array)
+            input.onChannelList?.invoke(channels)
+        }
+    }
+
+    suspend fun readChannels() {
+        withContext(Dispatchers.IO) {
+            conn.writeCommandListChannels()
         }
     }
 

@@ -21,7 +21,7 @@ class Conn(private val socket: Socket) {
         )
     )
 
-    fun readChannels(): List<String> {
+    fun writeCommandListChannels() {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -33,12 +33,6 @@ class Conn(private val socket: Socket) {
             msg.toString()
                 .toByteArray()
         )
-        val res = reader.readLine()
-        val jsonArray = JSONArray(res)
-        val channels = Array(jsonArray.length()) {
-            jsonArray.getString(it)
-        }
-        return channels.toList()
     }
 
     fun readFiles(channel: String): List<String> {
@@ -146,6 +140,21 @@ class Conn(private val socket: Socket) {
             .read(chunk)
         return chunk.sliceArray(IntRange(0, n - 1))
     }
+
+    fun readNext(): ByteArray {
+        val buff = ByteArray(SERVER_BUF_SIZE)
+        socket.getInputStream()
+            .read(buff)
+        return buff
+    }
+}
+
+fun parseCommandListChannels(array: JSONArray): List<String> {
+    // TODO must be a message with the array embedded
+    val channels = Array(array.length()) {
+        array.getString(it)
+    }
+    return channels.toList()
 }
 
 private fun getPercentage(count: Int, size: Int): Float {
