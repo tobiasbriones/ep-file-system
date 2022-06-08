@@ -5,6 +5,8 @@
 package engineer.mathsoftware.ep.tcpfs
 
 import android.util.Base64
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -79,7 +81,7 @@ class Conn(private val socket: Socket) {
         return Integer.parseInt(res)
     }
 
-    fun stream(bytes: ByteArray, l: (progress: Float) -> Unit) {
+    suspend fun stream(bytes: ByteArray, l: (progress: Float) -> Unit) {
         val size = bytes.size
         val os = socket.getOutputStream()
         var count = 0
@@ -92,7 +94,9 @@ class Conn(private val socket: Socket) {
             )
             os.write(chunk)
             count += SERVER_BUF_SIZE
-            l(getPercentage(count, size))
+            withContext(Dispatchers.Main) {
+                l(getPercentage(count, size))
+            }
         }
     }
 
@@ -122,14 +126,16 @@ class Conn(private val socket: Socket) {
         return JSONObject(str)
     }
 
-    fun downstream(size: Int, l: (progress: Float) -> Unit): ByteArray {
+    suspend fun downstream(size: Int, l: (progress: Float) -> Unit): ByteArray {
         var array = ByteArray(0)
         var count = 0
         while (count < size) {
             val chunk = readChunk()
             array += chunk
             count += chunk.size
-            l(getPercentage(count, size))
+            withContext(Dispatchers.Main) {
+                l(getPercentage(count, size))
+            }
         }
         return array
     }

@@ -4,7 +4,10 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.text.InputType
+import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -12,6 +15,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import engineer.mathsoftware.ep.tcpfs.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_server -> showServerDialog()
             R.id.action_settings -> true
             else                 -> super.onOptionsItemSelected(item)
         }
@@ -47,5 +52,26 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                || super.onSupportNavigateUp()
+    }
+
+    private fun showServerDialog(): Boolean {
+        val config = Config(this)
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        val view = LayoutInflater.from(this)
+            .inflate(R.layout.dialog_input_text, null)
+        val input = view.findViewById<TextView>(R.id.dialogInputText)
+        input.setHint("Enter host name")
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.text = config.getServerHost()
+        builder.setTitle("Config Server")
+        builder.setView(view)
+        builder.setPositiveButton("Save") { _, _ ->
+            val host = input.text.toString()
+            config.saveServerHost(host)
+            recreate()
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        builder.show()
+        return true
     }
 }

@@ -16,7 +16,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentClientBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.SocketException
 
 class ClientFragment : Fragment() {
@@ -88,8 +90,10 @@ class ClientFragment : Fragment() {
     }
 
     private fun connect() {
+        val host = Config(requireActivity()).getServerHost() ?: ""
+
         lifecycleScope.launch {
-            val c = Client.newInstance()
+            val c = Client.newInstance(host)
 
             if (c == null) {
                 handleConnectionFailed()
@@ -114,9 +118,11 @@ class ClientFragment : Fragment() {
 
     private fun readCID() {
         if (!this::client.isInitialized) return
+        val host = Config(requireActivity()).getServerHost()
+
         lifecycleScope.launch {
             val cid = client.readCID()
-            binding.clientText.text = "Client #$cid"
+            binding.clientText.text = "Client #$cid @$host"
             binding.channelText.text = "Channel: ${client.channel}"
             binding.infoText.text = "Connected"
         }

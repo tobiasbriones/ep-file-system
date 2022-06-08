@@ -12,6 +12,7 @@ import org.json.JSONObject
 import java.net.ConnectException
 import java.net.InetAddress
 import java.net.Socket
+import java.net.UnknownHostException
 
 enum class Action {
     UPLOAD,
@@ -27,19 +28,22 @@ enum class State {
     ERROR
 }
 
-const val HOST: String = "10.0.2.2" // This localhost IP works on the emulator
 const val PORT: Int = 8080
 
 class Client(private val socket: Socket, private val conn: Conn) {
     companion object {
-        suspend fun newInstance(): Client? {
+        suspend fun newInstance(host: String): Client? {
             return withContext(Dispatchers.IO) {
                 try {
-                    val address = InetAddress.getByName(HOST)
+                    val address = InetAddress.getByName(host)
                     val socket = Socket(address, PORT)
                     Client(socket, Conn(socket))
                 }
                 catch (e: ConnectException) {
+                    println("ERROR: " + e.message.toString())
+                    null
+                }
+                catch (e: UnknownHostException) {
                     println("ERROR: " + e.message.toString())
                     null
                 }

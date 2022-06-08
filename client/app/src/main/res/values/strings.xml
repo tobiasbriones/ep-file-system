@@ -14,4 +14,7 @@
     <string name="subscribe_to_channel_title">Subscribe to a channel</string>
     <string name="upload_title">Upload a File</string>
     <string name="files_title">List of Files</string>
+    <string name="action_server">Server</string>
+    <string name="saved_host_key">host</string>
+    <string name="saved_host_default_value">localhost</string>
 </resources>
