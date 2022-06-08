@@ -201,4 +201,5 @@ waits long (20min), but for waiting for a chunk it waits short (20sec).
 ## Tests
 
 A big amount of test cases can be found in the code base. Side effect tests
-for the server are in [/server/main_test.go](../../server/main_test.go).
+for the server are in [/server/main_test.go](../../server/main_test.go) and 
+the other test files in that package.
