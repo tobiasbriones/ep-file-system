@@ -96,7 +96,7 @@ class Client(
         // TODO Arrays are used for the list of clients, I must make this
         // type safe by embedding it into a message object
         withContext(Dispatchers.Main) {
-            val channels = parseCommandListChannels(array)
+            val channels = array.toStringList()
             input.onChannelList?.invoke(channels)
         }
     }

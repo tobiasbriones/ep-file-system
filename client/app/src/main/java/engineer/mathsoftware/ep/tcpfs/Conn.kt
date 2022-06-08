@@ -149,14 +149,6 @@ class Conn(private val socket: Socket) {
     }
 }
 
-fun parseCommandListChannels(array: JSONArray): List<String> {
-    // TODO must be a message with the array embedded
-    val channels = Array(array.length()) {
-        array.getString(it)
-    }
-    return channels.toList()
-}
-
 private fun getPercentage(count: Int, size: Int): Float {
     return if (count >= size) 1.0f
     else count.toFloat() / size.toFloat()
