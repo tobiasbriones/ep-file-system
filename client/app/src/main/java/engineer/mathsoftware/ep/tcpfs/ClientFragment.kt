@@ -91,7 +91,7 @@ class ClientFragment : Fragment() {
 
     private fun connect() {
         val host = Config(requireActivity()).getServerHost() ?: ""
-        val input = Input(null)
+        val input = Input(null, ::onFileList, ::onCID)
 
         lifecycleScope.launch {
             val c = Client.newInstance(host, input)
@@ -113,26 +113,58 @@ class ClientFragment : Fragment() {
         if (channel != null) {
             client.channel = channel
         }
-        readCID()
-        readFiles()
+        try {
+            listen()
+            readCID()
+            readFiles()
+        }
+        catch (e: Exception) {
+            handleConnectionFailed()
+            println(e.message)
+        }
+    }
+
+    private fun listen() {
+        lifecycleScope.launch {
+            client.listen()
+        }
     }
 
     private fun readCID() {
         if (!this::client.isInitialized) return
-        val host = Config(requireActivity()).getServerHost()
-
         lifecycleScope.launch {
-            val cid = client.readCID()
-            binding.clientText.text = "Client #$cid @$host"
-            binding.channelText.text = "Channel: ${client.channel}"
-            binding.infoText.text = "Connected"
+            client.readCID()
         }
+    }
+
+    private fun onFileList(values: List<String>) {
+        val size = values.size
+        binding.filesText
+            .text = "${getString(R.string.files_title)} ($size)"
+        files.clear()
+        files.addAll(values)
+        filesAdapter.notifyDataSetChanged()
+    }
+
+    private fun onCID(cid: Int) {
+        val host = Config(requireActivity()).getServerHost()
+        binding.clientText.text = "Client #$cid @$host"
+        binding.channelText.text = "Channel: ${client.channel}"
+        binding.infoText.text = "Connected"
     }
 
     private fun disconnect() {
         if (!this::client.isInitialized) return
         lifecycleScope.launch {
             client.disconnect()
+        }
+    }
+
+    private fun readFiles() {
+        if (!this::client.isInitialized) return
+        lifecycleScope.launch {
+            println("requesting files")
+            client.readFiles()
         }
     }
 
@@ -218,18 +250,5 @@ class ClientFragment : Fragment() {
             putExtra(Intent.EXTRA_TITLE, client.file)
         }
         startActivityForResult(intent, PICK_DOWNLOAD_DIR_REQUEST_CODE)
-    }
-
-    private fun readFiles() {
-        if (!this::client.isInitialized) return
-        lifecycleScope.launch {
-            val res = client.readFiles()
-            val size = res.size
-            binding.filesText
-                .text = "${getString(R.string.files_title)} ($size)"
-            files.clear()
-            files.addAll(res)
-            filesAdapter.notifyDataSetChanged()
-        }
     }
 }

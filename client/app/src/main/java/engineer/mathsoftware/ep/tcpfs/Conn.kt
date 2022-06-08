@@ -35,7 +35,7 @@ class Conn(private val socket: Socket) {
         )
     }
 
-    fun readFiles(channel: String): List<String> {
+    fun writeCommandListFiles(channel: String) {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -48,18 +48,9 @@ class Conn(private val socket: Socket) {
             msg.toString()
                 .toByteArray()
         )
-        val res = reader.readLine()
-        if (res == null || res == "null") {
-            return ArrayList()
-        }
-        val jsonArray = JSONArray(res)
-        val channels = Array(jsonArray.length()) {
-            jsonArray.getString(it)
-        }
-        return channels.toList()
     }
 
-    fun readCID(): Int {
+    fun writeCommandCID() {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -71,8 +62,6 @@ class Conn(private val socket: Socket) {
             msg.toString()
                 .toByteArray()
         )
-        val res = reader.readLine()
-        return Integer.parseInt(res)
     }
 
     suspend fun stream(bytes: ByteArray, l: (progress: Float) -> Unit) {
@@ -142,7 +131,9 @@ class Conn(private val socket: Socket) {
     }
 
     fun readNext(): ByteArray {
-        val buff = ByteArray(SERVER_BUF_SIZE)
+        // TODO give a big enough buffer to avoid while loop for now and
+        //  message end char
+        val buff = ByteArray(SERVER_BUF_SIZE*4)
         socket.getInputStream()
             .read(buff)
         return buff

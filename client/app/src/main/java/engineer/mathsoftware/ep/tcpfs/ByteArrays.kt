@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 sealed interface DataType {
     data class Message(val value: JSONObject) : DataType
-    data class Array(val value: JSONArray) : DataType
+    data class Array(val value: JSONArray) : DataType // TODO Not required now
     data class Raw(val value: ByteArray) : DataType
 }
 

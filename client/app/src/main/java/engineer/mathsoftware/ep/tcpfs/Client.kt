@@ -19,10 +19,15 @@ enum class Action {
     DOWNLOAD
 }
 
+// TODO temp. response values, server is still in beta
+const val OK = 3
+
 const val PORT: Int = 8080
 
 data class Input(
-    val onChannelList: ((channels: List<String>) -> Unit)?
+    val onChannelList: ((channels: List<String>) -> Unit)? = null,
+    val onFileList: ((channels: List<String>) -> Unit)? = null,
+    val onCID: ((cid: Int) -> Unit)? = null,
 )
 
 class Client(
@@ -50,6 +55,7 @@ class Client(
         }
     }
 
+    private val state = State()
     var file: String = ""
     var channel: String = "test"
 
@@ -64,13 +70,7 @@ class Client(
             try {
                 while (socket.isConnected) {
                     val data = conn.readNext()
-
-                    // No state yet, just test for MainFragment but breaks
-                    // the other functionalities!
-                    when (val res = data.parse()) {
-                        is DataType.Message -> onMessage(res.value)
-                        is DataType.Array   -> onArray(res.value)
-                    }
+                    onData(data)
                 }
             }
             catch (e: Exception) {
@@ -79,16 +79,55 @@ class Client(
         }
     }
 
-    private fun onMessage(msg: JSONObject) {
-        println(msg)
+    private suspend fun onData(data: ByteArray) {
+        if (state.isInProgress()) {
+            state.parse(data)
+        }
+        else {
+            parseResponse(data)
+        }
     }
 
-    private suspend fun onArray(array: JSONArray) {
-        // TODO Arrays are used for the list of clients, I must make this
-        // type safe by embedding it into a message object
+    private suspend fun parseResponse(data: ByteArray) {
+        val msg = data.parseMessage()
+        onMessage(msg)
+    }
+
+    private suspend fun onMessage(msg: JSONObject) {
+        val response = msg.getInt("Response")
+println(msg)
+        if (response != OK) {
+            // TODO handle
+            println("ERROR: Response not OK")
+        }
+        val command = msg.getJSONObject("Command")
+        when (command["REQ"].toString()) {
+            "LIST_CHANNELS" -> onListChannelsResponse(command)
+            "LIST_FILES"    -> onListFilesResponse(command)
+            "CID"           -> onCIDResponse(command)
+        }
+    }
+
+    private suspend fun onListChannelsResponse(command: JSONObject) {
+        val payload = command.getString("PAYLOAD")
+        val channels = JSONArray(payload).toStringList()
         withContext(Dispatchers.Main) {
-            val channels = array.toStringList()
             input.onChannelList?.invoke(channels)
+        }
+    }
+
+    private suspend fun onListFilesResponse(command: JSONObject) {
+        val payload = command.getString("PAYLOAD")
+        val files = JSONArray(payload).toStringList()
+        withContext(Dispatchers.Main) {
+            input.onFileList?.invoke(files)
+        }
+    }
+
+    private suspend fun onCIDResponse(command: JSONObject) {
+        val cid = command.getInt("PAYLOAD")
+        withContext(Dispatchers.Main) {
+            input.onCID?.invoke(cid)
         }
     }
 
@@ -98,15 +137,15 @@ class Client(
         }
     }
 
-    suspend fun readFiles(): List<String> {
-        return withContext(Dispatchers.IO) {
-            conn.readFiles(channel)
+    suspend fun readFiles() {
+        withContext(Dispatchers.IO) {
+            conn.writeCommandListFiles(channel)
         }
     }
 
-    suspend fun readCID(): Int {
+    suspend fun readCID() {
         return withContext(Dispatchers.IO) {
-            conn.readCID()
+            conn.writeCommandCID()
         }
     }
 
@@ -149,7 +188,8 @@ class Client(
 
                 var res = conn.readMessage()
                 var payload = conn.readData(res)
-                val size = payload["Size"].toString().toInt()
+                val size = payload["Size"].toString()
+                    .toInt()
                 println("Payload: $payload")
 
                 msg = getStreamMessage()

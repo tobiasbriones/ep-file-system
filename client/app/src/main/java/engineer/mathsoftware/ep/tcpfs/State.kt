@@ -24,4 +24,8 @@ class State {
         START, DONE, ERROR -> true
         else               -> false
     }
+
+    fun parse(data: ByteArray) {
+
+    }
 }
