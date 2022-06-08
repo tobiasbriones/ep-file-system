@@ -10,9 +10,15 @@
     tools:context="engineer.mathsoftware.ep.tcpfs.MainActivity"
     >
     <item
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:id="@+id/action_server" android:title="@string/action_server"
+        />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        android:orderInCategory="100"
+        android:orderInCategory="101"
         app:showAsAction="never"
         />
 </menu>
