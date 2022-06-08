@@ -100,14 +100,18 @@ func (c *Client) onMessage(msg Message) {
 	case process.Start:
 		c.state.start(msg)
 	default:
-		if msg.Command != nil {
-			err := c.command.execute(msg.Command)
-			if err != nil {
-				writeErrorState(err.Error(), c.conn)
-			}
-		} else {
-			writeErrorState("wrong message state", c.conn)
+		c.handleCommand(msg)
+	}
+}
+
+func (c *Client) handleCommand(msg Message) {
+	if msg.Command != nil {
+		err := c.command.execute(msg.Command)
+		if err != nil {
+			writeErrorState(err.Error(), c.conn)
 		}
+	} else {
+		writeErrorState("wrong message state", c.conn)
 	}
 }
 
