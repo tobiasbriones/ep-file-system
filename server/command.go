@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fs/files"
 	"fs/process"
@@ -69,37 +70,74 @@ func (c command) createChannel(cmd map[string]string) error {
 		log.Println(err)
 		return errors.New("server error")
 	}
-	return nil
+	return c.respond(CreateChannel, Ok, "")
 }
 
 func (c command) listChannels() error {
-	err := writeChannels(c.conn)
+	channels, err := readChannels()
 	if err != nil {
-		return errors.New("fail to send list of channels")
+		return errors.New("fail to read list of channels")
 	}
-	return nil
+	ser, _ := json.Marshal(channels)
+	return c.respond(ListChannels, Ok, string(ser))
 }
 
 func (c command) listFiles(cmd map[string]string) error {
 	// TODO channel := c.process.User().Channel()
 	channelName := cmd["CHANNEL"]
 	channel := process.NewChannel(channelName)
-	err := writeFiles(c.conn, channel)
+
+	fileList, err := readFiles(channel)
 	if err != nil {
-		return errors.New("fail to send list of files")
+		return errors.New("fail to read list of files")
 	}
-	return nil
+	ser, _ := json.Marshal(fileList)
+	return c.respond(ListFiles, Ok, string(ser))
 }
 
 func (c command) sendCID() error {
-	_, err := c.conn.Write([]byte(strconv.Itoa(int(c.cid())) + "\n"))
-	if err != nil {
-		return errors.New("fail to send client ID")
+	payload := strconv.Itoa(int(c.cid()))
+	return c.respond(CID, Ok, payload)
+}
+
+func (c command) respond(req req, res Response, payload string) error {
+	cmd := make(map[string]string)
+	cmd["REQ"] = string(req)
+	cmd["PAYLOAD"] = payload
+	msg := Message{
+		Command:  cmd,
+		Response: res,
 	}
-	return nil
+	return writeMessage(msg, c.conn)
 }
 
 type commandClient interface {
 	cid() uint
 	requestClientList()
+}
+
+func readChannels() ([]string, error) {
+	root, err := getFsRootFile()
+	if err != nil {
+		return nil, err
+	}
+	channels, err := files.ReadFileNames(root)
+	if err != nil {
+		return nil, err
+	}
+	return channels, nil
+}
+
+func readFiles(channel process.Channel) ([]string, error) {
+	root, err := getFsRootFile()
+	if err != nil {
+		return nil, err
+	}
+	dir, _ := channel.File()
+	channelFile := dir.ToOsFile(root.Path())
+	fileList, err := files.ReadFileNames(channelFile)
+	if err != nil {
+		return nil, err
+	}
+	return fileList, nil
 }
