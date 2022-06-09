@@ -31,17 +31,23 @@ func TestCommandId(t *testing.T) {
 	utils.RequirePassCase(t, err, "Fail to write command to the server")
 
 	// Receive response
-	buf := make([]byte, 32)
-	n, err := conn.Read(buf)
-	if err != nil {
-		t.Fatal("Fail to read CID: ", err)
-	}
+	data := readData(t, conn)
 
 	// Check
-	log.Println("Client ID:", string(buf[:n]))
+	res := Message{}
+	_ = json.Unmarshal(data, &res)
+
+	if res.Response != Ok {
+		t.Fatal("Response was not OK")
+	}
+	if res.Command["REQ"] != "CID" {
+		t.Fatal("Invalid request response")
+	}
+	log.Println("Client ID:", res.Command["PAYLOAD"])
 }
 
 func TestCommandListOfClients(t *testing.T) {
+	// TODO EXPERIMENTAL, don't use it yet, returns raw array instead of Message
 	runOnHold := func() {
 		tcpAddr, _ := net.ResolveTCPAddr(network, getServerAddress())
 		net.DialTCP(network, nil, tcpAddr)
@@ -97,11 +103,23 @@ func TestCommandChannelList(t *testing.T) {
 	utils.RequirePassCase(t, err, "Fail to write command to the server")
 
 	// Receive response
+	data := readData(t, conn)
+	res := Message{}
+	_ = json.Unmarshal(data, &res)
+
+	if res.Response != Ok {
+		t.Fatal("Response was not OK")
+	}
+	if res.Command["REQ"] != "LIST_CHANNELS" {
+		t.Fatal("Invalid request response")
+	}
+
+	// Check
 	var channels []string
-	dec := json.NewDecoder(conn)
-	err = dec.Decode(&channels)
+	err = json.Unmarshal([]byte(res.Command["PAYLOAD"]), &channels)
+
 	if err != nil {
-		return
+		t.Fatal("Fail to read payload")
 	}
 
 	// Check at least has the main, and test channels
@@ -111,6 +129,7 @@ func TestCommandChannelList(t *testing.T) {
 	if !utils.StringSliceContains(channels, "test") {
 		t.Fatal("Channel list does not contain channel: test")
 	}
+	log.Println("Channels:", channels)
 }
 
 func TestCommandFileList(t *testing.T) {
@@ -132,13 +151,37 @@ func TestCommandFileList(t *testing.T) {
 	utils.RequirePassCase(t, err, "Fail to write command to the server")
 
 	// Receive response
-	var fileList []string
-	dec := json.NewDecoder(conn)
-	err = dec.Decode(&fileList)
-	if err != nil {
-		return
+	data := readData(t, conn)
+	res := Message{}
+	_ = json.Unmarshal(data, &res)
+
+	if res.Response != Ok {
+		t.Fatal("Response was not OK")
+	}
+	if res.Command["REQ"] != "LIST_FILES" {
+		t.Fatal("Invalid request response")
 	}
 
 	// Check
+	var fileList []string
+	err = json.Unmarshal([]byte(res.Command["PAYLOAD"]), &fileList)
+
+	if err != nil {
+		t.Fatal("Fail to read payload")
+	}
+
+	// Check at least has the file.pdf file (required for side effect tests)
+	if !utils.StringSliceContains(fileList, "file.pdf") {
+		t.Fatal("Channel does not contain file: file.pdf")
+	}
 	log.Println("Files on channel test:", fileList)
+}
+
+func readData(t *testing.T, conn net.Conn) []byte {
+	buf := make([]byte, 2048)
+	n, err := conn.Read(buf)
+	if err != nil {
+		t.Fatal("Fail to read CID: ", err)
+	}
+	return buf[:n]
 }

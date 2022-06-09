@@ -16,9 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentClientBinding
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.SocketException
 
 class ClientFragment : Fragment() {
@@ -29,6 +27,7 @@ class ClientFragment : Fragment() {
 
     private val files = ArrayList<String>()
     private var _binding: FragmentClientBinding? = null
+    private lateinit var output: Output
     private lateinit var filesAdapter: FilesAdapter
 
     // This property is only valid between onCreateView and
@@ -46,6 +45,7 @@ class ClientFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        output = ClientOutput(binding.infoText) { requireContext().contentResolver }
         filesAdapter = FilesAdapter(files) { download(it) }
         initFileList()
         binding.buttonUpload.setOnClickListener {
@@ -91,9 +91,10 @@ class ClientFragment : Fragment() {
 
     private fun connect() {
         val host = Config(requireActivity()).getServerHost() ?: ""
+        val input = Input(null, ::onFileList, ::onCID, ::onUpdate)
 
         lifecycleScope.launch {
-            val c = Client.newInstance(host)
+            val c = Client.newInstance(host, input, output)
 
             if (c == null) {
                 handleConnectionFailed()
@@ -112,26 +113,62 @@ class ClientFragment : Fragment() {
         if (channel != null) {
             client.channel = channel
         }
-        readCID()
-        readFiles()
+        try {
+            listen()
+            readCID()
+            readFiles()
+        }
+        catch (e: Exception) {
+            handleConnectionFailed()
+            println(e.message)
+        }
+    }
+
+    private fun listen() {
+        lifecycleScope.launch {
+            client.listen()
+        }
     }
 
     private fun readCID() {
         if (!this::client.isInitialized) return
-        val host = Config(requireActivity()).getServerHost()
-
         lifecycleScope.launch {
-            val cid = client.readCID()
-            binding.clientText.text = "Client #$cid @$host"
-            binding.channelText.text = "Channel: ${client.channel}"
-            binding.infoText.text = "Connected"
+            client.readCID()
         }
+    }
+
+    private fun onFileList(values: List<String>) {
+        val size = values.size
+        binding.filesText
+            .text = "${getString(R.string.files_title)} ($size)"
+        files.clear()
+        files.addAll(values)
+        filesAdapter.notifyDataSetChanged()
+    }
+
+    private fun onCID(cid: Int) {
+        val host = Config(requireActivity()).getServerHost()
+        binding.clientText.text = "Client #$cid @$host"
+        binding.channelText.text = "Channel: ${client.channel}"
+        binding.infoText.text = "Connected"
+    }
+
+    private fun onUpdate() {
+        println("Update!")
+        readFiles()
     }
 
     private fun disconnect() {
         if (!this::client.isInitialized) return
         lifecycleScope.launch {
             client.disconnect()
+        }
+    }
+
+    private fun readFiles() {
+        if (!this::client.isInitialized) return
+        lifecycleScope.launch {
+            client.readFiles()
         }
     }
 
@@ -154,27 +191,14 @@ class ClientFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                var chunksTotal = 0
                 client.file = file
-                client.upload(bytes) {
-                    val percentage = it * 100
-                    binding.infoText.text = "Uploading $percentage%"
-                    chunksTotal++
-                }
-                handleFileUploaded(chunksTotal)
+                client.upload(bytes)
             }
-            catch (e: SocketException) {
+            catch (e: Exception) {
                 println("ERROR: ${e.message}")
                 handleConnectionFailed()
             }
         }
-    }
-
-    private fun handleFileUploaded(chunksTotal: Int) {
-        binding.infoText.text = """
-            File uploaded: ${client.file} | $chunksTotal chunks sent
-        """.trimIndent()
-        readFiles()
     }
 
     private fun download(file: String) {
@@ -186,28 +210,13 @@ class ClientFragment : Fragment() {
     private fun startDownload(uri: Uri) {
         lifecycleScope.launch {
             try {
-                var chunksTotal = 0
-                val array = client.download {
-                    val percentage = it * 100
-                    binding.infoText.text = "Downloading $percentage%"
-                    chunksTotal++
-                }
-                write(requireContext().contentResolver, uri, array)
-                handleFileDownloaded(chunksTotal)
-                println("Downloaded ${array.size}")
+                client.download(uri)
             }
-            catch (e: SocketException) {
+            catch (e: Exception) {
                 println("ERROR: ${e.message}")
                 handleConnectionFailed()
             }
         }
-    }
-
-    private fun handleFileDownloaded(chunksTotal: Int) {
-        binding.infoText.text = """
-            File downloaded: ${client.file} | $chunksTotal chunks received
-        """.trimIndent()
-        readFiles()
     }
 
     private fun chooseDownloadFolder() {
@@ -217,18 +226,5 @@ class ClientFragment : Fragment() {
             putExtra(Intent.EXTRA_TITLE, client.file)
         }
         startActivityForResult(intent, PICK_DOWNLOAD_DIR_REQUEST_CODE)
-    }
-
-    private fun readFiles() {
-        if (!this::client.isInitialized) return
-        lifecycleScope.launch {
-            val res = client.readFiles()
-            val size = res.size
-            binding.filesText
-                .text = "${getString(R.string.files_title)} ($size)"
-            files.clear()
-            files.addAll(res)
-            filesAdapter.notifyDataSetChanged()
-        }
     }
 }

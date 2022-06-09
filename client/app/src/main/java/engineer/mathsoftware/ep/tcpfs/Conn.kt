@@ -21,7 +21,7 @@ class Conn(private val socket: Socket) {
         )
     )
 
-    fun readChannels(): List<String> {
+    fun writeCommandListChannels() {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -33,15 +33,9 @@ class Conn(private val socket: Socket) {
             msg.toString()
                 .toByteArray()
         )
-        val res = reader.readLine()
-        val jsonArray = JSONArray(res)
-        val channels = Array(jsonArray.length()) {
-            jsonArray.getString(it)
-        }
-        return channels.toList()
     }
 
-    fun readFiles(channel: String): List<String> {
+    fun writeCommandListFiles(channel: String) {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -54,18 +48,9 @@ class Conn(private val socket: Socket) {
             msg.toString()
                 .toByteArray()
         )
-        val res = reader.readLine()
-        if (res == null || res == "null") {
-            return ArrayList()
-        }
-        val jsonArray = JSONArray(res)
-        val channels = Array(jsonArray.length()) {
-            jsonArray.getString(it)
-        }
-        return channels.toList()
     }
 
-    fun readCID(): Int {
+    fun writeCommandCID() {
         val os = socket.getOutputStream()
         val msg = JSONObject()
         val cmd = JSONObject()
@@ -77,14 +62,13 @@ class Conn(private val socket: Socket) {
             msg.toString()
                 .toByteArray()
         )
-        val res = reader.readLine()
-        return Integer.parseInt(res)
     }
 
-    suspend fun stream(bytes: ByteArray, l: (progress: Float) -> Unit) {
+    suspend fun stream(bytes: ByteArray, l: (progress: Float) -> Unit): Int {
         val size = bytes.size
         val os = socket.getOutputStream()
         var count = 0
+        var chunksTotal = 0
 
         while (count < size) {
             var end = count + SERVER_BUF_SIZE - 1
@@ -94,16 +78,12 @@ class Conn(private val socket: Socket) {
             )
             os.write(chunk)
             count += SERVER_BUF_SIZE
+            chunksTotal++
             withContext(Dispatchers.Main) {
                 l(getPercentage(count, size))
             }
         }
-    }
-
-    fun readState(): String {
-        val ser = readMessage()
-        return ser.get("State")
-            .toString()
+        return chunksTotal
     }
 
     fun readMessage(): JSONObject {
@@ -126,29 +106,17 @@ class Conn(private val socket: Socket) {
         return JSONObject(str)
     }
 
-    suspend fun downstream(size: Int, l: (progress: Float) -> Unit): ByteArray {
-        var array = ByteArray(0)
-        var count = 0
-        while (count < size) {
-            val chunk = readChunk()
-            array += chunk
-            count += chunk.size
-            withContext(Dispatchers.Main) {
-                l(getPercentage(count, size))
-            }
-        }
-        return array
-    }
-
-    fun readChunk(): ByteArray {
-        val chunk = ByteArray(SERVER_BUF_SIZE)
+    fun readNext(): ByteArray {
+        // TODO give a big enough buffer to avoid while loop for now and
+        //  message end char
+        val buff = ByteArray(SERVER_BUF_SIZE*4)
         val n = socket.getInputStream()
-            .read(chunk)
-        return chunk.sliceArray(IntRange(0, n - 1))
+            .read(buff)
+        return buff.sliceArray(IntRange(0, n - 1))
     }
 }
 
-private fun getPercentage(count: Int, size: Int): Float {
+fun getPercentage(count: Int, size: Int): Float {
     return if (count >= size) 1.0f
     else count.toFloat() / size.toFloat()
 }
