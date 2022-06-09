@@ -91,7 +91,7 @@ class ClientFragment : Fragment() {
 
     private fun connect() {
         val host = Config(requireActivity()).getServerHost() ?: ""
-        val input = Input(null, ::onFileList, ::onCID)
+        val input = Input(null, ::onFileList, ::onCID, ::onUpdate)
 
         lifecycleScope.launch {
             val c = Client.newInstance(host, input)
@@ -153,6 +153,11 @@ class ClientFragment : Fragment() {
         binding.infoText.text = "Connected"
     }
 
+    private fun onUpdate() {
+        println("Update!")
+        readFiles()
+    }
+
     private fun disconnect() {
         if (!this::client.isInitialized) return
         lifecycleScope.launch {
@@ -163,7 +168,6 @@ class ClientFragment : Fragment() {
     private fun readFiles() {
         if (!this::client.isInitialized) return
         lifecycleScope.launch {
-            println("requesting files")
             client.readFiles()
         }
     }

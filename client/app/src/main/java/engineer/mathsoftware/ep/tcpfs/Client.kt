@@ -20,6 +20,7 @@ enum class Action {
 }
 
 // TODO temp. response values, server is still in beta
+const val UPDATE = 2
 const val OK = 3
 
 const val PORT: Int = 8080
@@ -28,6 +29,7 @@ data class Input(
     val onChannelList: ((channels: List<String>) -> Unit)? = null,
     val onFileList: ((channels: List<String>) -> Unit)? = null,
     val onCID: ((cid: Int) -> Unit)? = null,
+    val onUpdate: (() -> Unit)? = null,
 )
 
 class Client(
@@ -95,7 +97,12 @@ class Client(
 
     private suspend fun onMessage(msg: JSONObject) {
         val response = msg.getInt("Response")
-println(msg)
+
+        println(msg)
+        if (response == UPDATE) {
+            input.onUpdate?.invoke()
+            return
+        }
         if (response != OK) {
             // TODO handle
             println("ERROR: Response not OK")
