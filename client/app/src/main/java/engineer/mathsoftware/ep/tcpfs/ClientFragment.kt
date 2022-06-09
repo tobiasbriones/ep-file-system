@@ -16,9 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentClientBinding
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.SocketException
 
 class ClientFragment : Fragment() {
@@ -29,6 +27,7 @@ class ClientFragment : Fragment() {
 
     private val files = ArrayList<String>()
     private var _binding: FragmentClientBinding? = null
+    private lateinit var output: Output
     private lateinit var filesAdapter: FilesAdapter
 
     // This property is only valid between onCreateView and
@@ -46,6 +45,7 @@ class ClientFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        output = ClientOutput(binding.infoText)
         filesAdapter = FilesAdapter(files) { download(it) }
         initFileList()
         binding.buttonUpload.setOnClickListener {
@@ -94,7 +94,7 @@ class ClientFragment : Fragment() {
         val input = Input(null, ::onFileList, ::onCID, ::onUpdate)
 
         lifecycleScope.launch {
-            val c = Client.newInstance(host, input)
+            val c = Client.newInstance(host, input, output)
 
             if (c == null) {
                 handleConnectionFailed()
@@ -191,27 +191,14 @@ class ClientFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                var chunksTotal = 0
                 client.file = file
-                client.upload(bytes) {
-                    val percentage = it * 100
-                    binding.infoText.text = "Uploading $percentage%"
-                    chunksTotal++
-                }
-                handleFileUploaded(chunksTotal)
+                client.upload(bytes)
             }
-            catch (e: SocketException) {
+            catch (e: Exception) {
                 println("ERROR: ${e.message}")
                 handleConnectionFailed()
             }
         }
-    }
-
-    private fun handleFileUploaded(chunksTotal: Int) {
-        binding.infoText.text = """
-            File uploaded: ${client.file} | $chunksTotal chunks sent
-        """.trimIndent()
-        readFiles()
     }
 
     private fun download(file: String) {

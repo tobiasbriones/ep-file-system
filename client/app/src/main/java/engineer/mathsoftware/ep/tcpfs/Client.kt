@@ -9,10 +9,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.net.ConnectException
-import java.net.InetAddress
-import java.net.Socket
-import java.net.UnknownHostException
+import java.net.*
 
 enum class Action {
     UPLOAD,
@@ -35,15 +32,20 @@ data class Input(
 class Client(
     private val socket: Socket,
     private val conn: Conn,
-    private val input: Input
+    private val input: Input,
+    output: Output
 ) {
     companion object {
-        suspend fun newInstance(host: String, input: Input): Client? {
+        suspend fun newInstance(
+            host: String,
+            input: Input,
+            output: Output
+        ): Client? {
             return withContext(Dispatchers.IO) {
                 try {
                     val address = InetAddress.getByName(host)
                     val socket = Socket(address, PORT)
-                    Client(socket, Conn(socket), input)
+                    Client(socket, Conn(socket), input, output)
                 }
                 catch (e: ConnectException) {
                     println("ERROR: " + e.message.toString())
@@ -57,11 +59,12 @@ class Client(
         }
     }
 
-    private val state = State()
+    private val state = State(conn, output)
     var file: String = ""
     var channel: String = "test"
 
     suspend fun disconnect() {
+        println("Disconnecting...")
         withContext(Dispatchers.IO) {
             socket.close()
         }
@@ -69,14 +72,16 @@ class Client(
 
     suspend fun listen() {
         withContext(Dispatchers.IO) {
-            try {
-                while (socket.isConnected) {
+            while (socket.isConnected) {
+                try {
                     val data = conn.readNext()
                     onData(data)
                 }
-            }
-            catch (e: Exception) {
-                println("ERROR: $e")
+                catch (e: SocketException) {
+                }
+                catch (e: Exception) {
+                    println("ERROR: $e")
+                }
             }
         }
     }
@@ -156,77 +161,6 @@ class Client(
         }
     }
 
-    suspend fun upload(bytes: ByteArray, l: (progress: Float) -> Unit) {
-        withContext(Dispatchers.IO) {
-            try {
-                var msg = getStartMessage(Action.UPLOAD, bytes.size)
-                conn.writeMessage(msg)
-                println("Start message sent")
-
-                var state = conn.readState()
-                println("STATE: $state")
-
-                conn.stream(bytes, l)
-                state = conn.readState()
-                println("Received status: $state")
-
-                msg = getEofMessage()
-                conn.writeMessage(msg)
-                println("EOF message sent")
-
-                state = conn.readState()
-                println("Received status: $state")
-            }
-            catch (e: JSONException) {
-                println("ERROR: fail to read server response: " + e.message)
-            }
-            catch (e: NoSuchElementException) {
-                println("Connection closed: $e.message")
-            }
-        }
-    }
-
-    suspend fun download(l: (progress: Float) -> Unit): ByteArray {
-        return withContext(Dispatchers.IO) {
-            try {
-                var msg = getStartMessage(Action.DOWNLOAD)
-                conn.writeMessage(msg)
-                println("Start message sent")
-
-                var res = conn.readMessage()
-                var payload = conn.readData(res)
-                val size = payload["Size"].toString()
-                    .toInt()
-                println("Payload: $payload")
-
-                msg = getStreamMessage()
-                conn.writeMessage(msg)
-
-                val array = conn.downstream(size, l)
-
-                if (array.size != size) {
-                    println("ERROR: Overflow")
-                }
-
-                msg = getEofMessage()
-                conn.writeMessage(msg)
-
-                val done = conn.readMessage()
-                println("State: ${done["State"]}")
-
-                array
-            }
-            catch (e: JSONException) {
-                println("ERROR: fail to read server response: " + e.message)
-                ByteArray(0)
-            }
-            catch (e: NoSuchElementException) {
-                println("Connection closed: $e.message")
-                ByteArray(0)
-            }
-        }
-    }
-
     suspend fun createChannel(channel: String) {
         withContext(Dispatchers.IO) {
             val msg = JSONObject()
@@ -238,46 +172,52 @@ class Client(
         }
     }
 
-    private fun getStartMessage(action: Action, size: Int = 0): JSONObject {
-        val payload = getStartPayload(action, size)
-        val ser = JSONObject()
-        ser.put("State", Process.START)
-        ser.put("Data", payload)
-        return ser
+    suspend fun upload(bytes: ByteArray) {
+        withContext(Dispatchers.IO) {
+            val payload = StartPayload(file, channel, bytes.size)
+            state.startUpload(bytes, payload)
+        }
     }
 
-    private fun getStartPayload(action: Action, size: Int = 0): JSONArray {
-        val payload = """
-            {
-                "Action": ${action.ordinal},
-                "Value": "$file",
-                "Size": $size,
-                "Channel": {
-                    "Name": $channel
-                }
+    suspend fun download(l: (progress: Float) -> Unit): ByteArray {
+        return withContext(Dispatchers.IO) {
+            try {
+                // var msg = getStartMessage(Action.DOWNLOAD)
+                // conn.writeMessage(msg)
+                // println("Start message sent")
+                //
+                // var res = conn.readMessage()
+                // var payload = conn.readData(res)
+                // val size = payload["Size"].toString()
+                //     .toInt()
+                // println("Payload: $payload")
+                //
+                // msg = getStreamMessage()
+                // conn.writeMessage(msg)
+                //
+                // val array = conn.downstream(size, l)
+                //
+                // if (array.size != size) {
+                //     println("ERROR: Overflow")
+                // }
+                //
+                // msg = getEofMessage()
+                // conn.writeMessage(msg)
+                //
+                // val done = conn.readMessage()
+                // println("State: ${done["State"]}")
+                //
+                // array
+                ByteArray(0)
             }
-        """.trimIndent()
-        var json = JSONObject(payload)
-        val arr = JSONArray()
-        json.toString()
-            .toByteArray()
-            .forEach {
-                arr.put(it)
+            catch (e: JSONException) {
+                println("ERROR: fail to read server response: " + e.message)
+                ByteArray(0)
             }
-        return arr
-    }
-
-    private fun getEofMessage(): JSONObject {
-        val ser = JSONObject()
-        ser.put("State", Process.EOF)
-        ser.put("Data", null)
-        return ser
-    }
-
-    private fun getStreamMessage(): JSONObject {
-        val ser = JSONObject()
-        ser.put("State", Process.STREAM)
-        ser.put("Data", null)
-        return ser
+            catch (e: NoSuchElementException) {
+                println("Connection closed: $e.message")
+                ByteArray(0)
+            }
+        }
     }
 }

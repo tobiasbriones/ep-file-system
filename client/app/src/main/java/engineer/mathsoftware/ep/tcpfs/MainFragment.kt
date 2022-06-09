@@ -65,7 +65,7 @@ class MainFragment : Fragment() {
         val input = Input(this::onChannelList)
 
         lifecycleScope.launch {
-            val c = Client.newInstance(host, input)
+            val c = Client.newInstance(host, input, VoidOutput())
 
             if (c == null) {
                 handleConnectionFailed()

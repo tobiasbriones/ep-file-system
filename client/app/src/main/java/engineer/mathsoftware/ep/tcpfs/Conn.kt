@@ -64,10 +64,11 @@ class Conn(private val socket: Socket) {
         )
     }
 
-    suspend fun stream(bytes: ByteArray, l: (progress: Float) -> Unit) {
+    suspend fun stream(bytes: ByteArray, l: (progress: Float) -> Unit): Int {
         val size = bytes.size
         val os = socket.getOutputStream()
         var count = 0
+        var chunksTotal = 0
 
         while (count < size) {
             var end = count + SERVER_BUF_SIZE - 1
@@ -77,10 +78,12 @@ class Conn(private val socket: Socket) {
             )
             os.write(chunk)
             count += SERVER_BUF_SIZE
+            chunksTotal++
             withContext(Dispatchers.Main) {
                 l(getPercentage(count, size))
             }
         }
+        return chunksTotal
     }
 
     fun readState(): String {
