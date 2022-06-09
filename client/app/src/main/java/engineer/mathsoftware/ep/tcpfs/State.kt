@@ -158,7 +158,7 @@ class State(private val conn: Conn, private val output: Output) {
     private fun readStateDone(msg: JSONObject) {
         if (msg["State"] != "DONE") {
             state = ERROR
-            print("ERROR: Fail to read state EOF: $msg")
+            print("ERROR: Fail to read state DONE: $msg")
             return
         }
         done()
