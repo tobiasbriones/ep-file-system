@@ -45,7 +45,7 @@ class ClientFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        output = ClientOutput(binding.infoText)
+        output = ClientOutput(binding.infoText) { requireContext().contentResolver }
         filesAdapter = FilesAdapter(files) { download(it) }
         initFileList()
         binding.buttonUpload.setOnClickListener {
@@ -210,28 +210,13 @@ class ClientFragment : Fragment() {
     private fun startDownload(uri: Uri) {
         lifecycleScope.launch {
             try {
-                var chunksTotal = 0
-                val array = client.download {
-                    val percentage = it * 100
-                    binding.infoText.text = "Downloading $percentage%"
-                    chunksTotal++
-                }
-                write(requireContext().contentResolver, uri, array)
-                handleFileDownloaded(chunksTotal)
-                println("Downloaded ${array.size}")
+                client.download(uri)
             }
-            catch (e: SocketException) {
+            catch (e: Exception) {
                 println("ERROR: ${e.message}")
                 handleConnectionFailed()
             }
         }
-    }
-
-    private fun handleFileDownloaded(chunksTotal: Int) {
-        binding.infoText.text = """
-            File downloaded: ${client.file} | $chunksTotal chunks received
-        """.trimIndent()
-        readFiles()
     }
 
     private fun chooseDownloadFolder() {

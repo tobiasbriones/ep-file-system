@@ -4,6 +4,7 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import android.net.Uri
 import engineer.mathsoftware.ep.tcpfs.Process.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -26,6 +27,8 @@ data class StartPayload(
 interface Output {
     fun updateUploadProgress(progress: Float)
     fun uploadDone(file: String, chunksTotal: Int)
+    fun updateDownloadProgress(progress: Float)
+    fun downloadDone(data: ByteArray, uri: Uri, file: String, chunksTotal: Int)
 }
 
 class State(private val conn: Conn, private val output: Output) {
@@ -34,6 +37,8 @@ class State(private val conn: Conn, private val output: Output) {
     private var file = ""
     private var data = ByteArray(0)
     private var chunksTotal = 0
+    private var downloadBuffer: DownloadBuffer? = null
+    private lateinit var downloadUri: Uri
 
     fun isInProgress() = !isOnHold()
 
@@ -44,9 +49,10 @@ class State(private val conn: Conn, private val output: Output) {
 
     suspend fun parse(data: ByteArray) {
         when (state) {
-            DATA -> readStateData(data.parseMessage())
-            EOF  -> readStateEOF(data.parseMessage())
-            DONE -> readStateDone(data.parseMessage())
+            DATA   -> readStateData(data.parseMessage())
+            STREAM -> handleStreamData(data)
+            EOF    -> readStateEOF(data.parseMessage())
+            DONE   -> readStateDone(data.parseMessage())
         }
     }
 
@@ -60,7 +66,24 @@ class State(private val conn: Conn, private val output: Output) {
         file = p.file
         data = bytes
         chunksTotal = 0
+        downloadBuffer = null
         state = DATA
+        println("Start message sent")
+    }
+
+    fun startDownload(p: StartPayload, uri: Uri) {
+        if (isInProgress()) {
+            return
+        }
+        var msg = getStartMessage(Action.DOWNLOAD, p)
+        conn.writeMessage(msg)
+        action = Action.DOWNLOAD
+        file = p.file
+        data = ByteArray(0)
+        chunksTotal = 0
+        downloadBuffer = null
+        downloadUri = uri
+        state = STREAM
         println("Start message sent")
     }
 
@@ -72,6 +95,42 @@ class State(private val conn: Conn, private val output: Output) {
         }
         println("STATE=DATA confirmed")
         sendData()
+    }
+
+    private suspend fun handleStreamData(data: ByteArray) {
+        if (downloadBuffer != null) {
+            readChunk(data)
+        }
+        else {
+            readStateStream(data.parseMessage())
+        }
+    }
+
+    private fun readStateStream(msg: JSONObject) {
+        if (msg["State"] != "STREAM") {
+            state = ERROR
+            print("ERROR: Fail to read state DATA: $msg")
+            return
+        }
+        val payload = conn.readData(msg)
+        val size = payload.getInt("Size")
+        downloadBuffer = DownloadBuffer(size, output::updateDownloadProgress)
+        val confirm = getStreamMessage()
+        conn.writeMessage(confirm)
+        println("STATE=STREAM confirmed")
+    }
+
+    private suspend fun readChunk(data: ByteArray) {
+        downloadBuffer?.append(data)
+        if (downloadBuffer?.isOverflowed() == true) {
+            state = ERROR
+            println("Overflow!")
+            return
+        }
+        if (downloadBuffer?.isDone() == true) {
+            state = EOF
+            sendEof()
+        }
     }
 
     private suspend fun sendData() {
@@ -107,7 +166,15 @@ class State(private val conn: Conn, private val output: Output) {
 
     private fun done() {
         state = START
-        output.uploadDone(file, chunksTotal)
+        when (action) {
+            Action.UPLOAD   -> output.uploadDone(file, chunksTotal)
+            Action.DOWNLOAD -> output.downloadDone(
+                downloadBuffer?.data ?: ByteArray(0),
+                downloadUri,
+                file,
+                downloadBuffer?.chunksTotal ?: 0
+            )
+        }
         println("Done!")
     }
 }

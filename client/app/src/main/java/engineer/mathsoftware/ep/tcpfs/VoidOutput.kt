@@ -4,7 +4,7 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
-import android.widget.TextView
+import android.net.Uri
 
 class VoidOutput() : Output {
     override fun updateUploadProgress(progress: Float) {
@@ -12,6 +12,19 @@ class VoidOutput() : Output {
     }
 
     override fun uploadDone(file: String, chunksTotal: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateDownloadProgress(progress: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun downloadDone(
+        data: ByteArray,
+        uri: Uri,
+        file: String,
+        chunksTotal: Int
+    ) {
         TODO("Not yet implemented")
     }
 }

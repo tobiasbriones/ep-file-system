@@ -4,6 +4,7 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -179,45 +180,10 @@ class Client(
         }
     }
 
-    suspend fun download(l: (progress: Float) -> Unit): ByteArray {
-        return withContext(Dispatchers.IO) {
-            try {
-                // var msg = getStartMessage(Action.DOWNLOAD)
-                // conn.writeMessage(msg)
-                // println("Start message sent")
-                //
-                // var res = conn.readMessage()
-                // var payload = conn.readData(res)
-                // val size = payload["Size"].toString()
-                //     .toInt()
-                // println("Payload: $payload")
-                //
-                // msg = getStreamMessage()
-                // conn.writeMessage(msg)
-                //
-                // val array = conn.downstream(size, l)
-                //
-                // if (array.size != size) {
-                //     println("ERROR: Overflow")
-                // }
-                //
-                // msg = getEofMessage()
-                // conn.writeMessage(msg)
-                //
-                // val done = conn.readMessage()
-                // println("State: ${done["State"]}")
-                //
-                // array
-                ByteArray(0)
-            }
-            catch (e: JSONException) {
-                println("ERROR: fail to read server response: " + e.message)
-                ByteArray(0)
-            }
-            catch (e: NoSuchElementException) {
-                println("Connection closed: $e.message")
-                ByteArray(0)
-            }
+    suspend fun download(uri: Uri) {
+        withContext(Dispatchers.IO) {
+            val payload = StartPayload(file, channel)
+            state.startDownload(payload, uri)
         }
     }
 }

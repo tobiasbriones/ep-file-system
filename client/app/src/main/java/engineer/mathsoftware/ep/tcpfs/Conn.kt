@@ -86,12 +86,6 @@ class Conn(private val socket: Socket) {
         return chunksTotal
     }
 
-    fun readState(): String {
-        val ser = readMessage()
-        return ser.get("State")
-            .toString()
-    }
-
     fun readMessage(): JSONObject {
         val res = reader.readLine()
         return JSONObject(res)
@@ -112,38 +106,17 @@ class Conn(private val socket: Socket) {
         return JSONObject(str)
     }
 
-    suspend fun downstream(size: Int, l: (progress: Float) -> Unit): ByteArray {
-        var array = ByteArray(0)
-        var count = 0
-        while (count < size) {
-            val chunk = readChunk()
-            array += chunk
-            count += chunk.size
-            withContext(Dispatchers.Main) {
-                l(getPercentage(count, size))
-            }
-        }
-        return array
-    }
-
-    fun readChunk(): ByteArray {
-        val chunk = ByteArray(SERVER_BUF_SIZE)
-        val n = socket.getInputStream()
-            .read(chunk)
-        return chunk.sliceArray(IntRange(0, n - 1))
-    }
-
     fun readNext(): ByteArray {
         // TODO give a big enough buffer to avoid while loop for now and
         //  message end char
         val buff = ByteArray(SERVER_BUF_SIZE*4)
-        socket.getInputStream()
+        val n = socket.getInputStream()
             .read(buff)
-        return buff
+        return buff.sliceArray(IntRange(0, n - 1))
     }
 }
 
-private fun getPercentage(count: Int, size: Int): Float {
+fun getPercentage(count: Int, size: Int): Float {
     return if (count >= size) 1.0f
     else count.toFloat() / size.toFloat()
 }

@@ -4,9 +4,14 @@
 
 package engineer.mathsoftware.ep.tcpfs
 
+import android.content.ContentResolver
+import android.net.Uri
 import android.widget.TextView
 
-class ClientOutput(private val info: TextView) : Output {
+class ClientOutput(
+    private val info: TextView,
+    private val getContentResolver: () -> ContentResolver
+) : Output {
     override fun updateUploadProgress(progress: Float) {
         val percentage = progress * 100
         info.text = "Uploading $percentage%"
@@ -16,5 +21,23 @@ class ClientOutput(private val info: TextView) : Output {
         info.text = """
             File uploaded: ${file} | $chunksTotal chunks sent
         """.trimIndent()
+    }
+
+    override fun updateDownloadProgress(progress: Float) {
+        val percentage = progress * 100
+        info.text = "Downloading $percentage%"
+    }
+
+    override fun downloadDone(
+        data: ByteArray,
+        uri: Uri,
+        file: String,
+        chunksTotal: Int
+    ) {
+        write(getContentResolver(), uri, data)
+        info.text = """
+            File downloaded: ${file} | $chunksTotal chunks received
+        """.trimIndent()
+        println("Downloaded ${data.size}")
     }
 }
