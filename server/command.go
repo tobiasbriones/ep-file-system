@@ -116,7 +116,7 @@ func (c command) deleteChannel(cmd map[string]string) error {
 		log.Println(err)
 		return errors.New("server error")
 	}
-	return c.respond(DeleteChannel, Ok, "")
+	return c.respond(DeleteChannel, Ok, name)
 }
 
 func (c command) listChannels() error {
