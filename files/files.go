@@ -33,6 +33,10 @@ func CreateIfNotExists(file fs.OsFile) error {
 	return os.MkdirAll(file.Path(), os.ModePerm)
 }
 
+func DeleteIfExists(file fs.OsFile) error {
+	return os.RemoveAll(file.Path())
+}
+
 func ReadSize(file fs.OsFile) (int64, error) {
 	f, err := os.Open(file.Path())
 	if err != nil {
