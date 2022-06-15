@@ -2,21 +2,31 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
 
-import { newConn } from '@/model/conn';
-
 const HOST = 'localhost';
-const PORT = 8080;
+const PORT = 8081;
 const URL = `ws://${ HOST }:${ PORT }`;
 
-export function newClient(handleConnected) {
-  function handleMessage(event) {
-    console.log(event.data);
-  }
-
-  const conn = newConn(URL, handleConnected, handleMessage);
+export function Client(handleUsers) {
+  const socket = new WebSocket(URL);
+  const handleData = data => readData(data).apply(handleUsers);
+  const handleClose = e => console.log(`Connection closed, code=${ e.code } reason=${ e.reason }`);
+  const handleError = e => console.log(`ERROR: ${ e }`);
   return {
-    readUsers() {
-      conn.sendCommandConnectedUsers();
+    init() {
+      socket.onmessage = e => handleData(e.data);
+      socket.onclose = e => (
+        e.wasClean ? handleClose(e) : handleError('Connection died')
+      );
+      socket.onerror = handleError;
+    }
+  };
+}
+
+function readData(data) {
+  const array = JSON.parse(data);
+  return {
+    apply(f) {
+      f(array);
     }
   };
 }

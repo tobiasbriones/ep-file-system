@@ -6,7 +6,7 @@
 
 <script>
 import AdminUsers from '@/components/Users';
-import { newClient } from '@/model/client';
+import { Client } from '@/model/client';
 
 export default {
   name: 'AdminHome',
@@ -23,11 +23,12 @@ export default {
     };
   },
   created() {
-    this.client = newClient(this.onConnected)
+    this.client = Client(this.handleUsers);
+    this.client.init();
   },
   methods: {
-    onConnected() {
-      console.log("Connected!");
+    handleUsers(users) {
+      console.log(users);
     }
   }
 };

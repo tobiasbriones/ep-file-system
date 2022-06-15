@@ -3,11 +3,14 @@
 // This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
 
 import { Client } from './tcp.mjs';
+import { WSS } from './wss.mjs';
 
 const client = Client(handle);
+const wss = WSS();
 
 client.connect();
+wss.init();
 
 function handle(msg) {
-  console.log(msg);
+  wss.broadcast(msg);
 }
