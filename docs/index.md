@@ -10,4 +10,5 @@ Go to:
 
 - [TCP/IP Protocol](tcp-ip-protocol): Theoretical framework.
 - [File System Protocol](file-system-protocol): High-level system architecture.
+- [WS Client](ws-client): Web Socket client vs TCP Socket server.
 - [Dev](dev): Personal experiences I've had in this project.
