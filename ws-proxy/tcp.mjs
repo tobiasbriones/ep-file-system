@@ -8,12 +8,32 @@ const PORT = 8080;
 const HOST = 'localhost';
 const OK = 3;
 
-export function run() {
+export function Client(handle) {
   const client = new Net.Socket();
 
-  client.connect({ port: PORT, host: HOST }, () => handleConnect(client));
-  client.on('data', handleData);
-  client.on('end', handleEnd);
+  return {
+    connect() {
+      client.connect({ port: PORT, host: HOST }, () => handleConnect(client));
+      client.on('data', handleData);
+      client.on('end', handleEnd);
+    }
+  };
+
+  function handleData(data) {
+    const str = data.toString();
+    const messages = [];
+    let start = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      if (char === '\n') {
+        const msg = JSON.parse(str.substring(start, i));
+        messages.push(msg);
+        start = i;
+      }
+    }
+    messages.map(readMessage)
+            .forEach(handle);
+  }
 }
 
 function handleConnect(client) {
@@ -30,40 +50,25 @@ function handleEnd() {
   console.log('Ending the connection');
 }
 
-function handleData(data) {
-  const str = data.toString();
-  const messages = [];
-  let start = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    if (char === '\n') {
-      const msg = JSON.parse(str.substring(start, i));
-      messages.push(msg);
-      start = i;
-    }
-  }
-  messages.forEach(readMessage);
-}
-
 function readMessage(msg) {
   if (msg.Response === OK) {
-    readCommandResponse(msg.Command);
+    return readCommandResponse(msg.Command);
   }
   else {
-    console.log('Response not OK');
+    return console.log('Response not OK');
   }
 }
 
 function readCommandResponse(cmd) {
   if (cmd['REQ'] === 'SUBSCRIBE_TO_LIST_CONNECTED_USERS') {
-    readPayload(cmd['PAYLOAD']);
+    return readPayload(cmd['PAYLOAD']);
   }
   else {
     console.log('Command request not expected');
+    return [];
   }
 }
 
 function readPayload(payload) {
-  const users = JSON.parse(payload);
-  console.log(users);
+  return JSON.parse(payload);
 }

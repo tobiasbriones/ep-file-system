@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // This file is part of https://github.com/tobiasbriones/ep-tcp-file-system
 
-import { run } from './tcp.mjs';
+import { Client } from './tcp.mjs';
 
-run();
+const client = Client(handle);
+
+client.connect();
+
+function handle(msg) {
+  console.log(msg);
+}
