@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import engineer.mathsoftware.ep.tcpfs.databinding.FragmentMainBinding
 import kotlinx.coroutines.launch
-import org.json.JSONException
 
 class MainFragment : Fragment() {
     private val channels = ArrayList<String>()
@@ -41,7 +40,7 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        channelsAdapter = ChannelsAdapter(channels) { subscribe(it) }
+        channelsAdapter = ChannelsAdapter(channels, ::subscribe, ::delete)
         binding.fab.setOnClickListener { showCreateChannelDialog() }
         initChannelList()
         connect()
@@ -62,7 +61,10 @@ class MainFragment : Fragment() {
 
     private fun connect() {
         val host = Config(requireActivity()).getServerHost() ?: ""
-        val input = Input(this::onChannelList)
+        val input = Input(
+            this::onChannelList,
+            onDeleteChannel = this::onDeleteChannel
+        )
 
         lifecycleScope.launch {
             val c = Client.newInstance(host, input, VoidOutput())
@@ -100,6 +102,19 @@ class MainFragment : Fragment() {
         loadChannels(channels)
     }
 
+    private fun onDeleteChannel(channel: String) {
+        if (!this::client.isInitialized) return
+        Snackbar.make(
+            requireView(),
+            "Channel deleted: $channel",
+            Snackbar.LENGTH_LONG
+        )
+            .show()
+        lifecycleScope.launch {
+            client.readChannels()
+        }
+    }
+
     private fun subscribe(channel: String) {
         disconnect()
         val bundle = bundleOf("channel" to channel)
@@ -107,6 +122,13 @@ class MainFragment : Fragment() {
             R.id.action_FirstFragment_to_SecondFragment,
             bundle
         )
+    }
+
+    private fun delete(channel: String) {
+        if (!this::client.isInitialized) return
+        lifecycleScope.launch {
+            client.delete(channel)
+        }
     }
 
     private fun disconnect() {

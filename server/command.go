@@ -19,6 +19,7 @@ type req string
 const (
 	Subscribe                     req = "SUBSCRIBE"
 	CreateChannel                 req = "CREATE_CHANNEL"
+	DeleteChannel                 req = "DELETE_CHANNEL"
 	ListChannels                  req = "LIST_CHANNELS"
 	ListFiles                     req = "LIST_FILES"
 	CID                           req = "CID"
@@ -55,6 +56,8 @@ func (c command) execute(cmd map[string]string) error {
 		return c.subscribe(cmd)
 	case CreateChannel:
 		return c.createChannel(cmd)
+	case DeleteChannel:
+		return c.deleteChannel(cmd)
 	case ListChannels:
 		return c.listChannels()
 	case ListFiles:
@@ -95,6 +98,25 @@ func (c command) createChannel(cmd map[string]string) error {
 		return errors.New("server error")
 	}
 	return c.respond(CreateChannel, Ok, "")
+}
+
+func (c command) deleteChannel(cmd map[string]string) error {
+	name := cmd["CHANNEL"]
+	file, err := getFsRootFile()
+	if err != nil {
+		log.Println(err)
+		return errors.New("server error")
+	}
+	err = file.Append(name)
+	if err != nil {
+		return errors.New("invalid channel")
+	}
+	err = files.DeleteIfExists(file)
+	if err != nil {
+		log.Println(err)
+		return errors.New("server error")
+	}
+	return c.respond(DeleteChannel, Ok, name)
 }
 
 func (c command) listChannels() error {
