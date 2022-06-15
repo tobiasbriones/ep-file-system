@@ -8,7 +8,6 @@ import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
 import java.net.*
 
@@ -28,6 +27,7 @@ data class Input(
     val onFileList: ((channels: List<String>) -> Unit)? = null,
     val onCID: ((cid: Int) -> Unit)? = null,
     val onUpdate: (() -> Unit)? = null,
+    val onDeleteChannel: ((channel: String) -> Unit)? = null,
 )
 
 class Client(
@@ -121,9 +121,10 @@ class Client(
         }
         val command = msg.getJSONObject("Command")
         when (command["REQ"].toString()) {
-            "LIST_CHANNELS" -> onListChannelsResponse(command)
-            "LIST_FILES"    -> onListFilesResponse(command)
-            "CID"           -> onCIDResponse(command)
+            "LIST_CHANNELS"  -> onListChannelsResponse(command)
+            "LIST_FILES"     -> onListFilesResponse(command)
+            "CID"            -> onCIDResponse(command)
+            "DELETE_CHANNEL" -> onDeleteChannelResponse(command)
         }
     }
 
@@ -150,6 +151,13 @@ class Client(
         }
     }
 
+    private suspend fun onDeleteChannelResponse(command: JSONObject) {
+        val channel = command.getString("PAYLOAD")
+        withContext(Dispatchers.Main) {
+            input.onDeleteChannel?.invoke(channel)
+        }
+    }
+
     suspend fun readChannels() {
         withContext(Dispatchers.IO) {
             conn.writeCommandListChannels()
@@ -173,6 +181,17 @@ class Client(
             val msg = JSONObject()
             val cmd = JSONObject()
             cmd.put("REQ", "CREATE_CHANNEL")
+            cmd.put("CHANNEL", channel)
+            msg.put("Command", cmd)
+            conn.writeMessage(msg)
+        }
+    }
+
+    suspend fun delete(channel: String) {
+        withContext(Dispatchers.IO) {
+            val msg = JSONObject()
+            val cmd = JSONObject()
+            cmd.put("REQ", "DELETE_CHANNEL")
             cmd.put("CHANNEL", channel)
             msg.put("Command", cmd)
             conn.writeMessage(msg)
