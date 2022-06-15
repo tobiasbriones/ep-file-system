@@ -10,7 +10,8 @@ const OK = 3;
 
 export function Client(handle) {
   const client = new Net.Socket();
-
+  const handleData = data => readMessages(data).map(readMessage)
+                                               .forEach(handle);
   return {
     connect() {
       client.connect({ port: PORT, host: HOST }, () => handleConnect(client));
@@ -18,22 +19,6 @@ export function Client(handle) {
       client.on('end', handleEnd);
     }
   };
-
-  function handleData(data) {
-    const str = data.toString();
-    const messages = [];
-    let start = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str[i];
-      if (char === '\n') {
-        const msg = JSON.parse(str.substring(start, i));
-        messages.push(msg);
-        start = i;
-      }
-    }
-    messages.map(readMessage)
-            .forEach(handle);
-  }
 }
 
 function handleConnect(client) {
@@ -71,4 +56,19 @@ function readCommandResponse(cmd) {
 
 function readPayload(payload) {
   return JSON.parse(payload);
+}
+
+function readMessages(data) {
+  const str = data.toString();
+  const messages = [];
+  let start = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === '\n') {
+      const msg = JSON.parse(str.substring(start, i));
+      messages.push(msg);
+      start = i;
+    }
+  }
+  return messages;
 }
