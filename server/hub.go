@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"strconv"
 )
@@ -86,7 +87,11 @@ func (h *Hub) broadcastChange() {
 func (h *Hub) listClients(c *Client) {
 	var list []string
 	for _, client := range h.clients {
-		list = append(list, strconv.Itoa(int(client.id)))
+		item := make(map[string]string)
+		item["cid"] = strconv.Itoa(int(client.id))
+		item["channel"] = client.channel().Name
+		ser, _ := json.Marshal(item)
+		list = append(list, string(ser))
 	}
 	c.sendList(list)
 }

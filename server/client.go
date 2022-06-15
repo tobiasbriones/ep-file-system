@@ -167,6 +167,17 @@ func (c Client) cid() uint {
 	return c.id
 }
 
+func (c *Client) subscribe(channel process.Channel) {
+	c.state.channel = channel
+	go func() {
+		c.clientHubChange <- struct{}{}
+	}()
+}
+
+func (c Client) channel() process.Channel {
+	return c.state.channel
+}
+
 func (c *Client) requestClientList() {
 	c.list <- c
 }

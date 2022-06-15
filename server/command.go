@@ -17,6 +17,7 @@ import (
 type req string
 
 const (
+	Subscribe                     req = "SUBSCRIBE"
 	CreateChannel                 req = "CREATE_CHANNEL"
 	ListChannels                  req = "LIST_CHANNELS"
 	ListFiles                     req = "LIST_FILES"
@@ -50,6 +51,8 @@ func (c command) execute(cmd map[string]string) error {
 	req := req(cmd["REQ"])
 
 	switch req {
+	case Subscribe:
+		return c.subscribe(cmd)
 	case CreateChannel:
 		return c.createChannel(cmd)
 	case ListChannels:
@@ -67,6 +70,12 @@ func (c command) execute(cmd map[string]string) error {
 		return errors.New("invalid command request")
 	}
 	return nil
+}
+
+func (c command) subscribe(cmd map[string]string) error {
+	name := cmd["CHANNEL"]
+	c.commandClient.subscribe(process.Channel{Name: name})
+	return c.respond(Subscribe, Ok, "")
 }
 
 func (c command) createChannel(cmd map[string]string) error {
@@ -143,6 +152,7 @@ func (c command) respond(req req, res Response, payload string) error {
 
 type commandClient interface {
 	cid() uint
+	subscribe(channel process.Channel)
 	requestClientList()
 }
 
