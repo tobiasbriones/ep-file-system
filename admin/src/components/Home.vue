@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     handleUsers(users) {
-      console.log(users);
+      this.users = users.map(u => JSON.parse(u));
     }
   }
 };

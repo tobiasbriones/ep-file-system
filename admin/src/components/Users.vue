@@ -2,9 +2,9 @@
   <h2>Connected Users</h2>
   <ul class="list-group" v-for="user in users" v-bind:key="user.id">
     <li class="list-group-item">
-      Client <strong>#{{ user.id }}</strong>
+      Client <strong>#{{ user.cid }}</strong>
       <span class="at">@</span>
-      <span class="channel">{{ user.channel }}</span>
+      <span class="channel">{{ user.channel || ' ---' }}</span>
     </li>
   </ul>
 </template>
