@@ -141,8 +141,15 @@ func (c *Client) sendUpdate(u UpdatePayload) {
 }
 
 func (c *Client) sendList(clients []string) {
-	enc := json.NewEncoder(c.conn)
-	enc.Encode(clients)
+	ser, _ := json.Marshal(clients)
+	cmd := make(map[string]string)
+	cmd["REQ"] = "SUBSCRIBE_TO_LIST_CONNECTED_USERS"
+	cmd["PAYLOAD"] = string(ser)
+	msg := Message{
+		Command:  cmd,
+		Response: Ok,
+	}
+	writeMessage(msg, c.conn)
 }
 
 func (c *Client) handleReadError(err error, msg string) {
