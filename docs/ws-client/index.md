@@ -50,3 +50,21 @@ or client physical devices or computers.
 
 Web Sockets would be great for other applications like chats or mere JSON 
 messages that do not require access to the device hardware.
+
+### Migrating to Web Sockets
+
+Migrating the file system server to Web Sockets is not feasible and does not 
+give any additional advantage.
+
+I always think about this problems in terms of what has to be done.
+
+In this case, hardware or intensive use of disks have to be done as a 
+primary use case of the system, so raw TCP Sockets make sense.
+
+For media IO like stats and dashboards, the Web Socket Proxy works well.
+
+Then we make use of the correct tools for the job: TCP for lower-level 
+implementations, and WS for higher-level results.
+
+It's about matching the underlying subproblems to low-level and high-level 
+constructs.
