@@ -181,15 +181,16 @@ along with any additional data attribute required by the command.
 
 ### Supported Commands
 
-| **Request**                       | **Attr. 1**              | **Description**                                                                 |
-|-----------------------------------|--------------------------|---------------------------------------------------------------------------------|
-| SUBSCRIBE                         | CHANNEL (channel's name) | It sets the channel the client wants to subscribe for the given connection      |
-| CREATE_CHANNEL                    | CHANNEL (channel's name) | It creates a new channel. It does not perform any action if already exists.     |
-| LIST_CHANNELS                     | -                        | Returns a list of existing channels.                                            |
-| LIST_FILES                        | CHANNEL (files parent)   | Returns a list of files under the given channel.                                |
-| CID                               | -                        | Returns the per-server-instance ID that was generated to identify that client.  |
-| CONNECTED_USERS                   | -                        | Returns a list of all connected clients into this server hub instance.          |
-| SUBSCRIBE_TO_LIST_CONNECTED_USERS | -                        | It sends a list of connected users when a user registers/unregisters/subscribes |
+| **Request**                       | **Attr. 1**              | **Description**                                                                                         |
+|-----------------------------------|--------------------------|---------------------------------------------------------------------------------------------------------|
+| SUBSCRIBE                         | CHANNEL (channel's name) | It sets the channel the client wants to subscribe for the given connection                              |
+| CREATE_CHANNEL                    | CHANNEL (channel's name) | It creates a new channel. It does not perform any action if already exists.                             |
+| DELETE_CHANNEL                    | CHANNEL (channel's name) | It deletes the given channel and all its contents. It does not perform any action if it does not exist. |
+| LIST_CHANNELS                     | -                        | Returns a list of existing channels.                                                                    |
+| LIST_FILES                        | CHANNEL (files parent)   | Returns a list of files under the given channel.                                                        |
+| CID                               | -                        | Returns the per-server-instance ID that was generated to identify that client.                          |
+| CONNECTED_USERS                   | -                        | Returns a list of all connected clients into this server hub instance.                                  |
+| SUBSCRIBE_TO_LIST_CONNECTED_USERS | -                        | It sends a list of connected users when a user registers/unregisters/subscribes                         |
 
 ## Non-Functional Requirements
 
