@@ -12,15 +12,16 @@ import (
 )
 
 type Client struct {
-	conn       net.Conn
-	command    command
-	state      state
-	id         uint // Current ID assigned by the Hub
-	register   chan *Client
-	unregister chan *Client
-	notify     chan UpdatePayload
-	list       chan *Client
-	quit       chan struct{}
+	conn            net.Conn
+	command         command
+	state           state
+	id              uint // Current ID assigned by the Hub
+	register        chan *Client
+	unregister      chan *Client
+	notify          chan UpdatePayload
+	list            chan *Client
+	quit            chan struct{}
+	clientHubChange chan struct{}
 }
 
 func newClient(
@@ -30,16 +31,18 @@ func newClient(
 	unregister chan *Client,
 	change chan struct{},
 	list chan *Client,
+	clientHubChange chan struct{},
 ) *Client {
 	client := &Client{
-		conn:       conn,
-		register:   register,
-		unregister: unregister,
-		list:       list,
-		notify:     make(chan UpdatePayload),
-		quit:       make(chan struct{}),
+		conn:            conn,
+		register:        register,
+		unregister:      unregister,
+		list:            list,
+		notify:          make(chan UpdatePayload),
+		quit:            make(chan struct{}),
+		clientHubChange: clientHubChange,
 	}
-	client.command = newCommand(client.conn, client)
+	client.command = newCommand(client.conn, client, clientHubChange, client.quit)
 	client.state = newState(client.conn, osFsRoot, client.sendQuit, change)
 	return client
 }

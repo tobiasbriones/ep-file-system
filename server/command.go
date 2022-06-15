@@ -17,20 +17,33 @@ import (
 type req string
 
 const (
-	CreateChannel  req = "CREATE_CHANNEL"
-	ListChannels   req = "LIST_CHANNELS"
-	ListFiles      req = "LIST_FILES"
-	CID            req = "CID"
-	ConnectedUsers req = "CONNECTED_USERS"
+	CreateChannel                 req = "CREATE_CHANNEL"
+	ListChannels                  req = "LIST_CHANNELS"
+	ListFiles                     req = "LIST_FILES"
+	CID                           req = "CID"
+	ConnectedUsers                req = "CONNECTED_USERS"
+	SubscribeToListConnectedUsers req = "SUBSCRIBE_TO_LIST_CONNECTED_USERS"
 )
 
 type command struct {
 	conn net.Conn
 	commandClient
+	clientHubChange chan struct{}
+	quit            chan struct{}
 }
 
-func newCommand(conn net.Conn, client commandClient) command {
-	return command{conn: conn, commandClient: client}
+func newCommand(
+	conn net.Conn,
+	client commandClient,
+	clientHubChange chan struct{},
+	quit chan struct{},
+) command {
+	return command{
+		conn:            conn,
+		commandClient:   client,
+		clientHubChange: clientHubChange,
+		quit:            quit,
+	}
 }
 
 func (c command) execute(cmd map[string]string) error {
@@ -48,6 +61,8 @@ func (c command) execute(cmd map[string]string) error {
 	case ConnectedUsers:
 		// Send a signal to send the list of users to this client
 		c.requestClientList()
+	case SubscribeToListConnectedUsers:
+		return c.subscribeToListConnectedUsers()
 	default:
 		return errors.New("invalid command request")
 	}
@@ -98,6 +113,21 @@ func (c command) listFiles(cmd map[string]string) error {
 func (c command) sendCID() error {
 	payload := strconv.Itoa(int(c.cid()))
 	return c.respond(CID, Ok, payload)
+}
+
+func (c command) subscribeToListConnectedUsers() error {
+	log.Println("Subscribing client to listen for connected users")
+	go func() {
+		for {
+			select {
+			case <-c.clientHubChange:
+				c.requestClientList()
+			case <-c.quit:
+				return
+			}
+		}
+	}()
+	return nil
 }
 
 func (c command) respond(req req, res Response, payload string) error {

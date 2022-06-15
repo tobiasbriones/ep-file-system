@@ -10,24 +10,26 @@ import (
 )
 
 type Hub struct {
-	clients    map[uint]*Client
-	register   chan *Client
-	unregister chan *Client
-	quit       chan struct{}
-	change     chan struct{} // Rudimentary signal to test broadcast
-	list       chan *Client  // Signal to send the list of connected clients
-	cid        uint          // Current ID for clients on this server instance
+	clients         map[uint]*Client
+	register        chan *Client
+	unregister      chan *Client
+	quit            chan struct{}
+	change          chan struct{} // Rudimentary signal to test broadcast
+	list            chan *Client  // Signal to send the list of connected clients
+	cid             uint          // Current ID for clients on this server instance
+	clientHubChange chan struct{} // When a client regs or unregs
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		clients:    make(map[uint]*Client),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		quit:       make(chan struct{}),
-		change:     make(chan struct{}),
-		list:       make(chan *Client),
-		cid:        0,
+		clients:         make(map[uint]*Client),
+		register:        make(chan *Client),
+		unregister:      make(chan *Client),
+		quit:            make(chan struct{}),
+		change:          make(chan struct{}),
+		list:            make(chan *Client),
+		cid:             0,
+		clientHubChange: make(chan struct{}),
 	}
 }
 
@@ -54,6 +56,9 @@ func (h *Hub) registerClient(client *Client) {
 	client.id = id
 	h.clients[id] = client
 	h.cid++
+	go func() {
+		h.clientHubChange <- struct{}{}
+	}()
 	log.Println("Registering client", id, "into the Hub")
 }
 
@@ -65,6 +70,9 @@ func (h *Hub) unregisterAll() {
 
 func (h *Hub) unregisterClient(c *Client) {
 	delete(h.clients, c.id)
+	go func() {
+		h.clientHubChange <- struct{}{}
+	}()
 	log.Println("Unregistering client", c.id, "from the Hub")
 }
 
