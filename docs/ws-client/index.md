@@ -70,3 +70,11 @@ implementations, and WS for higher-level results.
 
 It's about matching the underlying subproblems to low-level and high-level
 constructs.
+
+## Conclusion
+
+A Web Socket Server Proxy was design to allow bridging the communication between
+the Web clients and the Raw TCP Socket server.
+
+It's recommended to implement the proxy in Node.js and have a thinner client
+with only high-level features for the web client.
