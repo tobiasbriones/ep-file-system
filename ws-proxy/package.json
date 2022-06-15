@@ -2,7 +2,7 @@
   "name": "ws-proxy",
   "version": "0.4.0",
   "description": "Web Socket proxy to enable communication between a web client and the TCP Go server",
-  "main": "main.js",
+  "main": "main.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
