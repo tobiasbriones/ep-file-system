@@ -31,3 +31,22 @@ high-performance applications like file systems.
 
 That is due to the extra overhead added by Web Sockets to upgrade the 
 connection from HTTP to WS as well as other \*minor*\ inconveniences.
+
+### Building a Proxy Server
+
+This is the solution that was initially implemented.
+
+It consists of running a Node.js Web Socket server that communicates with 
+Web clients, and it's also a TCP Socket client to bridge between the actual 
+TCP server in Go and the actual Web Socket client in the web browser. 
+
+The result is the following architecture:
+
+![WS Proxy](ws-proxy.svg)
+
+Architecture that works well for this project since the web socket is a 
+really simple client, and we care about the file system either on the server 
+or client physical devices or computers.
+
+Web Sockets would be great for other applications like chats or mere JSON 
+messages that do not require access to the device hardware.
