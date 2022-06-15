@@ -14,6 +14,7 @@ import (
 type state struct {
 	conn    net.Conn
 	process process.Process
+	channel process.Channel
 	quit    func()
 	change  chan struct{}
 }
@@ -27,6 +28,7 @@ func newState(
 	return state{
 		conn:    conn,
 		process: process.NewProcess(osFsRoot),
+		channel: process.Channel{},
 		quit:    quit,
 		change:  change,
 	}
@@ -70,6 +72,11 @@ func (s *state) start(msg Message) {
 		s.error(err.Error())
 		return
 	}
+	// TODO check breaks backward compatibility
+	//if s.process.User().Channel().Name != s.channel.Name {
+	//	s.error("Client channel doesn't match")
+	//	return
+	//}
 	log.Println("Accepting request:", payload)
 	s.onProcessStarted()
 }

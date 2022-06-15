@@ -71,6 +71,12 @@ class Client(
         }
     }
 
+    suspend fun subscribe() {
+        withContext(Dispatchers.IO) {
+            conn.writeCommandSubscribe(channel)
+        }
+    }
+
     suspend fun listen() {
         withContext(Dispatchers.IO) {
             while (socket.isConnected) {

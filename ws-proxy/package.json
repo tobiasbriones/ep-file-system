@@ -1,0 +1,14 @@
+{
+  "name": "ws-proxy",
+  "version": "0.4.0",
+  "description": "Web Socket proxy to enable communication between a web client and the TCP Go server",
+  "main": "main.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tobias Briones",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "ws": "^8.8.0"
+  }
+}

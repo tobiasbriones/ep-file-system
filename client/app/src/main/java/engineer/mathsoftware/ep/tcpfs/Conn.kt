@@ -21,6 +21,21 @@ class Conn(private val socket: Socket) {
         )
     )
 
+    fun writeCommandSubscribe(channel: String) {
+        val os = socket.getOutputStream()
+        val msg = JSONObject()
+        val cmd = JSONObject()
+
+        cmd.put("REQ", "SUBSCRIBE")
+        cmd.put("CHANNEL", channel)
+        msg.put("Command", cmd)
+
+        os.write(
+            msg.toString()
+                .toByteArray()
+        )
+    }
+
     fun writeCommandListChannels() {
         val os = socket.getOutputStream()
         val msg = JSONObject()

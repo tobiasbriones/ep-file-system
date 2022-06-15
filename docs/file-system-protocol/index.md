@@ -25,18 +25,18 @@ year:
 The communication states are to be the following FSM:
 
 - **START**: The communication is on hold for starting a new process.
-- **DATA**: Chunks of files are being streamed from the client to the server 
+- **DATA**: Chunks of files are being streamed from the client to the server
   (upload).
-- **STREAM**: Chunks of data are being streamed from the server to the 
+- **STREAM**: Chunks of data are being streamed from the server to the
   client (download).
-- **EOF**: End of File to indicate that the file has been completely sent or 
+- **EOF**: End of File to indicate that the file has been completely sent or
   received, in order to finish the underlying process.
 - **DONE**: Indicates the process has been successfully completed.
 - **ERROR**: The request couldn't be processed.
 
 The `DATA`, or `STREAM` states should not be explicitly passed or serialized to
-avoid the extra boilerplate overhead as many chunks will be sent for large 
-files. They are agreed before sending/receiving the chunks so both server 
+avoid the extra boilerplate overhead as many chunks will be sent for large
+files. They are agreed before sending/receiving the chunks so both server
 and client have the correct state to handle raw chunk data.
 
 ## Serialization
@@ -59,22 +59,22 @@ The DTO should look like the following:
 
 Where:
 
-- **Command**: Passes a dynamically typed hashmap or object with each 
+- **Command**: Passes a dynamically typed hashmap or object with each
   command signature as key-value pairs.
-- **Response**: Integer constant originally defined in the server to give a 
+- **Response**: Integer constant originally defined in the server to give a
   server response status (not that important for now).
-- **State**: The process FSM state that indicates what is being done 
+- **State**: The process FSM state that indicates what is being done
   (uploading, waiting for EOF, Done, etc.).
-- **Payload**: Payload object defined in the server and serialized into a 
-  raw byte array into this JSON attribute. It might need to use `Base64` to 
-  decode the bytes on the client to read it as a JSON object. The payload data 
+- **Payload**: Payload object defined in the server and serialized into a
+  raw byte array into this JSON attribute. It might need to use `Base64` to
+  decode the bytes on the client to read it as a JSON object. The payload data
   types are defined on the server when in doubt.
 
 The payload can contain any information needed for that state.
 
 For the special `DATA` state, a JSON array is to be sent as payload instead.
 When the client detects it as array it will know that is a data chunk. The
-existence of the `Size` attribute here implies that the status is `DATA` too 
+existence of the `Size` attribute here implies that the status is `DATA` too
 since the client has to send the file size when uploading it.
 
 The size indicates the length of the chunk or buffer that the client or server
@@ -97,7 +97,7 @@ A start payload should look like this:
 }
 ```
 
-These attributes are embedding in the Go data types, so they are actually 
+These attributes are embedding in the Go data types, so they are actually
 flat, e.g. pass `Value` directly as the `File#Path#Value`.
 
 ## System Interaction
@@ -109,9 +109,9 @@ logic flow for this system:
 
 With that, stakeholders can understand the system architecture.
 
-Note: I have to say, this diagram is a bit out of date as if was the initial 
-design I devised, and the state diagram below depicts this model more 
-accurately. Even though, it still tells us how concurrent users can be seen 
+Note: I have to say, this diagram is a bit out of date as if was the initial
+design I devised, and the state diagram below depicts this model more
+accurately. Even though, it still tells us how concurrent users can be seen
 by the server.
 
 More conceptual or technical documentation can be developed if required, but it
@@ -122,14 +122,14 @@ machine defined below.
 
 ![TCP FS Process State Diagram](tcp-fs-process-state-diagram.svg)
 
-Invisible transitions are implicitly sent to the same state (e.g. if more 
+Invisible transitions are implicitly sent to the same state (e.g. if more
 data is coming, then the state keeps at `DATA` until if *finishes*).
 
 The next flow diagram shows a normal use case for action `DOWNLOAD`:
 
 ![TCP FS Basic Flow](tcp-fs-basic-flow.svg)
 
-Keeping the states consistently on the server and client by allowing a good 
+Keeping the states consistently on the server and client by allowing a good
 communication is key.
 
 ## System Modules
@@ -141,7 +141,7 @@ The system requires the following modules:
   files (Go).
 - **server**: TCP server implementation (Go).
 - **files**: Functions implementing operations on domain files (Go).
-- **utils**: Umbrella functions to help build the system (Go). 
+- **utils**: Umbrella functions to help build the system (Go).
 - **client**: Android client app (Kotlin).
 - **admin**: Basic admin dashboard (Vue.js).
 
@@ -163,10 +163,10 @@ client.
 
 ## Commands
 
-In addition to the process defined, the server also accepts commands as 
+In addition to the process defined, the server also accepts commands as
 specified in the data types above.
 
-To call a command, the process must be at state `START` (on hold), and pass 
+To call a command, the process must be at state `START` (on hold), and pass
 it to the `Command` message attribute:
 
 ```json
@@ -181,13 +181,15 @@ along with any additional data attribute required by the command.
 
 ### Supported Commands
 
-| **Request**     | **Attr. 1**              | **Description**                                                                |
-|-----------------|--------------------------|--------------------------------------------------------------------------------|
-| CREATE_CHANNEL  | CHANNEL (channel's name) | It creates a new channel. It does not perform any action if already exists.    |
-| LIST_CHANNELS   | -                        | Returns a list of existing channels.                                           |
-| LIST_FILES      | CHANNEL (files parent)   | Returns a list of files under the given channel.                               |
-| CID             | -                        | Returns the per-server-instance ID that was generated to identify that client. |
-| CONNECTED_USERS | -                        | Returns a list of all connected clients into this server hub instance.         |
+| **Request**                       | **Attr. 1**              | **Description**                                                                 |
+|-----------------------------------|--------------------------|---------------------------------------------------------------------------------|
+| SUBSCRIBE                         | CHANNEL (channel's name) | It sets the channel the client wants to subscribe for the given connection      |
+| CREATE_CHANNEL                    | CHANNEL (channel's name) | It creates a new channel. It does not perform any action if already exists.     |
+| LIST_CHANNELS                     | -                        | Returns a list of existing channels.                                            |
+| LIST_FILES                        | CHANNEL (files parent)   | Returns a list of files under the given channel.                                |
+| CID                               | -                        | Returns the per-server-instance ID that was generated to identify that client.  |
+| CONNECTED_USERS                   | -                        | Returns a list of all connected clients into this server hub instance.          |
+| SUBSCRIBE_TO_LIST_CONNECTED_USERS | -                        | It sends a list of connected users when a user registers/unregisters/subscribes |
 
 ## Non-Functional Requirements
 
@@ -201,5 +203,5 @@ waits long (20min), but for waiting for a chunk it waits short (20sec).
 ## Tests
 
 A big amount of test cases can be found in the code base. Side effect tests
-for the server are in [/server/main_test.go](../../server/main_test.go) and 
+for the server are in [/server/main_test.go](../../server/main_test.go) and
 the other test files in that package.

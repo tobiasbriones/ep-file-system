@@ -115,6 +115,7 @@ class ClientFragment : Fragment() {
         }
         try {
             listen()
+            subscribe()
             readCID()
             readFiles()
         }
@@ -127,6 +128,13 @@ class ClientFragment : Fragment() {
     private fun listen() {
         lifecycleScope.launch {
             client.listen()
+        }
+    }
+
+    private fun subscribe() {
+        if (!this::client.isInitialized) return
+        lifecycleScope.launch {
+            client.subscribe()
         }
     }
 

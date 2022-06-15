@@ -12,15 +12,16 @@ import (
 )
 
 type Client struct {
-	conn       net.Conn
-	command    command
-	state      state
-	id         uint // Current ID assigned by the Hub
-	register   chan *Client
-	unregister chan *Client
-	notify     chan UpdatePayload
-	list       chan *Client
-	quit       chan struct{}
+	conn            net.Conn
+	command         command
+	state           state
+	id              uint // Current ID assigned by the Hub
+	register        chan *Client
+	unregister      chan *Client
+	notify          chan UpdatePayload
+	list            chan *Client
+	quit            chan struct{}
+	clientHubChange chan struct{}
 }
 
 func newClient(
@@ -30,16 +31,18 @@ func newClient(
 	unregister chan *Client,
 	change chan struct{},
 	list chan *Client,
+	clientHubChange chan struct{},
 ) *Client {
 	client := &Client{
-		conn:       conn,
-		register:   register,
-		unregister: unregister,
-		list:       list,
-		notify:     make(chan UpdatePayload),
-		quit:       make(chan struct{}),
+		conn:            conn,
+		register:        register,
+		unregister:      unregister,
+		list:            list,
+		notify:          make(chan UpdatePayload),
+		quit:            make(chan struct{}),
+		clientHubChange: clientHubChange,
 	}
-	client.command = newCommand(client.conn, client)
+	client.command = newCommand(client.conn, client, clientHubChange, client.quit)
 	client.state = newState(client.conn, osFsRoot, client.sendQuit, change)
 	return client
 }
@@ -138,8 +141,15 @@ func (c *Client) sendUpdate(u UpdatePayload) {
 }
 
 func (c *Client) sendList(clients []string) {
-	enc := json.NewEncoder(c.conn)
-	enc.Encode(clients)
+	ser, _ := json.Marshal(clients)
+	cmd := make(map[string]string)
+	cmd["REQ"] = "SUBSCRIBE_TO_LIST_CONNECTED_USERS"
+	cmd["PAYLOAD"] = string(ser)
+	msg := Message{
+		Command:  cmd,
+		Response: Ok,
+	}
+	writeMessage(msg, c.conn)
 }
 
 func (c *Client) handleReadError(err error, msg string) {
@@ -155,6 +165,17 @@ func (c *Client) sendQuit() {
 
 func (c Client) cid() uint {
 	return c.id
+}
+
+func (c *Client) subscribe(channel process.Channel) {
+	c.state.channel = channel
+	go func() {
+		c.clientHubChange <- struct{}{}
+	}()
+}
+
+func (c Client) channel() process.Channel {
+	return c.state.channel
 }
 
 func (c *Client) requestClientList() {
