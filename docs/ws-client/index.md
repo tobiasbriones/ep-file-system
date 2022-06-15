@@ -4,6 +4,9 @@
 
 # WS Client
 
+In this article, the design decision for communicating a web client (Web Socket)
+to the file system server (Raw TCP Socket) is established.
+
 ## Introduction
 
 Raw TCP servers and clients are low-level implementations of sockets as said
