@@ -3,3 +3,19 @@
 <!-- This file is part of https://github.com/tobiasbriones/ep-tcp-file-system -->
 
 # WS Client
+
+## Introduction
+
+Raw TCP servers and clients are low-level implementations of sockets as said
+along this project documentation. They send streams instead of
+standalone packages and have a blocking nature while Web Sockets are
+implemented on top of TCP but are higher-leve, this including sending
+asynchronous packages of messages.
+
+The main problem with the underlying issue is that while TCP being low-level
+it needs to be implemented close to the OS layer with traditional sockets
+like Java/Go/C/C++/Rust/Android TCP sockets.
+
+Raw TCP sockets can't be added to web browsers due to security
+vulnerabilities so Web Sockets are the ones that can (barely) run in the web
+browser.
