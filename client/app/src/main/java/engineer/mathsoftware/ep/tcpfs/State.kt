@@ -6,6 +6,8 @@ package engineer.mathsoftware.ep.tcpfs
 
 import android.net.Uri
 import engineer.mathsoftware.ep.tcpfs.Process.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -155,7 +157,7 @@ class State(private val conn: Conn, private val output: Output) {
         println("EOF message sent")
     }
 
-    private fun readStateDone(msg: JSONObject) {
+    private suspend fun readStateDone(msg: JSONObject) {
         if (msg["State"] != "DONE") {
             state = ERROR
             print("ERROR: Fail to read state DONE: $msg")
@@ -164,16 +166,18 @@ class State(private val conn: Conn, private val output: Output) {
         done()
     }
 
-    private fun done() {
+    private suspend fun done() {
         state = START
-        when (action) {
-            Action.UPLOAD   -> output.uploadDone(file, chunksTotal)
-            Action.DOWNLOAD -> output.downloadDone(
-                downloadBuffer?.data ?: ByteArray(0),
-                downloadUri,
-                file,
-                downloadBuffer?.chunksTotal ?: 0
-            )
+        withContext(Dispatchers.Main) {
+            when (action) {
+                Action.UPLOAD   -> output.uploadDone(file, chunksTotal)
+                Action.DOWNLOAD -> output.downloadDone(
+                    downloadBuffer?.data ?: ByteArray(0),
+                    downloadUri,
+                    file,
+                    downloadBuffer?.chunksTotal ?: 0
+                )
+            }
         }
         println("Done!")
     }
