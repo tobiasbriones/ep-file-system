@@ -74,11 +74,25 @@ func TestCommandListOfClients(t *testing.T) {
 	utils.RequirePassCase(t, err, "Fail to write command to the server")
 
 	// Receive response
+	data := readData(t, conn)
+	res := Message{}
+	_ = json.Unmarshal(data, &res)
+	log.Println(res)
+	if res.Response != Ok {
+		t.Fatal("Response was not OK")
+	}
+	// It used to be CONNECTED_USERS but both are about the same
+	// TODO it should be well defined
+	if res.Command["REQ"] != "SUBSCRIBE_TO_LIST_CONNECTED_USERS" {
+		t.Fatal("Invalid request response")
+	}
+
+	// Check
 	var users []string
-	dec := json.NewDecoder(conn)
-	err = dec.Decode(&users)
+	err = json.Unmarshal([]byte(res.Command["PAYLOAD"]), &users)
+
 	if err != nil {
-		t.Fatal("Fail to read CONNECTED_USERS: ", err)
+		t.Fatal("Fail to read payload")
 	}
 
 	// Check
