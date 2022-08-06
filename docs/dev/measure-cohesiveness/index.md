@@ -89,8 +89,7 @@ tradeoffs allow it.
 
 ## I Found Something Superb
 
-Cohesiveness here is an **abstract computer science measure** unlike buzzwords
-you hear from clowns like YouTubers, marketers, etc.
+Cohesiveness here is an **abstract computer science measure**.
 
 The Wikipedia article defines it as:
 
@@ -141,7 +140,11 @@ I've been aware of all this, and then in sections like this I have the
 chance to develop it so others learn from me. Can you see? I'm an autonomous 
 engineer, I don't need a professor with 10 degrees or a manager to tell what 
 I have to tell!. Schools, capitalism, etc., are stereotypes with generic 
-rules. We don't need them.
+rules. We don't need them [^2].
+
+[^2]: From my real job experiences (not university) we've never had a 
+    manager or clown who looks you down from a pyramidal hierarchy, so we're 
+    pretty much autonomous engineers instead
 
 ### Take Away
 
@@ -150,25 +153,30 @@ integral: a family of functions. SWE principles tell you accurate
 definitions of how to solve a family of problems so that for a particular
 problem we come out with an accurate way to do the right thing right.
 
-Unlike buzzwords that tell *generic* rules that are not backed by science
+Unlike buzzwords that tell *generic* [^3] rules that are not backed by science
 and math.
 
-I always contrast math/FP/CS/formalism vs dev/OOP/buzzwords and the result 
-is the same:
-
-- accurate and domain specific vs generic and general purpose.
-- real engineering vs clowns who get called engineers.
-
-Most software is cheap as I say below, so don't confuse real engineering 
-with daily toy development.
+[^3]: Those generic workarounds of OOP and "people-skilled" jobs do not 
+    get specialized, they're not like "generic programming" but just stay 
+    "generic" forever instead, so they're poorly defined in order to bypass 
+    formalisms of real engineering
 
 ## Make the Right Thing Right
 
-Incompetent programmers or engineers may say sentences like "duplication is 
-better than the wrong abstraction". That is not an excuse to make things 
-wrong. Something valid is to say "this is a prototype, just get it done" 
-because prototypes are not meant to be correct, they are not engineered a 
-lot, they're made more by frontend developers than actual engineers.
+Incompetent programmers or engineers put excuses to make things wrong.
+
+Something valid is to say "this is a prototype, just get it done" 
+because prototypes are not meant to be correct by their nature, they are not 
+engineered a lot, and they're made more by frontend/scripting developers 
+(frontend does not necessarily mean GUI like HTML and CSS) than actual engineers.
+
+They can say "duplication is better than the wrong abstraction". That is not an
+excuse to make things wrong because you either have to work with robust 
+well-defined software or prototypes but prototypes don't have many 
+abstractions!, so there are no excuses.
+
+When I was struggling in real life after graduating from high-school I had a 
+repetitive saying in my mind: excuses are for losers.
 
 Some say you should write a prototype in a different language (a toy
 scripting language like Ruby, Python, PHP or JS sure) than the final
@@ -180,46 +188,8 @@ difference I emphasized above:
 - to build prototypes (most software out there) you don't have to mess with
   wrong abstractions, so you don't have excuses either.
 
+I wrote a [critic](critic) about bad practitioners, so you can get more insight.
+
 I hope that insight had given you a better perspective to be a professional 
 engineer who acts on behalf computer science rather than excuses and cringe 
 marketing buzzwords like "WET", "DRY", ".NET", etc.
-
-## Taking About Clowns
-
-Those with no skills, even marketers who can edit video and upload it to the
-internet get called engineers by capitalist because that's how they
-brainwash morons to make them believe they're "important" so they have happy
-(non-important) employees.
-
-Even if a job is complete trash like selling cable and internet under the
-sun from door to door with trash salary and no basic human rights, they now
-call them "selling executives". Capitalists are currently the root of most evil,
-is like Java: everything is money, everything (but the 8 primitives) is an "
-object" (monolith). And guess what, money is another *generic* stereotype to
-brainwash peons. Some say "capitalism has allowed great stuff", but the fact 
-that works doesn't mean is must be so. Slaves achieved many things long ago too.
-
-We can have many forms of energy or value instead of money.
-
-Some say over there: "the best slaves are those who don't know they're
-slaves", or "who are happy being slaves". So have happy slaves calling them
-engineers when it does not even follow any formal definition of what an
-engineer is supposed to be.
-
-I know many juniors can grow to become engineers, but a junior engineer !=
-engineer (that's for another day). You have to take into account the domain
-of engineering too.
-
-The definition for engineering is clear, briefly and simple put is:
-building goods for society with correctness, economical, social, legal, etc.
-constraints. The key is that for **correctness** *engineering* must be derived
-directly from sciences and math (even more SWE), or in my words: engineers
-must be good at direct knowledge.
-
-Thus, not everyone can be called an "engineer".
-
-Many look down software engineers like clowns who learned to code in three
-months by watching videos. We don't have anything to do with clowns.
-Software engineering is powerful, is beautiful, is the engineering that
-requires the most math and creativity. Others like electrical engineers
-require the most physics for example. Engineering is about direct knowledge.
