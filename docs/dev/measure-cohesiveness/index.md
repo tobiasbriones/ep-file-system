@@ -223,25 +223,3 @@ months by watching videos. We don't have anything to do with clowns.
 Software engineering is powerful, is beautiful, is the engineering that
 requires the most math and creativity. Others like electrical engineers
 require the most physics for example. Engineering is about direct knowledge.
-
-## Make the Right Thing Right
-
-Incompetent programmers or engineers may say sentences like "duplication is 
-better than the wrong abstraction". That is not an excuse to make things 
-wrong. Something valid is to say "this is a prototype, just get it done" 
-because prototypes are not meant to be correct, they are not engineered a 
-lot, they're made more by frontend developers than actual engineers.
-
-Some say you should write a prototype in a different language (a toy
-scripting language like Ruby, Python, PHP or JS sure) than the final
-language you will use to prevent reusing the prototype. This clarifies the
-difference I emphasized above:
-
-- to build a real system you have to make it right (as far as requires) without
-  ridiculous excuses, and
-- to build prototypes (most software out there) you don't have to mess with
-  wrong abstractions, so you don't have excuses either.
-
-I hope that insight had given you a better perspective to be a professional 
-engineer who acts on behalf computer science rather than excuses and cringe 
-marketing buzzwords like "WET", "DRY", ".NET", etc.
